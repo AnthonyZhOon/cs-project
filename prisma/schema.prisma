@@ -8,25 +8,70 @@ generator dbml {
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  email     String   @unique
-  name      String?
-  role      Role     @default(USER)
-  posts     Post[]
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  email String @unique
+  name  String
+
+  taskIds          String[]          @db.ObjectId
+  tasks            Task[]            @relation(fields: [taskIds], references: [id])
+  eventIds         String[]          @db.ObjectId
+  events           Event[]           @relation(fields: [eventIds], references: [id])
+  workspaces       Workspace[]
+  workspaceMembers WorkspaceMember[]
 }
 
-model Post {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  published Boolean  @default(false)
-  title     String
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  String   @db.ObjectId
+model Task {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  completed   Boolean   @default(false)
+  deadline    DateTime?
+  priority    Priority?
+  // tags        String[]
+
+  assigneeIds String[] @db.ObjectId
+  assignees   User[]   @relation(fields: [assigneeIds], references: [id])
 }
 
-enum Role {
-  USER
-  ADMIN
+model Event {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  start       DateTime
+  end         DateTime
+  // tags        String[]
+
+  attendeeIds String[] @db.ObjectId
+  attendees   User[]   @relation(fields: [attendeeIds], references: [id])
+}
+
+model Workspace {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+
+  ownerId String            @db.ObjectId
+  owner   User              @relation(fields: [ownerId], references: [id])
+  members WorkspaceMember[]
+}
+
+model WorkspaceMember {
+  id   String              @id @default(auto()) @map("_id") @db.ObjectId
+  role WorkspaceMemberRole
+
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id])
+  workspaceId String    @db.ObjectId
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum WorkspaceMemberRole {
+  MANAGER
+  MEMBER
+  INVITED
 }
