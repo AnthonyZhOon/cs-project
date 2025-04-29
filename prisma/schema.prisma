@@ -29,6 +29,9 @@ model Task {
   priority    Priority?
   // tags        String[]
 
+  workspaceId String    @db.ObjectId
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+
   assigneeIds String[] @db.ObjectId
   assignees   User[]   @relation(fields: [assigneeIds], references: [id])
 }
@@ -41,6 +44,9 @@ model Event {
   end         DateTime
   // tags        String[]
 
+  workspaceId String    @db.ObjectId
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+
   attendeeIds String[] @db.ObjectId
   attendees   User[]   @relation(fields: [attendeeIds], references: [id])
 }
@@ -52,6 +58,9 @@ model Workspace {
   ownerId String            @db.ObjectId
   owner   User              @relation(fields: [ownerId], references: [id])
   members WorkspaceMember[]
+
+  tasks    Task[]
+  events   Event[]
 }
 
 model WorkspaceMember {
