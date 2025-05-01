@@ -16,6 +16,7 @@ Table Task {
   completed Boolean [not null, default: false]
   deadline DateTime
   priority Priority
+  tags String[] [not null]
 }
 
 Table Event {
@@ -27,6 +28,7 @@ Table Event {
   description String
   start DateTime [not null]
   end DateTime [not null]
+	tags String[] [not null]
 }
 
 Table Workspace {

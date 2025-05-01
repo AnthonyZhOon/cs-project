@@ -27,7 +27,7 @@ model Task {
   completed   Boolean   @default(false)
   deadline    DateTime?
   priority    Priority?
-  // tags        String[]
+  tags        String[]  @default([])
 
   workspaceId String    @db.ObjectId
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
@@ -42,7 +42,7 @@ model Event {
   description String?
   start       DateTime
   end         DateTime
-  // tags        String[]
+  tags        String[] @default([])
 
   workspaceId String    @db.ObjectId
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
