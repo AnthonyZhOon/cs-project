@@ -12,12 +12,12 @@ model User {
   email String @unique
   name  String
 
-  taskIds          String[]          @db.ObjectId
-  tasks            Task[]            @relation(fields: [taskIds], references: [id])
-  eventIds         String[]          @db.ObjectId
-  events           Event[]           @relation(fields: [eventIds], references: [id])
-  workspaces       Workspace[]
-  workspaceMembers WorkspaceMember[]
+  assignedTaskIds   String[]          @db.ObjectId
+  assignedTasks     Task[]            @relation(fields: [assignedTaskIds], references: [id])
+  attendingEventIds String[]          @db.ObjectId
+  attendingEvents   Event[]           @relation(fields: [attendingEventIds], references: [id])
+  ownedWorkspaces   Workspace[]
+  workspaceMembers  WorkspaceMember[]
 }
 
 model Task {
@@ -59,8 +59,8 @@ model Workspace {
   owner   User              @relation(fields: [ownerId], references: [id])
   members WorkspaceMember[]
 
-  tasks    Task[]
-  events   Event[]
+  tasks  Task[]
+  events Event[]
 }
 
 model WorkspaceMember {

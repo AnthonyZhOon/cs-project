@@ -1,0 +1,75 @@
+Table User {
+  id String [pk]
+  email String [unique, not null]
+  name String [not null]
+  assignedTaskIds String[] [not null]
+  attendingEventIds String[] [not null]
+}
+
+Table Task {
+  id String [pk]
+  workspaceId String [not null]
+  assigneeIds String[] [not null]
+
+  title String [not null]
+  description String
+  completed Boolean [not null, default: false]
+  deadline DateTime
+  priority Priority
+}
+
+Table Event {
+  id String [pk]
+  workspaceId String [not null]
+  attendeeIds String[] [not null]
+
+  title String [not null]
+  description String
+  start DateTime [not null]
+  end DateTime [not null]
+}
+
+Table Workspace {
+  id String [pk]
+  name String [not null]
+  ownerId String [not null]
+  tasks Task [not null]
+  events Event [not null]
+}
+
+Table WorkspaceMember {
+  id String [pk]
+  role WorkspaceMemberRole [not null]
+  userId String [not null]
+  workspaceId String [not null]
+}
+
+Enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+Enum WorkspaceMemberRole {
+  MANAGER
+  MEMBER
+  INVITED
+}
+
+Ref: User.assignedTaskIds <> Task.id
+
+Ref: User.attendingEventIds <> Event.id
+
+Ref: Task.workspaceId > Workspace.id
+
+Ref: Task.assigneeIds <> User.id
+
+Ref: Event.workspaceId > Workspace.id
+
+Ref: Event.attendeeIds <> User.id
+
+Ref: Workspace.ownerId > User.id
+
+Ref: WorkspaceMember.userId > User.id
+
+Ref: WorkspaceMember.workspaceId > Workspace.id
