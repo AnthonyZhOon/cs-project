@@ -2,41 +2,33 @@ Table User {
   id String [pk]
   email String [unique, not null]
   name String [not null]
-  assignedTaskIds String[] [not null]
-  attendingEventIds String[] [not null]
 }
 
 Table Task {
   id String [pk]
-  workspaceId String [not null]
-  assigneeIds String[] [not null]
-
   title String [not null]
   description String
   completed Boolean [not null, default: false]
   deadline DateTime
   priority Priority
   tags String[] [not null]
+  workspaceId String [not null]
 }
 
 Table Event {
   id String [pk]
-  workspaceId String [not null]
-  attendeeIds String[] [not null]
-
   title String [not null]
   description String
   start DateTime [not null]
   end DateTime [not null]
-	tags String[] [not null]
+  tags String[] [not null]
+  workspaceId String [not null]
 }
 
 Table Workspace {
   id String [pk]
   name String [not null]
   ownerId String [not null]
-  tasks Task [not null]
-  events Event [not null]
 }
 
 Table WorkspaceMember {
@@ -44,6 +36,16 @@ Table WorkspaceMember {
   role WorkspaceMemberRole [not null]
   userId String [not null]
   workspaceId String [not null]
+}
+
+Table TaskToUser {
+  taskId String [not null, ref: > Task.id]
+  assigneeId String [not null, ref: > User.id]
+}
+
+Table EventToUser {
+  eventId String [not null, ref: > Event.id]
+  attendeeId String [not null, ref: > User.id]
 }
 
 Enum Priority {
@@ -58,20 +60,12 @@ Enum WorkspaceMemberRole {
   INVITED
 }
 
-Ref: User.assignedTaskIds <> Task.id
+Ref: Task.workspaceId > Workspace.id [delete: Cascade]
 
-Ref: User.attendingEventIds <> Event.id
-
-Ref: Task.workspaceId > Workspace.id
-
-Ref: Task.assigneeIds <> User.id
-
-Ref: Event.workspaceId > Workspace.id
-
-Ref: Event.attendeeIds <> User.id
+Ref: Event.workspaceId > Workspace.id [delete: Cascade]
 
 Ref: Workspace.ownerId > User.id
 
-Ref: WorkspaceMember.userId > User.id
+Ref: WorkspaceMember.userId > User.id [delete: Cascade]
 
-Ref: WorkspaceMember.workspaceId > Workspace.id
+Ref: WorkspaceMember.workspaceId > Workspace.id [delete: Cascade]

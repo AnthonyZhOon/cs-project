@@ -1,5 +1,5 @@
 datasource db {
-  provider = "mongodb"
+  provider = "postgres"
   url      = env("DB_URL")
 }
 
@@ -8,20 +8,18 @@ generator dbml {
 }
 
 model User {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  id    String @id @default(cuid(2))
   email String @unique
   name  String
 
-  assignedTaskIds   String[]          @db.ObjectId
-  assignedTasks     Task[]            @relation(fields: [assignedTaskIds], references: [id])
-  attendingEventIds String[]          @db.ObjectId
-  attendingEvents   Event[]           @relation(fields: [attendingEventIds], references: [id])
-  ownedWorkspaces   Workspace[]
-  workspaceMembers  WorkspaceMember[]
+  assignedTasks    Task[]
+  attendingEvents  Event[]
+  ownedWorkspaces  Workspace[]
+  workspaceMembers WorkspaceMember[]
 }
 
 model Task {
-  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  id          String    @id @default(cuid(2))
   title       String
   description String?
   completed   Boolean   @default(false)
@@ -29,33 +27,31 @@ model Task {
   priority    Priority?
   tags        String[]  @default([])
 
-  workspaceId String    @db.ObjectId
+  workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  assigneeIds String[] @db.ObjectId
-  assignees   User[]   @relation(fields: [assigneeIds], references: [id])
+  assignees User[]
 }
 
 model Event {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(cuid(2))
   title       String
   description String?
   start       DateTime
   end         DateTime
   tags        String[] @default([])
 
-  workspaceId String    @db.ObjectId
+  workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  attendeeIds String[] @db.ObjectId
-  attendees   User[]   @relation(fields: [attendeeIds], references: [id])
+  attendees User[]
 }
 
 model Workspace {
-  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  id   String @id @default(cuid(2))
   name String
 
-  ownerId String            @db.ObjectId
+  ownerId String
   owner   User              @relation(fields: [ownerId], references: [id])
   members WorkspaceMember[]
 
@@ -64,12 +60,12 @@ model Workspace {
 }
 
 model WorkspaceMember {
-  id   String              @id @default(auto()) @map("_id") @db.ObjectId
+  id   String              @id @default(cuid(2))
   role WorkspaceMemberRole
 
-  userId      String    @db.ObjectId
+  userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspaceId String    @db.ObjectId
+  workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 }
 
