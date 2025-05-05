@@ -48,6 +48,11 @@ Table EventToUser {
   attendeeId String [not null, ref: > User.id]
 }
 
+Table TaskDependency {
+  parentId String [not null, ref: > Task.id]
+  dependencyId String [not null, ref: > Task.id]
+}
+
 Enum Priority {
   LOW
   MEDIUM

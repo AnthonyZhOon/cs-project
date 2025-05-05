@@ -31,6 +31,9 @@ model Task {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   assignees User[]
+
+  dependencies Task[] @relation("TaskDependency")
+  parents      Task[] @relation("TaskDependency")
 }
 
 model Event {
