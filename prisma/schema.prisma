@@ -53,7 +53,7 @@ model Event {
 model TaskTag {
   tag    String
   taskId String
-  task   Task   @relation(fields: [taskId], references: [id])
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
 
   @@unique([tag, taskId])
 }
@@ -61,7 +61,7 @@ model TaskTag {
 model EventTag {
   tag     String
   eventId String
-  event   Event  @relation(fields: [eventId], references: [id])
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@unique([tag, eventId])
 }
@@ -74,8 +74,9 @@ model Workspace {
   owner   User              @relation(fields: [ownerId], references: [id])
   members WorkspaceMember[]
 
-  tasks  Task[]
-  events Event[]
+  tasks   Task[]
+  events  Event[]
+  invites WorkspaceInvite[]
 }
 
 model WorkspaceMember {
@@ -86,6 +87,14 @@ model WorkspaceMember {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model WorkspaceInvite {
+  email       String
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@unique([email, workspaceId])
 }
 
 enum Priority {
