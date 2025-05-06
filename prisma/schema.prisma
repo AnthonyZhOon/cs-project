@@ -25,7 +25,7 @@ model Task {
   completed   Boolean   @default(false)
   deadline    DateTime?
   priority    Priority?
-  tags        String[]  @default([])
+  tags        TaskTag[]
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -37,17 +37,33 @@ model Task {
 }
 
 model Event {
-  id          String   @id @default(cuid(2))
+  id          String     @id @default(cuid(2))
   title       String
   description String?
   start       DateTime
   end         DateTime
-  tags        String[] @default([])
+  tags        EventTag[]
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   attendees User[]
+}
+
+model TaskTag {
+  tag    String
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id])
+
+  @@unique([tag, taskId])
+}
+
+model EventTag {
+  tag     String
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
+
+  @@unique([tag, eventId])
 }
 
 model Workspace {
@@ -81,5 +97,4 @@ enum Priority {
 enum WorkspaceMemberRole {
   MANAGER
   MEMBER
-  INVITED
 }
