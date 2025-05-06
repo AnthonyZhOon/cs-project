@@ -1,31 +1,31 @@
 Table User {
-  id String [pk]
-  email String [unique, not null]
-  name String [not null]
+  id text [pk]
+  email text [unique, not null]
+  name text [not null]
 }
 
 Table Task {
-  id String [pk]
-  title String [not null]
-  description String
-  completed Boolean [not null, default: false]
-  deadline DateTime
+  id text [pk]
+  title text [not null]
+  description text
+  completed boolean [not null, default: false]
+  deadline timestamp(3)
   priority Priority
-  workspaceId String [not null]
+  workspaceId text [not null]
 }
 
 Table Event {
-  id String [pk]
-  title String [not null]
-  description String
-  start DateTime [not null]
-  end DateTime [not null]
-  workspaceId String [not null]
+  id text [pk]
+  title text [not null]
+  description text
+  start timestamp(3) [not null]
+  end timestamp(3) [not null]
+  workspaceId text [not null]
 }
 
 Table TaskTag {
-  tag String [not null]
-  taskId String [not null]
+  tag text [not null]
+  taskId text [not null]
 
   indexes {
     (tag, taskId) [unique]
@@ -33,8 +33,8 @@ Table TaskTag {
 }
 
 Table EventTag {
-  tag String [not null]
-  eventId String [not null]
+  tag text [not null]
+  eventId text [not null]
 
   indexes {
     (tag, eventId) [unique]
@@ -42,14 +42,14 @@ Table EventTag {
 }
 
 Table Workspace {
-  id String [pk]
-  name String [not null]
-  ownerId String [not null]
+  id text [pk]
+  name text [not null]
+  ownerId text [not null]
 }
 
 Table WorkspaceMember {
-  userId String [not null]
-  workspaceId String [not null]
+  userId text [not null]
+  workspaceId text [not null]
   role WorkspaceMemberRole [not null]
 
   indexes {
@@ -58,8 +58,8 @@ Table WorkspaceMember {
 }
 
 Table WorkspaceInvite {
-  email String [not null]
-  workspaceId String [not null]
+  email text [not null]
+  workspaceId text [not null]
   memberRole WorkspaceMemberRole [not null]
 
   indexes {
@@ -68,8 +68,8 @@ Table WorkspaceInvite {
 }
 
 Table TaskAssignee {
-  taskId String [not null, ref: > Task.id]
-  assigneeId String [not null, ref: > User.id]
+  taskId text [not null, ref: > Task.id]
+  assigneeId text [not null, ref: > User.id]
 
   indexes {
     (taskId, assigneeId) [unique]
@@ -77,8 +77,8 @@ Table TaskAssignee {
 }
 
 Table EventAttendee {
-  eventId String [not null, ref: > Event.id]
-  attendeeId String [not null, ref: > User.id]
+  eventId text [not null, ref: > Event.id]
+  attendeeId text [not null, ref: > User.id]
 
   indexes {
     (eventId, attendeeId) [unique]
@@ -86,8 +86,8 @@ Table EventAttendee {
 }
 
 Table TaskDependency {
-  parentId String [not null, ref: > Task.id]
-  dependencyId String [not null, ref: > Task.id]
+  parentId text [not null, ref: > Task.id]
+  dependencyId text [not null, ref: > Task.id]
 }
 
 Enum Priority {
