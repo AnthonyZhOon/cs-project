@@ -60,6 +60,7 @@ Table WorkspaceMember {
 Table WorkspaceInvite {
   email String [not null]
   workspaceId String [not null]
+  memberRole WorkspaceMemberRole [not null]
 
   indexes {
     (email, workspaceId) [unique]

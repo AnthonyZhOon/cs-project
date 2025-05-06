@@ -81,10 +81,10 @@ model Workspace {
 
 model WorkspaceMember {
   userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  role WorkspaceMemberRole
+  workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  role        WorkspaceMemberRole
 
   @@id([userId, workspaceId])
 }
@@ -92,7 +92,8 @@ model WorkspaceMember {
 model WorkspaceInvite {
   email       String
   workspaceId String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  memberRole  WorkspaceMemberRole
 
   @@unique([email, workspaceId])
 }
