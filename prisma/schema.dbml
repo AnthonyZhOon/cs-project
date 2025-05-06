@@ -48,10 +48,13 @@ Table Workspace {
 }
 
 Table WorkspaceMember {
-  id String [pk]
-  role WorkspaceMemberRole [not null]
   userId String [not null]
   workspaceId String [not null]
+  role WorkspaceMemberRole [not null]
+
+  indexes {
+    (userId, workspaceId) [pk]
+  }
 }
 
 Table WorkspaceInvite {
