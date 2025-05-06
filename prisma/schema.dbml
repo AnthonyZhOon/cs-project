@@ -11,7 +11,6 @@ Table Task {
   completed Boolean [not null, default: false]
   deadline DateTime
   priority Priority
-  tags String[] [not null]
   workspaceId String [not null]
 }
 
@@ -21,8 +20,25 @@ Table Event {
   description String
   start DateTime [not null]
   end DateTime [not null]
-  tags String[] [not null]
   workspaceId String [not null]
+}
+
+Table TaskTag {
+  tag String [not null]
+  taskId String [not null]
+
+  indexes {
+    (tag, taskId) [unique]
+  }
+}
+
+Table EventTag {
+  tag String [not null]
+  eventId String [not null]
+
+  indexes {
+    (tag, eventId) [unique]
+  }
 }
 
 Table Workspace {
@@ -38,14 +54,31 @@ Table WorkspaceMember {
   workspaceId String [not null]
 }
 
-Table TaskToUser {
-  taskId String [not null, ref: > Task.id]
-  assigneeId String [not null, ref: > User.id]
+Table WorkspaceInvite {
+  email String [not null]
+  workspaceId String [not null]
+
+  indexes {
+    (email, workspaceId) [unique]
+  }
 }
 
-Table EventToUser {
+Table TaskAssignee {
+  taskId String [not null, ref: > Task.id]
+  assigneeId String [not null, ref: > User.id]
+
+  indexes {
+    (taskId, assigneeId) [unique]
+  }
+}
+
+Table EventAttendee {
   eventId String [not null, ref: > Event.id]
   attendeeId String [not null, ref: > User.id]
+
+  indexes {
+    (eventId, attendeeId) [unique]
+  }
 }
 
 Table TaskDependency {
@@ -62,15 +95,20 @@ Enum Priority {
 Enum WorkspaceMemberRole {
   MANAGER
   MEMBER
-  INVITED
 }
 
 Ref: Task.workspaceId > Workspace.id [delete: Cascade]
 
 Ref: Event.workspaceId > Workspace.id [delete: Cascade]
 
+Ref: TaskTag.taskId > Task.id [delete: Cascade]
+
+Ref: EventTag.eventId > Event.id [delete: Cascade]
+
 Ref: Workspace.ownerId > User.id
 
 Ref: WorkspaceMember.userId > User.id [delete: Cascade]
 
 Ref: WorkspaceMember.workspaceId > Workspace.id [delete: Cascade]
+
+Ref: WorkspaceInvite.workspaceId > Workspace.id [delete: Cascade]
