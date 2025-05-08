@@ -8,7 +8,7 @@ Table Task {
   id text [pk]
   title text [not null]
   description text
-  completed boolean [not null, default: false]
+  status TaskStatus [not null, default: 'TODO']
   deadline timestamp(3)
   priority Priority
   workspaceId text [not null]
@@ -94,6 +94,12 @@ Enum Priority {
   LOW
   MEDIUM
   HIGH
+}
+
+Enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETE
 }
 
 Enum WorkspaceMemberRole {
