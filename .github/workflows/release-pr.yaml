@@ -1,13 +1,13 @@
-name: Deploy PR to Preview Environment?
+name: Deploy PR to Preview Environment
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  pull-requests: write # Add PR comments
+
 env:
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   NODE_VERSION: 22
   PNPM_VERSION: 10
 
