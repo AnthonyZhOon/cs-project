@@ -1,3 +1,6 @@
+projects:
+  - './'
+
 onlyBuiltDependencies:
   - '@prisma/engines'
   - esbuild
@@ -5,3 +8,4 @@ onlyBuiltDependencies:
 
 ignoredBuiltDependencies:
   - '@prisma/client'
+  - unrs-resolver

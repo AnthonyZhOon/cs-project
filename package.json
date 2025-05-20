@@ -8,11 +8,11 @@
   },
   "scripts": {
     "dev": "next",
-    "build": "prisma generate && next build",
+    "build": "prisma migrate deploy && prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "generate-prisma": "prisma generate",
-    "init-db": "prisma migrate dev --name initial_migration && prisma db seed",
+    "seed-db": "prisma db seed",
     "drop-db": "tsx prisma/drop-tables.ts"
   },
   "prisma": {
