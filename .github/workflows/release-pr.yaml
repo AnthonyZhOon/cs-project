@@ -57,7 +57,7 @@ jobs:
         run: |
           vercel pull --yes --environment=production --token=${{ env.VERCEL_TOKEN }}
           vercel env pull .env --token=${{ env.VERCEL_TOKEN }}
-          vercel build --token=${{ env.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ env.VERCEL_TOKEN }}
           vercel deploy --prebuilt --prod --token=${{ env.VERCEL_TOKEN }}
 
       - name: Comment PR with deployment URL
