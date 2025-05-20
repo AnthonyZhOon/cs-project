@@ -50,6 +50,7 @@ jobs:
         run: pnpm add --global vercel@latest
 
       - name: Deploy to Vercel
+        id: deploy
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -59,8 +60,8 @@ jobs:
           vercel env pull .env --token=${{ env.VERCEL_TOKEN }}
           vercel build --prod --token=${{ env.VERCEL_TOKEN }}
           DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ env.VERCEL_TOKEN }})
-          echo "$DEPLOY_URL"
           echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "Preview URL: $DEPLOY_URL"
 
       - name: Comment PR with deployment URL
         uses: actions/github-script@v6
@@ -73,5 +74,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-            body: `🚀 Preview deployment is ready! Visit: ${process.env.URL}`
+            body: `🚀 Preview deployment is ready! Visit: ${{ steps.deploy.outputs.deploy_url }}`
             });
