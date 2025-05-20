@@ -55,10 +55,10 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          vercel pull --yes --environment=development --token=${{ env.VERCEL_TOKEN }}
-          vercel env pull .env --yes --environment=development --token=${{ env.VERCEL_TOKEN }}
+          vercel pull --yes --environment=production --token=${{ env.VERCEL_TOKEN }}
+          vercel env pull .env --token=${{ env.VERCEL_TOKEN }}
           vercel build --token=${{ env.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --token=${{ env.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ env.VERCEL_TOKEN }}
 
       - name: Comment PR with deployment URL
         uses: actions/github-script@v6
