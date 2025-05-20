@@ -64,6 +64,8 @@ jobs:
 
       - name: Comment PR with deployment URL
         uses: actions/github-script@v6
+        env:
+          URL: ${{ steps.deploy.outputs.deploy_url }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -71,5 +73,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: "🚀 Preview deployment is ready! Visit: ${{ steps.deploy.outputs.deploy_url }}"
+            body: `🚀 Preview deployment is ready! Visit: ${process.env.URL}`
             });
