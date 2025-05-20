@@ -58,26 +58,17 @@ jobs:
           vercel pull --yes --environment=production --token=${{ env.VERCEL_TOKEN }}
           vercel env pull .env --token=${{ env.VERCEL_TOKEN }}
           vercel build --prod --token=${{ env.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --prod --token=${{ env.VERCEL_TOKEN }}
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ env.VERCEL_TOKEN }})
+          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
 
       - name: Comment PR with deployment URL
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs');
-            const deploymentUrl = fs.readFileSync('.vercel/output/config.json', 'utf8');
-            const url = JSON.parse(deploymentUrl).url;
-
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🚀 Preview deployment is ready! Visit: https://${url}`
+              body: `🚀 Preview deployment is ready! Visit: ${{ steps.deploy.outputs.deploy_url }}`
             });
-      - uses: amondnet/vercel-action@v25 #deploy
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
-          github-token: ${{ secrets.GITHUB_TOKEN }} #Optional
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID}} #Required
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID}} #Required
