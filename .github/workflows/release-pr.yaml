@@ -96,11 +96,11 @@ jobs:
           BRANCH_ID=${{ steps.check-branch.outputs.branch_id || steps.create-branch.outputs.branch_id }}
           
           # Create database user or update existing one
-          USER_RESULT=$(neonctl roles create --name prisma_user --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID --output json 2>/dev/null 
+          neonctl roles create --name ${{ env.DB_USER }} --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID --output json 2>/dev/null
           
           # Get connection string
-          POOLED_STRING=$(neonctl connection-string --role-name prisma_user --pooled --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID)
-          DIRECT_STRING=$(neonctl connection-string --role-name prisma_user --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID)
+          POOLED_STRING=$(neonctl connection-string --role-name ${{ env.DB_USER }} --pooled --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID)
+          DIRECT_STRING=$(neonctl connection-string --role-name ${{ env.DB_USER }} --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID)
           
           # Set outputs
           echo "::add-mask::$POOLED_STRING"
