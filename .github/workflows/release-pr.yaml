@@ -10,7 +10,7 @@ env:
   NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
   NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
   NODE_VERSION: 18
-  PNPM_VERSION: 8
+  PNPM_VERSION: 10
 
 jobs:
   setup-and-deploy:
