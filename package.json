@@ -2,11 +2,21 @@
   "name": "cs-project",
   "version": "0.0.1",
   "description": "",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
+  },
   "scripts": {
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "generate-prisma": "prisma generate"
+    "lint": "next lint",
+    "generate-prisma": "prisma generate",
+    "init-db": "prisma migrate dev --name initial_migration && prisma db seed",
+    "drop-db": "tsx prisma/drop-tables.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
