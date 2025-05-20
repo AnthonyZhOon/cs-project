@@ -10,7 +10,7 @@ env:
   NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
   NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
   DB_USER: "prisma_user"
-  NODE_VERSION: 18
+  NODE_VERSION: 22
   PNPM_VERSION: 10
 
 jobs:
