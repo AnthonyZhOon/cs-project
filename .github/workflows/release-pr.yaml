@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
           
       - name: Install dependencies
-        run: pnpm install --frozen-lock-file
+        run: pnpm install --frozen-lockfile
 
       - uses: amondnet/vercel-action@v25 #deploy
         with:
