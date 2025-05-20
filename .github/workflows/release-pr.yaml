@@ -8,9 +8,6 @@ env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-  NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
-  NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
-  DB_USER: "prisma_user"
   NODE_VERSION: 22
   PNPM_VERSION: 10
 
@@ -52,83 +49,11 @@ jobs:
       - name: Install Vercel CLI
         run: pnpm add --global vercel@latest
       
-      - name: Get branch name
-        id: branch-name
-        run: |
-          BRANCH_NAME=$(echo ${{ github.head_ref }} | sed 's/\//-/g' | tr '[:upper:]' '[:lower:]')
-          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
-          echo "Branch name for database: $BRANCH_NAME"
-          
-      - name: Install Neon CLI
-        run: |
-          pnpm i -g neonctl
-
-      - name: Check if branch exists on Neon
-        id: check-branch
-        run: |
-          BRANCH_EXISTS=$(neonctl branches list --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --output json | jq -r '.[] | select(.name=="${{ steps.branch-name.outputs.branch_name }}") | .id')
-          if [ -n "$BRANCH_EXISTS" ]; then
-            echo "Branch exists, will reset it"
-            echo "branch_exists=true" >> $GITHUB_OUTPUT
-            echo "branch_id=$BRANCH_EXISTS" >> $GITHUB_OUTPUT
-          else
-            echo "Branch does not exist, will create it"
-            echo "branch_exists=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Create new database branch
-        if: steps.check-branch.outputs.branch_exists == 'false'
-        id: create-branch
-        run: |
-          RESULT=$(neonctl branches create --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --name ${{ steps.branch-name.outputs.branch_name }} --output json)
-          BRANCH_ID=$(echo $RESULT | jq -r '.id')
-          echo "$RESULT"
-          echo "branch_id=$BRANCH_ID" >> $GITHUB_OUTPUT
-          echo "Created new branch with ID: $BRANCH_ID"
-
-      - name: Reset database branch
-        if: steps.check-branch.outputs.branch_exists == 'true'
-        run: |
-          neonctl branches reset ${{ steps.check-branch.outputs.branch_id }} --parent --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} 
-
-      - name: Create database user
-        id: create-user
-        run: |
-          BRANCH_ID=${{ steps.check-branch.outputs.branch_id || steps.create-branch.outputs.branch_id }}
-          
-          # Create database user or update existing one
-          neonctl roles create --name ${{ env.DB_USER }} --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID --output json 2>/dev/null
-          
-          # Get connection string
-          POOLED_STRING=$(neonctl connection-string --role-name ${{ env.DB_USER }} --pooled --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID)
-          DIRECT_STRING=$(neonctl connection-string --role-name ${{ env.DB_USER }} --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID)
-          
-          # Set outputs
-          echo "::add-mask::$POOLED_STRING"
-          echo "::add-mask::$DIRECT_STRING"
-          echo "pooled_string=$POOLED_STRING" >> $GITHUB_OUTPUT
-          echo "direct_string=$DIRECT_STRING" >> $GITHUB_OUTPUT
-
-      - name: Run Prisma migrations
-        run: |
-          export DATABASE_URL="${{ steps.create-user.outputs.pooled_string }}"
-          export DIRECT_URL="${{ steps.create-user.outputs.direct_string }}"
-          pnpm exec prisma migrate deploy
-
-      - name: Run Prisma seed (optional)
-        run: |
-          export DATABASE_URL="${{ steps.create-user.outputs.pooled_string }}"
-          export DIRECT_URL="${{ steps.create-user.outputs.direct_string }}"
-          pnpm exec prisma db seed
-        continue-on-error: true
-
       - name: Deploy to Vercel
         run: |
           vercel pull --yes --environment=preview --token=${{ env.VERCEL_TOKEN }} &&
           vercel build --token=${{ env.VERCEL_TOKEN }} &&
-          vercel deploy --prebuilt --token=${{ env.VERCEL_TOKEN }} \
-            --env DATABASE_URL="${{ steps.create-user.outputs.pooled_string }}" \
-            --env DIRECT_URL="${{ steps.create-user.outputs.direct_string }}"
+          vercel deploy --prebuilt --token=${{ env.VERCEL_TOKEN }} 
 
       - name: Comment PR with deployment URL
         uses: actions/github-script@v6
