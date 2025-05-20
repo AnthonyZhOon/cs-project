@@ -1,0 +1,151 @@
+name: Deploy PR to Preview Environment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+  NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+  NODE_VERSION: 18
+  PNPM_VERSION: 8
+
+jobs:
+  setup-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+          
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Install Vercel CLI
+        run: pnpm add --global vercel@latest
+      
+      - name: Get branch name
+        id: branch-name
+        run: |
+          BRANCH_NAME=$(echo ${{ github.head_ref }} | sed 's/\//-/g' | tr '[:upper:]' '[:lower:]')
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "Branch name for database: $BRANCH_NAME"
+          
+      - name: Install Neon CLI
+        run: |
+          curl -fsSL https://get.neon.tech/install.sh | bash
+          neonctl auth --api-key ${{ env.NEON_API_KEY }}
+
+      - name: Check if branch exists on Neon
+        id: check-branch
+        run: |
+          BRANCH_EXISTS=$(neonctl branches list --project-id ${{ env.NEON_PROJECT_ID }} --output json | jq -r '.[] | select(.name=="${{ steps.branch-name.outputs.branch_name }}") | .id')
+          if [ -n "$BRANCH_EXISTS" ]; then
+            echo "Branch exists, will reset it"
+            echo "branch_exists=true" >> $GITHUB_OUTPUT
+            echo "branch_id=$BRANCH_EXISTS" >> $GITHUB_OUTPUT
+          else
+            echo "Branch does not exist, will create it"
+            echo "branch_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create new database branch
+        if: steps.check-branch.outputs.branch_exists == 'false'
+        id: create-branch
+        run: |
+          RESULT=$(neonctl branches create --project-id ${{ env.NEON_PROJECT_ID }} --name ${{ steps.branch-name.outputs.branch_name }} --output json)
+          BRANCH_ID=$(echo $RESULT | jq -r '.id')
+          echo "branch_id=$BRANCH_ID" >> $GITHUB_OUTPUT
+          echo "Created new branch with ID: $BRANCH_ID"
+
+      - name: Reset database branch
+        if: steps.check-branch.outputs.branch_exists == 'true'
+        run: |
+          neonctl branches reset --project-id ${{ env.NEON_PROJECT_ID }} --branch-id ${{ steps.check-branch.outputs.branch_id }} --confirm
+
+      - name: Create database user
+        id: create-user
+        run: |
+          BRANCH_ID=${{ steps.check-branch.outputs.branch_id || steps.create-branch.outputs.branch_id }}
+          # Generate a secure random password
+          DB_PASSWORD=$(openssl rand -base64 16 | tr -dc 'a-zA-Z0-9' | head -c 16)
+          
+          # Create database user or update existing one
+          USER_RESULT=$(neonctl users create --project-id ${{ env.NEON_PROJECT_ID }} --branch-id $BRANCH_ID --username prisma_user --output json 2>/dev/null || neonctl users list --project-id ${{ env.NEON_PROJECT_ID }} --branch-id $BRANCH_ID --output json | jq -r '.[] | select(.name=="prisma_user") | .id')
+          
+          # Get user ID
+          USER_ID=$(echo $USER_RESULT | jq -r '.id' 2>/dev/null || echo $USER_RESULT)
+          
+          # Set password for the user
+          neonctl users reset-password --project-id ${{ env.NEON_PROJECT_ID }} --branch-id $BRANCH_ID --user $USER_ID --password $DB_PASSWORD
+          
+          # Get connection string
+          CONNECTION_STRING=$(neonctl connection-string --project-id ${{ env.NEON_PROJECT_ID }} --branch-id $BRANCH_ID --role prisma_user --password $DB_PASSWORD)
+          
+          # Set outputs
+          echo "::add-mask::$DB_PASSWORD"
+          echo "::add-mask::$CONNECTION_STRING"
+          echo "connection_string=$CONNECTION_STRING" >> $GITHUB_OUTPUT
+
+      - name: Run Prisma migrations
+        run: |
+          export DATABASE_URL="${{ steps.create-user.outputs.connection_string }}"
+          pnpm exec prisma migrate deploy
+
+      - name: Run Prisma seed (optional)
+        run: |
+          export DATABASE_URL="${{ steps.create-user.outputs.connection_string }}"
+          pnpm exec prisma db seed
+        continue-on-error: true
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          vercel pull --yes --environment=preview --token=${{ env.VERCEL_TOKEN }}
+          vercel build --token=${{ env.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --token=${{ env.VERCEL_TOKEN }} \
+            --env DATABASE_URL="${{ steps.create-user.outputs.connection_string }}" \
+            --env DIRECT_URL="${{ steps.create-user.outputs.connection_string }}"
+
+      - name: Comment PR with deployment URL
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const deploymentUrl = fs.readFileSync('.vercel/output/config.json', 'utf8');
+            const url = JSON.parse(deploymentUrl).url;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Preview deployment is ready! Visit: https://${url}`
+            });
