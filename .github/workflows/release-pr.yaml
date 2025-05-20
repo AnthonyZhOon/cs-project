@@ -60,12 +60,11 @@ jobs:
       - name: Install Neon CLI
         run: |
           pnpm i -g neonctl
-          neonctl auth --api-key ${{ env.NEON_API_KEY }}
 
       - name: Check if branch exists on Neon
         id: check-branch
         run: |
-          BRANCH_EXISTS=$(neonctl branches list --project-id ${{ env.NEON_PROJECT_ID }} --output json | jq -r '.[] | select(.name=="${{ steps.branch-name.outputs.branch_name }}") | .id')
+          BRANCH_EXISTS=$(neonctl branches list --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --output json | jq -r '.[] | select(.name=="${{ steps.branch-name.outputs.branch_name }}") | .id')
           if [ -n "$BRANCH_EXISTS" ]; then
             echo "Branch exists, will reset it"
             echo "branch_exists=true" >> $GITHUB_OUTPUT
@@ -79,7 +78,7 @@ jobs:
         if: steps.check-branch.outputs.branch_exists == 'false'
         id: create-branch
         run: |
-          RESULT=$(neonctl branches create --project-id ${{ env.NEON_PROJECT_ID }} --name ${{ steps.branch-name.outputs.branch_name }} --output json)
+          RESULT=$(neonctl branches create --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --name ${{ steps.branch-name.outputs.branch_name }} --output json)
           BRANCH_ID=$(echo $RESULT | jq -r '.id')
           echo "branch_id=$BRANCH_ID" >> $GITHUB_OUTPUT
           echo "Created new branch with ID: $BRANCH_ID"
@@ -87,7 +86,7 @@ jobs:
       - name: Reset database branch
         if: steps.check-branch.outputs.branch_exists == 'true'
         run: |
-          neonctl branches reset --project-id ${{ env.NEON_PROJECT_ID }} --branch-id ${{ steps.check-branch.outputs.branch_id }} --confirm
+          neonctl branches reset --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch-id ${{ steps.check-branch.outputs.branch_id }} --confirm
 
       - name: Create database user
         id: create-user
@@ -97,16 +96,16 @@ jobs:
           DB_PASSWORD=$(openssl rand -base64 16 | tr -dc 'a-zA-Z0-9' | head -c 16)
           
           # Create database user or update existing one
-          USER_RESULT=$(neonctl users create --project-id ${{ env.NEON_PROJECT_ID }} --branch-id $BRANCH_ID --username prisma_user --output json 2>/dev/null || neonctl users list --project-id ${{ env.NEON_PROJECT_ID }} --branch-id $BRANCH_ID --output json | jq -r '.[] | select(.name=="prisma_user") | .id')
+          USER_RESULT=$(neonctl users create --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch-id $BRANCH_ID --username prisma_user --output json 2>/dev/null || neonctl users list --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch-id $BRANCH_ID --output json | jq -r '.[] | select(.name=="prisma_user") | .id')
           
           # Get user ID
           USER_ID=$(echo $USER_RESULT | jq -r '.id' 2>/dev/null || echo $USER_RESULT)
           
           # Set password for the user
-          neonctl users reset-password --project-id ${{ env.NEON_PROJECT_ID }} --branch-id $BRANCH_ID --user $USER_ID --password $DB_PASSWORD
+          neonctl users reset-password --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch-id $BRANCH_ID --user $USER_ID --password $DB_PASSWORD
           
           # Get connection string
-          CONNECTION_STRING=$(neonctl connection-string --project-id ${{ env.NEON_PROJECT_ID }} --branch-id $BRANCH_ID --role prisma_user --password $DB_PASSWORD)
+          CONNECTION_STRING=$(neonctl connection-string --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch-id $BRANCH_ID --role prisma_user --password $DB_PASSWORD)
           
           # Set outputs
           echo "::add-mask::$DB_PASSWORD"
