@@ -59,7 +59,7 @@ jobs:
           
       - name: Install Neon CLI
         run: |
-          curl -fsSL https://get.neon.tech/install.sh | bash
+          pnpm i -g neonctl
           neonctl auth --api-key ${{ env.NEON_API_KEY }}
 
       - name: Check if branch exists on Neon
