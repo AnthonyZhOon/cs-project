@@ -7,6 +7,7 @@ on:
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
   NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
   DB_USER: "prisma_user"
@@ -122,11 +123,9 @@ jobs:
         continue-on-error: true
 
       - name: Deploy to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          vercel pull --yes --environment=preview --token=${{ env.VERCEL_TOKEN }}
-          vercel build --token=${{ env.VERCEL_TOKEN }}
+          vercel pull --yes --environment=preview --token=${{ env.VERCEL_TOKEN }} &&
+          vercel build --token=${{ env.VERCEL_TOKEN }} &&
           vercel deploy --prebuilt --token=${{ env.VERCEL_TOKEN }} \
             --env DATABASE_URL="${{ steps.create-user.outputs.pooled_string }}" \
             --env DIRECT_URL="${{ steps.create-user.outputs.direct_string }}"
