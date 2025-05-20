@@ -80,6 +80,7 @@ jobs:
         run: |
           RESULT=$(neonctl branches create --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --name ${{ steps.branch-name.outputs.branch_name }} --output json)
           BRANCH_ID=$(echo $RESULT | jq -r '.id')
+          echo "$RESULT"
           echo "branch_id=$BRANCH_ID" >> $GITHUB_OUTPUT
           echo "Created new branch with ID: $BRANCH_ID"
 
