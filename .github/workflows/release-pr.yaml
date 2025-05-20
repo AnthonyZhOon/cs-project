@@ -103,7 +103,7 @@ jobs:
           DIRECT_STRING=$(neonctl connection-string --role-name ${{env.DB_USER}} --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID)
           
           # Set outputs
-          echo "::add-mask::$POOKED_STRING"
+          echo "::add-mask::$POOLED_STRING"
           echo "pooled_string=$POOLED_STRING" >> $GITHUB_OUTPUT
           echo "direct_string=$DIRECT_STRING" >> $GITHUB_OUTPUT
 
