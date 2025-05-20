@@ -9,6 +9,7 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
   NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+  DB_USER: "prisma_user"
   NODE_VERSION: 18
   PNPM_VERSION: 10
 
@@ -87,40 +88,33 @@ jobs:
       - name: Reset database branch
         if: steps.check-branch.outputs.branch_exists == 'true'
         run: |
-          neonctl branches reset --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch-id ${{ steps.check-branch.outputs.branch_id }} --confirm
+          neonctl branches reset --branch ${{ steps.check-branch.outputs.branch_id }} --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} 
 
       - name: Create database user
         id: create-user
         run: |
           BRANCH_ID=${{ steps.check-branch.outputs.branch_id || steps.create-branch.outputs.branch_id }}
-          # Generate a secure random password
-          DB_PASSWORD=$(openssl rand -base64 16 | tr -dc 'a-zA-Z0-9' | head -c 16)
           
           # Create database user or update existing one
-          USER_RESULT=$(neonctl users create --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch-id $BRANCH_ID --username prisma_user --output json 2>/dev/null || neonctl users list --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch-id $BRANCH_ID --output json | jq -r '.[] | select(.name=="prisma_user") | .id')
-          
-          # Get user ID
-          USER_ID=$(echo $USER_RESULT | jq -r '.id' 2>/dev/null || echo $USER_RESULT)
-          
-          # Set password for the user
-          neonctl users reset-password --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch-id $BRANCH_ID --user $USER_ID --password $DB_PASSWORD
+          USER_RESULT=$(neonctl roles create --name ${{env.DB_USER}} --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID --output json 2>/dev/null 
           
           # Get connection string
-          CONNECTION_STRING=$(neonctl connection-string --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch-id $BRANCH_ID --role prisma_user --password $DB_PASSWORD)
+          POOLED_STRING=$(neonctl connection-string --role-name ${{env.DB_USER}} --pooled --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID)
+          DIRECT_STRING=$(neonctl connection-string --role-name ${{env.DB_USER}} --project-id ${{ env.NEON_PROJECT_ID }} --api-key ${{ env.NEON_API_KEY }} --branch $BRANCH_ID)
           
           # Set outputs
-          echo "::add-mask::$DB_PASSWORD"
-          echo "::add-mask::$CONNECTION_STRING"
-          echo "connection_string=$CONNECTION_STRING" >> $GITHUB_OUTPUT
+          echo "::add-mask::$POOKED_STRING"
+          echo "pooled_string=$POOLED_STRING" >> $GITHUB_OUTPUT
+          echo "direct_string=$DIRECT_STRING" >> $GITHUB_OUTPUT
 
       - name: Run Prisma migrations
         run: |
-          export DATABASE_URL="${{ steps.create-user.outputs.connection_string }}"
+          export DATABASE_URL="${{ steps.create-user.outputs.pooled_string }}"
           pnpm exec prisma migrate deploy
 
       - name: Run Prisma seed (optional)
         run: |
-          export DATABASE_URL="${{ steps.create-user.outputs.connection_string }}"
+          export DATABASE_URL="${{ steps.create-user.outputs.pooled_string }}"
           pnpm exec prisma db seed
         continue-on-error: true
 
@@ -131,8 +125,8 @@ jobs:
           vercel pull --yes --environment=preview --token=${{ env.VERCEL_TOKEN }}
           vercel build --token=${{ env.VERCEL_TOKEN }}
           vercel deploy --prebuilt --token=${{ env.VERCEL_TOKEN }} \
-            --env DATABASE_URL="${{ steps.create-user.outputs.connection_string }}" \
-            --env DIRECT_URL="${{ steps.create-user.outputs.connection_string }}"
+            --env DATABASE_URL="${{ steps.create-user.outputs.pooled_string }}" \
+            --env DIRECT_URL="${{ steps.create-user.outputs.direct_string }}"
 
       - name: Comment PR with deployment URL
         uses: actions/github-script@v6
