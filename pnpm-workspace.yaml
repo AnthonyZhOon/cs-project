@@ -1,5 +1,5 @@
 projects:
-  - './'
+  - ./
 
 onlyBuiltDependencies:
   - '@prisma/engines'
@@ -8,4 +8,5 @@ onlyBuiltDependencies:
 
 ignoredBuiltDependencies:
   - '@prisma/client'
+  - sharp
   - unrs-resolver
