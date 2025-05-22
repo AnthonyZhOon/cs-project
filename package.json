@@ -7,16 +7,12 @@
     "pnpm": ">=10"
   },
   "scripts": {
-    "dev": "next",
+    "dev": "prisma migrate deploy && prisma generate && next",
     "build": "prisma migrate deploy && prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "generate-prisma": "prisma generate",
-    "seed-db": "prisma db seed",
     "drop-db": "tsx prisma/drop-tables.ts"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +30,7 @@
     "@types/react": "19.1.4",
     "eslint": "^9.27.0",
     "eslint-config-next": "^15.3.2",
+    "eslint-plugin-only-warn": "^1.1.0",
     "prisma": "^6.8.2",
     "prisma-dbml-generator": "^0.12.0",
     "tsx": "^4.19.4",

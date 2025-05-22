@@ -15,6 +15,16 @@ export const getStaticProps: GetStaticProps = async () => {
         email: "burk@prisma.io",
       },
     },
+    {
+      id: "2",
+      title: "Prisma is the perfect ORM for Next.js",
+      content: "[Prisma](https://github.com/prisma/prisma) and Next.js go _great_ together!",
+      published: false,
+      author: {
+        name: "Nikolas Burk",
+        email: "burk@prisma.io",
+      },
+    },
   ]
   return { 
     props: { feed }, 
@@ -31,7 +41,6 @@ const Blog: React.FC<Props> = (props) => {
     <Layout>
       <div className="page">
         <h1>Public Feed</h1>
-        <h2>I don't know man</h2>
         <main>
           {props.feed.map((post) => (
             <div key={post.id} className="post">

@@ -14,3 +14,24 @@
 	- add/remove managers
 	- delete workspace
 - The owner of a workspace (who always has the `MANAGER` role) can do everything.
+
+# Development
+
+Tool versions:
+
+- node Version 22
+- pnpm version 10
+
+Populate dependencies
+
+- `pnpm install` 
+
+To use the development environment, connect the project with a Vercel account either using a personal deployment
+with `pnpx vercel link`. Or by requesting a Vercel API token from the shared project.
+
+- `pnpx vercel pull --environment=development --token=$TOKEN`
+- `pnpx vercel env pull .env` # Populate the `.env` file with the APIs needed to connect with the database, etc.
+	- Providing the database_url environment variables configured in the Prisma schema
+- `pnpm run dev`
+
+This should connect your local environment with the development database.
