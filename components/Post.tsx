@@ -1,5 +1,6 @@
+'use client'
 import React from "react";
-import Router from "next/router";
+import Router from "next/navigation";
 import ReactMarkdown from "react-markdown";
 
 export type PostProps = {
