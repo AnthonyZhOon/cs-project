@@ -15,7 +15,7 @@
 	- delete workspace
 - The owner of a workspace (who always has the `MANAGER` role) can do everything.
 
-# Development
+## Development
 
 Tool versions:
 
@@ -24,7 +24,7 @@ Tool versions:
 
 Populate dependencies
 
-- `pnpm install` 
+- `pnpm install`
 
 To use the development environment, connect the project with a Vercel account either using a personal deployment
 with `pnpx vercel link`. Or by requesting a Vercel API token from the shared project.
