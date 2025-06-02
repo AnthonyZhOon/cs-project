@@ -1,6 +1,6 @@
 datasource db {
-  provider = "postgres"
-  url      = env("NEON_POSTGRES_PRISMA_URL")
+  provider  = "postgres"
+  url       = env("NEON_POSTGRES_PRISMA_URL")
   directUrl = env("NEON_DATABASE_URL_UNPOOLED")
 }
 
@@ -10,7 +10,7 @@ generator dbml {
 
 generator client {
   provider = "prisma-client-js"
-  output = "../app/generated/prisma"
+  output   = "../app/generated/prisma"
 }
 
 model User {
@@ -25,10 +25,11 @@ model User {
 }
 
 model Task {
-  id          String     @id @default(cuid(2))
+  id          String              @id @default(cuid(2))
   title       String
   description String?
-  status      TaskStatus @default(TODO)
+  visibility  WorkspaceMemberRole @default(MEMBER)
+  status      TaskStatus          @default(TODO)
   deadline    DateTime?
   priority    Priority?
   tags        TaskTag[]
@@ -43,9 +44,10 @@ model Task {
 }
 
 model Event {
-  id          String     @id @default(cuid(2))
+  id          String              @id @default(cuid(2))
   title       String
   description String?
+  visibility  WorkspaceMemberRole @default(MEMBER)
   start       DateTime
   end         DateTime
   tags        EventTag[]
