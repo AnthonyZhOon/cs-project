@@ -1,8 +1,8 @@
-node_modules/
+/app/generated/
 /prisma/dbml/
 .env*.local
 .env
-.vercel/
+.eslintcache
 .next/
-.vercel
-app/generated
+.vercel/
+node_modules/
