@@ -19,7 +19,7 @@
 
 Tool versions:
 
-- node Version 22
+- Node.js version 22
 - pnpm version 10
 
 Populate dependencies
