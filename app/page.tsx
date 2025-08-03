@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import Calendar from '@/components/Calendar';
 import ComponentBox from '@/components/ComponentBox';
-import Task, {exampleTask} from '@/components/Task';
+import Task, { exampleTask } from '@/components/Task';
 import TaskSummaryChart from '@/components/TaskSummary';
 import UpcomingBox from '@/components/UpcomingBox';
+import { auth0 } from '@/lib/auth0';
 import prisma from '@/lib/prisma';
-
 // const getFeed = () => {
 // 	const feed = [
 // 		{
@@ -35,106 +35,104 @@ import prisma from '@/lib/prisma';
 // }
 
 const getUsers = async () => {
-	const users = await prisma.user.findMany();
-	return users;
+  const users = await prisma.user.findMany();
+  return users;
 };
 
 const exampleTasks = [
-	{
-		name: 'Task 1',
-		date: new Date('01-01-01'),
-		url: '',
-		complete: true,
-	},
-	{
-		name: 'Task 2',
-		date: new Date('02-02-02'),
-		url: '',
-		complete: false,
-	},
-	{
-		name: 'Task 3',
-		date: new Date('03-03-03'),
-		url: '',
-		complete: false,
-	},
+  {
+    name: 'Task 1',
+    date: new Date('01-01-01'),
+    url: '',
+    complete: true,
+  },
+  {
+    name: 'Task 2',
+    date: new Date('02-02-02'),
+    url: '',
+    complete: false,
+  },
+  {
+    name: 'Task 3',
+    date: new Date('03-03-03'),
+    url: '',
+    complete: false,
+  },
 ];
 
 export default async function Blog() {
-	const users = await getUsers();
-	// const feed = getFeed()
-	return (
-		<div className="p-2">
-			<div className="mb-4">
-				<Link
-					href="/tasks/new"
-					className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
-				>
-					Create Task
-				</Link>
-				<Link
-					href="/events/new"
-					className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
-				>
-					Create Event
-				</Link>
-				<Link href="/auth/signup" className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800">
-					Signup
-				</Link>
-				<Link
-				href="/auth/createWorkspace"
-				className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
-				>
-					Create Workspace
-				</Link>
-				<Link
-				href="/auth/invitation"
-				className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
-				>
-					Invitation
-				</Link>
-				<Link href="/dashboard" className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800">
-					Dashboard
-				</Link>
-			</div>
+  const users = await getUsers();
+  // eslint-disable-next-line
+  const session = await auth0.getSession();
+  console.log(session);
+  if (session === null) {
+    return (
+      <main>
+        <a href="/auth/login?screen_hint=signup">
+          <button>Sign up</button>
+        </a>
+        <a href="/auth/login">
+          <button>Log in</button>
+        </a>
+      </main>
+    );
+  }
 
-			<ol className="list-decimal list-inside font-[family-name:var(--font-geist-sans)]">
-				{users.map(user => (
-					<li key={user.id} className="mb-2">
-						{user.name}
-					</li>
-				))}
-			</ol>
-			{/* Example Chart */}
-			<div className="max-w-sm mt-6">
-				<TaskSummaryChart todo={30} inProgress={40} done={30} />
-			</div>
-			{/* Example Component Box */}
-			<div className="w-sm">
-				<ComponentBox title="Title">
-					Content
-					<ul className="list-disc list-inside">
-						<li>Item 1</li>
-						<li>Item 2</li>
-						<li>Item 3</li>
-						<li>Item 4</li>
-					</ul>
-				</ComponentBox>
-			</div>
+  // const feed = getFeed()
+  return (
+    <div className="p-2">
+      <div className="mb-4">
+        <Link
+          href="/tasks/new"
+          className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
+        >
+          Create Task
+        </Link>
+        <Link
+          href="/events/new"
+          className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
+        >
+          Create Event
+        </Link>
+      </div>
 
-			{/* Example Upcoming Box */}
-			<div className="w-sm mt-2">
-				<UpcomingBox itemType="Task" items={exampleTasks} />
-			</div>
+      <ol className="list-decimal list-inside font-[family-name:var(--font-geist-sans)]">
+        {users.map(user => (
+          <li key={user.id} className="mb-2">
+            {user.name}
+          </li>
+        ))}
+      </ol>
+      {/* Example Chart */}
+      <div className="max-w-sm mt-6">
+        <TaskSummaryChart todo={30} inProgress={40} done={30} />
+      </div>
+      {/* Example Component Box */}
+      <div className="w-sm">
+        <ComponentBox title="Title">
+          Content
+          <ul className="list-disc list-inside">
+            <li>Item 1</li>
+            <li>Item 2</li>
+            <li>Item 3</li>
+            <li>Item 4</li>
+          </ul>
+        </ComponentBox>
+      </div>
 
-			<div>
-				<Calendar
-					className="w-sm"
-					markedDates={[new Date('2025-08-20')]}
-				></Calendar>
-			</div>
+      {/* Example Upcoming Box */}
+      <div className="w-sm mt-2">
+        <UpcomingBox itemType="Task" items={exampleTasks} />
+      </div>
 
-			<Task task={exampleTask} className="mt-4" />
-		</div>
-	);
+      <div>
+        <Calendar
+          className="w-sm"
+          markedDates={[new Date('2025-08-20')]}
+        ></Calendar>
+      </div>
+
+      <Task task={exampleTask} className="mt-4" />
+    </div>
+  );
 }
