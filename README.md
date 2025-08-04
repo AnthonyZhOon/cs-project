@@ -26,12 +26,11 @@ Populate dependencies
 
 - `pnpm install`
 
-To use the development environment, connect the project with a Vercel account either using a personal deployment
-with `pnpx vercel link`. Or by requesting a Vercel API token from the shared project.
+
+Vercel Setup
+Get token API token from discord group:
 
 - `pnpx vercel pull --environment=development --token=$TOKEN`
 - `pnpx vercel env pull .env --token=$TOKEN` # Populate the `.env` file with the APIs needed to connect with the database, etc.
   - Providing the database_url environment variables configured in the Prisma schema
 - `pnpm run dev`
-
-This should connect your local environment with the development database.
