@@ -30,7 +30,7 @@ To use the development environment, connect the project with a Vercel account ei
 with `pnpx vercel link`. Or by requesting a Vercel API token from the shared project.
 
 - `pnpx vercel pull --environment=development --token=$TOKEN`
-- `pnpx vercel env pull .env` # Populate the `.env` file with the APIs needed to connect with the database, etc.
+- `pnpx vercel env pull .env --token=$TOKEN` # Populate the `.env` file with the APIs needed to connect with the database, etc.
   - Providing the database_url environment variables configured in the Prisma schema
 - `pnpm run dev`
 
