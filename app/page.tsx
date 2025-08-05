@@ -46,11 +46,20 @@ export default async function Blog() {
 					</li>
 				))}
 			</ol>
-			
-			<ComponentBox title="Title">
-				Content
-			</ComponentBox>
 
+			{/* Example Component Box */}
+			<div className="w-sm">
+				<ComponentBox title="Title">
+					Content
+
+					<ul className="list-disc list-inside">
+						<li>Item 1</li>
+						<li>Item 2</li>
+						<li>Item 3</li>
+						<li>Item 4</li>
+					</ul>
+				</ComponentBox>
+			</div>
 		</div>
 	);
 }
