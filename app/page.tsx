@@ -1,3 +1,4 @@
+import ComponentBox from '@/components/ComponentBox'
 import prisma from '@/lib/prisma';
 
 // const getFeed = () => {
@@ -37,7 +38,7 @@ export default async function Blog() {
 	const users = await getUsers();
 	// const feed = getFeed()
 	return (
-		<div>
+		<div className="p-2">
 			<ol className="list-decimal list-inside font-[family-name:var(--font-geist-sans)]">
 				{users.map(user => (
 					<li key={user.id} className="mb-2">
@@ -45,6 +46,11 @@ export default async function Blog() {
 					</li>
 				))}
 			</ol>
+			
+			<ComponentBox title="Title">
+				Content
+			</ComponentBox>
+
 		</div>
 	);
 }
