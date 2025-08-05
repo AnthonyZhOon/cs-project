@@ -1,9 +1,9 @@
 'use client';
 
-export default function UpcomingBox({ children, title }: { children: React.ReactNode, title: string }) {
+export default function ComponentBox({ children, title, className = "" }: { children: React.ReactNode, title: string, className?: string }) {
 
 	return (
-		<div className="w-full border border-black rounded-md">
+		<div className={`w-full border border-black rounded-md ${className}`}>
 			<div className="border-b p-1 font-bold">
 				{title}
 			</div>
