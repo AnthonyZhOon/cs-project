@@ -9,7 +9,66 @@ import type {
 	WorkspaceMemberRole,
 } from './types';
 
-/* Sorted by deadline in ascending order */
+// #region Users
+
+type CreateUserArgs = Readonly<{email: string; name: string}>;
+
+export const createUser = async (data: CreateUserArgs): Promise<Id> => {
+	const {id} = await prisma.user.create({
+		select: {id: true},
+		data,
+	});
+	return id;
+};
+
+export const updateUser = async (
+	id: Id,
+	data: Partial<CreateUserArgs>,
+): Promise<void> => {
+	await prisma.user.update({
+		select: {id: true},
+		where: {id},
+		data,
+	});
+};
+
+// #endregion
+
+// #region Workspaces
+
+export const getWorkspaces = (user: Id): Promise<Workspace[]> =>
+	// TODO: only select properties that are needed
+	prisma.workspace.findMany({where: {members: {some: {userId: user}}}});
+
+type CreateWorkspaceArgs = Readonly<{name: string; owner: Id}>;
+
+export const createWorkspace = async ({
+	owner,
+	...rest
+}: CreateWorkspaceArgs): Promise<Id> => {
+	const {id} = await prisma.workspace.create({
+		select: {id: true},
+		data: {owner: {connect: {id: owner}}, ...rest},
+	});
+	return id;
+};
+
+export const updateWorkspace = async (
+	id: Id,
+	{owner, ...rest}: Partial<CreateWorkspaceArgs>,
+): Promise<void> => {
+	await prisma.workspace.update({
+		select: {id: true},
+		where: {id},
+		data: {owner: {connect: {id: owner}}, ...rest},
+	});
+};
+
+// #endregion
+
+// #region Tasks & Events
+
+/** Sorted by deadline in ascending order */
 export const getTasks = (user: Id): Promise<Task[]> =>
 	prisma.task.findMany({
 		where: {assignees: {some: {id: user}}},
@@ -17,39 +76,13 @@ export const getTasks = (user: Id): Promise<Task[]> =>
 		orderBy: {deadline: 'asc'},
 	});
 
-/* Sorted by start time and then end time in ascending order */
+/** Sorted by start time and then end time in ascending order */
 export const getEvents = (user: Id): Promise<Event[]> =>
 	prisma.event.findMany({
 		where: {attendees: {some: {id: user}}},
 		// TODO: only select properties that are needed
 		orderBy: [{start: 'asc'}, {end: 'asc'}],
 	});
-
-export const getWorkspaces = (user: Id): Promise<Workspace[]> =>
-	// TODO: only select properties that are needed
-	prisma.workspace.findMany({where: {members: {some: {userId: user}}}});
-
-export const createUser = async ({
-	email,
-	name,
-}: Readonly<{email: string; name: string}>): Promise<Id> => {
-	const {id} = await prisma.user.create({
-		select: {id: true},
-		data: {email, name},
-	});
-	return id;
-};
-
-export const createWorkspace = async ({
-	name,
-	owner,
-}: Readonly<{name: string; owner: Id}>): Promise<Id> => {
-	const {id} = await prisma.workspace.create({
-		select: {id: true},
-		data: {name, owner: {connect: {id: owner}}},
-	});
-	return id;
-};
 
 type CreateTaskArgs = Readonly<{
 	title: string;
@@ -132,14 +165,10 @@ export const updateTask = async (
 		where: {id},
 		data: {
 			workspace: {connect: {id: workspaceId}},
-			...(tags
-				? {tags: {set: tags.map(tag => ({tag_taskId: {tag, taskId: id}}))}}
-				: {}),
-			...(assignees ? {assignees: {connect: assignees.map(id => ({id}))}} : {}),
-			...(dependencies
-				? {dependencies: {connect: dependencies.map(id => ({id}))}}
-				: {}),
-			...(parents ? {parents: {connect: parents.map(id => ({id}))}} : {}),
+			tags: {set: tags?.map(tag => ({tag_taskId: {tag, taskId: id}}))},
+			assignees: {connect: assignees?.map(id => ({id}))},
+			dependencies: {connect: dependencies?.map(id => ({id}))},
+			parents: {connect: parents?.map(id => ({id}))},
 			...rest,
 		},
 	});
@@ -154,11 +183,11 @@ export const updateEvent = async (
 		where: {id},
 		data: {
 			workspace: {connect: {id: workspaceId}},
-			...(tags
-				? {tags: {set: tags.map(tag => ({tag_eventId: {tag, eventId: id}}))}}
-				: {}),
-			...(attendees ? {attendees: {connect: attendees.map(id => ({id}))}} : {}),
+			tags: {set: tags?.map(tag => ({tag_eventId: {tag, eventId: id}}))},
+			attendees: {connect: attendees?.map(id => ({id}))},
 			...rest,
 		},
 	});
 };
+
+// #endregion
