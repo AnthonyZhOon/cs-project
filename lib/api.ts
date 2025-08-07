@@ -111,7 +111,7 @@ export const createTask = async ({
 		select: {id: true},
 		data: {
 			workspace: {connect: {id: workspaceId}},
-			tags: {create: tags.map(tag => ({tag}))},
+			tags: {create: tags.map(name => ({name}))},
 			assignees: {connect: assignees.map(id => ({id}))},
 			dependencies: {connect: dependencies.map(id => ({id}))},
 			parents: {connect: parents.map(id => ({id}))},
@@ -143,7 +143,7 @@ export const createEvent = async ({
 		select: {id: true},
 		data: {
 			workspace: {connect: {id: workspaceId}},
-			tags: {create: tags.map(tag => ({tag}))},
+			tags: {create: tags.map(name => ({name}))},
 			attendees: {connect: attendees.map(id => ({id}))},
 			...rest,
 		},
@@ -168,7 +168,7 @@ export const updateTask = async (
 		where: {id},
 		data: {
 			workspace: {connect: {id: workspaceId}},
-			tags: {set: tags?.map(tag => ({tag_taskId: {tag, taskId: id}}))},
+			tags: {set: tags?.map(name => ({name}))},
 			assignees: {connect: assignees?.map(id => ({id}))},
 			dependencies: {connect: dependencies?.map(id => ({id}))},
 			parents: {connect: parents?.map(id => ({id}))},
@@ -187,7 +187,7 @@ export const updateEvent = async (
 		where: {id},
 		data: {
 			workspace: {connect: {id: workspaceId}},
-			tags: {set: tags?.map(tag => ({tag_eventId: {tag, eventId: id}}))},
+			tags: {set: tags?.map(name => ({name}))},
 			attendees: {connect: attendees?.map(id => ({id}))},
 			...rest,
 		},
