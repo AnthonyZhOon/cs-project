@@ -106,6 +106,7 @@ export const createTask = async ({
 	parents = [],
 	...rest
 }: CreateTaskArgs): Promise<Id> => {
+	// TODO: check assignees have access to task
 	const {id} = await prisma.task.create({
 		select: {id: true},
 		data: {
@@ -137,6 +138,7 @@ export const createEvent = async ({
 	attendees = [],
 	...rest
 }: CreateEventArgs): Promise<Id> => {
+	// TODO: check attendees have access to event
 	const {id} = await prisma.event.create({
 		select: {id: true},
 		data: {
@@ -160,6 +162,7 @@ export const updateTask = async (
 		...rest
 	}: Partial<CreateTaskArgs>,
 ): Promise<void> => {
+	// TODO: check assignees have access to task
 	await prisma.task.update({
 		select: {id: true},
 		where: {id},
@@ -178,6 +181,7 @@ export const updateEvent = async (
 	id: Id,
 	{workspaceId, tags, attendees, ...rest}: Partial<CreateEventArgs>,
 ): Promise<void> => {
+	// TODO: check attendees have access to event
 	await prisma.event.update({
 		select: {id: true},
 		where: {id},
