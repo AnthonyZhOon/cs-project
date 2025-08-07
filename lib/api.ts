@@ -22,14 +22,7 @@ export const getEvents = (user: string): Promise<Event[]> =>
 		orderBy: [{start: 'asc'}, {end: 'asc'}],
 	});
 
-export const createTask = async ({
-	workspaceId,
-	tags = [],
-	assignees = [],
-	dependencies = [],
-	parents = [],
-	...rest
-}: Readonly<{
+type CreateTaskArgs = Readonly<{
 	title: string;
 	workspaceId: Id;
 	description?: string;
@@ -41,7 +34,16 @@ export const createTask = async ({
 	assignees?: readonly Id[];
 	dependencies?: readonly Id[];
 	parents?: readonly Id[];
-}>): Promise<Id> => {
+}>;
+
+export const createTask = async ({
+	workspaceId,
+	tags = [],
+	assignees = [],
+	dependencies = [],
+	parents = [],
+	...rest
+}: CreateTaskArgs): Promise<Id> => {
 	const {id} = await prisma.task.create({
 		select: {id: true},
 		data: {
@@ -56,12 +58,7 @@ export const createTask = async ({
 	return id;
 };
 
-export const createEvent = async ({
-	workspaceId,
-	tags = [],
-	attendees = [],
-	...rest
-}: Readonly<{
+type CreateEventArgs = Readonly<{
 	title: string;
 	workspaceId: Id;
 	description?: string;
@@ -70,7 +67,14 @@ export const createEvent = async ({
 	end: Date;
 	tags?: readonly string[];
 	attendees?: readonly Id[];
-}>): Promise<Id> => {
+}>;
+
+export const createEvent = async ({
+	workspaceId,
+	tags = [],
+	attendees = [],
+	...rest
+}: CreateEventArgs): Promise<Id> => {
 	const {id} = await prisma.event.create({
 		select: {id: true},
 		data: {
@@ -81,4 +85,51 @@ export const createEvent = async ({
 		},
 	});
 	return id;
+};
+
+export const updateTask = async (
+	id: Id,
+	{
+		workspaceId,
+		tags,
+		assignees,
+		dependencies,
+		parents,
+		...rest
+	}: Partial<CreateTaskArgs>,
+): Promise<void> => {
+	await prisma.task.update({
+		select: {id: true},
+		where: {id},
+		data: {
+			workspace: {connect: {id: workspaceId}},
+			...(tags
+				? {tags: {set: tags.map(tag => ({tag_taskId: {tag, taskId: id}}))}}
+				: {}),
+			...(assignees ? {assignees: {connect: assignees.map(id => ({id}))}} : {}),
+			...(dependencies
+				? {dependencies: {connect: dependencies.map(id => ({id}))}}
+				: {}),
+			...(parents ? {parents: {connect: parents.map(id => ({id}))}} : {}),
+			...rest,
+		},
+	});
+};
+
+export const updateEvent = async (
+	id: Id,
+	{workspaceId, tags, attendees, ...rest}: Partial<CreateEventArgs>,
+): Promise<void> => {
+	await prisma.event.update({
+		select: {id: true},
+		where: {id},
+		data: {
+			workspace: {connect: {id: workspaceId}},
+			...(tags
+				? {tags: {set: tags.map(tag => ({tag_eventId: {tag, eventId: id}}))}}
+				: {}),
+			...(attendees ? {attendees: {connect: attendees.map(id => ({id}))}} : {}),
+			...rest,
+		},
+	});
 };
