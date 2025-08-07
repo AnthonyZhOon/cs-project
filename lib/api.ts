@@ -12,6 +12,7 @@ import type {
 export const getTasks = (user: string): Promise<Task[]> =>
 	prisma.task.findMany({
 		where: {assignees: {some: {id: user}}},
+		// TODO: only select properties that are needed
 		orderBy: {deadline: 'asc'},
 	});
 
@@ -19,8 +20,20 @@ export const getTasks = (user: string): Promise<Task[]> =>
 export const getEvents = (user: string): Promise<Event[]> =>
 	prisma.event.findMany({
 		where: {attendees: {some: {id: user}}},
+		// TODO: only select properties that are needed
 		orderBy: [{start: 'asc'}, {end: 'asc'}],
 	});
+
+export const createWorkspace = async ({
+	name,
+	owner,
+}: Readonly<{name: string; owner: Id}>): Promise<Id> => {
+	const {id} = await prisma.workspace.create({
+		select: {id: true},
+		data: {name, owner: {connect: {id: owner}}},
+	});
+	return id;
+};
 
 type CreateTaskArgs = Readonly<{
 	title: string;
