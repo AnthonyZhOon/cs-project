@@ -5,11 +5,12 @@ import type {
 	Priority,
 	Task,
 	TaskStatus,
+	Workspace,
 	WorkspaceMemberRole,
 } from './types';
 
 /* Sorted by deadline in ascending order */
-export const getTasks = (user: string): Promise<Task[]> =>
+export const getTasks = (user: Id): Promise<Task[]> =>
 	prisma.task.findMany({
 		where: {assignees: {some: {id: user}}},
 		// TODO: only select properties that are needed
@@ -17,12 +18,16 @@ export const getTasks = (user: string): Promise<Task[]> =>
 	});
 
 /* Sorted by start time and then end time in ascending order */
-export const getEvents = (user: string): Promise<Event[]> =>
+export const getEvents = (user: Id): Promise<Event[]> =>
 	prisma.event.findMany({
 		where: {attendees: {some: {id: user}}},
 		// TODO: only select properties that are needed
 		orderBy: [{start: 'asc'}, {end: 'asc'}],
 	});
+
+export const getWorkspaces = (user: Id): Promise<Workspace[]> =>
+	// TODO: only select properties that are needed
+	prisma.workspace.findMany({where: {members: {some: {userId: user}}}});
 
 export const createWorkspace = async ({
 	name,
