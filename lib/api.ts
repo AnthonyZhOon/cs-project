@@ -29,6 +29,17 @@ export const getWorkspaces = (user: Id): Promise<Workspace[]> =>
 	// TODO: only select properties that are needed
 	prisma.workspace.findMany({where: {members: {some: {userId: user}}}});
 
+export const createUser = async ({
+	email,
+	name,
+}: Readonly<{email: string; name: string}>): Promise<Id> => {
+	const {id} = await prisma.user.create({
+		select: {id: true},
+		data: {email, name},
+	});
+	return id;
+};
+
 export const createWorkspace = async ({
 	name,
 	owner,
