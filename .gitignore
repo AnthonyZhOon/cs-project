@@ -1,4 +1,4 @@
-/app/generated/
+/lib/generated/
 /prisma/dbml/
 .env*.local
 .env
