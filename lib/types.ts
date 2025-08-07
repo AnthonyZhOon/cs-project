@@ -1,8 +1,13 @@
-import type {$Enums} from './generated/prisma';
-
-export type {Event, Task} from './generated/prisma';
-export type Priority = $Enums.Priority;
-export type TaskStatus = $Enums.TaskStatus;
-export type WorkspaceMemberRole = $Enums.WorkspaceMemberRole;
+export type {
+	Event,
+	Priority,
+	Task,
+	TaskStatus,
+	User,
+	Workspace,
+	WorkspaceInvite,
+	WorkspaceMember,
+	WorkspaceMemberRole,
+} from './generated/prisma';
 
 export type Id = string;
