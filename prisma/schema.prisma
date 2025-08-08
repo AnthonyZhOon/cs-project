@@ -4,13 +4,18 @@ datasource db {
   directUrl = env("NEON_DATABASE_URL_UNPOOLED")
 }
 
-generator dbml {
-  provider = "prisma-dbml-generator"
-}
+/**
+ * Error:
+ * Cannot read properties of undefined (reading 'type')
+ */
+// generator dbml {
+//   provider = "prisma-dbml-generator"
+// }
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../lib/generated/prisma"
+  provider        = "prisma-client-js"
+  output          = "../lib/generated/prisma"
+  previewFeatures = ["strictUndefinedChecks"]
 }
 
 model User {
