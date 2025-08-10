@@ -350,14 +350,13 @@ export const createEvent = async ({
 
 export const updateEvent = async (
 	id: Id,
-	{workspaceId, tags, attendees, ...rest}: Partial<CreateEventArgs>,
+	{tags, attendees, ...rest}: Partial<Omit<CreateEventArgs, 'workspaceId'>>,
 ): Promise<void> => {
 	// TODO: check attendees have access to event
 	await prisma.event.update({
 		select: {id: true},
 		where: {id},
 		data: {
-			workspace: {connect: {id: workspaceId ?? Prisma.skip}},
 			tags: {set: tags?.map(name => ({name})) ?? Prisma.skip},
 			attendees: {connect: attendees?.map(id => ({id})) ?? Prisma.skip},
 			...rest,
