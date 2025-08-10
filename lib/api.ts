@@ -6,6 +6,7 @@ import {
 	type Priority,
 	type Task,
 	type TaskStatus,
+	type User,
 	type Workspace,
 	type WorkspaceMemberRole,
 } from './types';
@@ -16,6 +17,10 @@ interface CreateUserArgs {
 	email: string;
 	name: string;
 }
+
+export const getUser = async (id: Id): Promise<User | null> =>
+	// TODO: only select properties that are needed
+	prisma.user.findUnique({where: {id}});
 
 export const createUser = async (data: CreateUserArgs): Promise<Id> => {
 	const {id} = await prisma.user.create({
@@ -39,6 +44,10 @@ export const updateUser = async (
 // #endregion
 
 // #region Workspaces
+
+export const getWorkspace = async (id: Id): Promise<Workspace | null> =>
+	// TODO: only select properties that are needed
+	prisma.workspace.findUnique({where: {id}});
 
 export const getWorkspaces = (user: Id): Promise<Workspace[]> =>
 	// TODO: only select properties that are needed
@@ -74,6 +83,14 @@ export const updateWorkspace = async (
 // #endregion
 
 // #region Tasks & Events
+
+export const getTask = async (id: Id): Promise<Task | null> =>
+	// TODO: only select properties that are needed
+	prisma.task.findUnique({where: {id}});
+
+export const getEvent = async (id: Id): Promise<Event | null> =>
+	// TODO: only select properties that are needed
+	prisma.event.findUnique({where: {id}});
 
 /** Sorted by deadline in ascending order */
 export const getTasks = (user: Id): Promise<Task[]> =>
