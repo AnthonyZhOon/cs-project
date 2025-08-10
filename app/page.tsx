@@ -1,5 +1,6 @@
 import ComponentBox from '@/components/ComponentBox'
 import prisma from '@/lib/prisma';
+import Link from 'next/link';
 
 // const getFeed = () => {
 // 	const feed = [
@@ -39,6 +40,21 @@ export default async function Blog() {
 	// const feed = getFeed()
 	return (
 		<div className="p-2">
+			<div className="mb-4">
+        		<Link
+          			href="/tasks/new"
+          			className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
+       			>
+          	Create Task
+        </Link>
+			<Link
+				href="/events/new"
+				className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
+			>
+				Create Event
+			</Link>
+      </div>
+	  
 			<ol className="list-decimal list-inside font-[family-name:var(--font-geist-sans)]">
 				{users.map(user => (
 					<li key={user.id} className="mb-2">
