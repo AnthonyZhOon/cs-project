@@ -35,3 +35,5 @@ with `pnpx vercel link`. Or by requesting a Vercel API token from the shared pro
 - `pnpm run dev`
 
 This should connect your local environment with the development database.
+
+If you have any errors to do with 'Invalid Compact JWE', delete any cookies for e.g. `localhost:3000` first and try again.
