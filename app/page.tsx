@@ -1,4 +1,5 @@
-import ComponentBox from '@/components/ComponentBox'
+import ComponentBox from '@/components/ComponentBox';
+import Task, {exampleTask} from '@/components/Task';
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
 
@@ -41,20 +42,20 @@ export default async function Blog() {
 	return (
 		<div className="p-2">
 			<div className="mb-4">
-        		<Link
-          			href="/tasks/new"
-          			className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
-       			>
-          	Create Task
-        </Link>
-			<Link
-				href="/events/new"
-				className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
-			>
-				Create Event
-			</Link>
-      </div>
-	  
+				<Link
+					href="/tasks/new"
+					className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
+				>
+					Create Task
+				</Link>
+				<Link
+					href="/events/new"
+					className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
+				>
+					Create Event
+				</Link>
+			</div>
+
 			<ol className="list-decimal list-inside font-[family-name:var(--font-geist-sans)]">
 				{users.map(user => (
 					<li key={user.id} className="mb-2">
@@ -67,7 +68,6 @@ export default async function Blog() {
 			<div className="w-sm">
 				<ComponentBox title="Title">
 					Content
-
 					<ul className="list-disc list-inside">
 						<li>Item 1</li>
 						<li>Item 2</li>
@@ -76,6 +76,7 @@ export default async function Blog() {
 					</ul>
 				</ComponentBox>
 			</div>
+			<Task task={exampleTask} className="mt-4" />
 		</div>
 	);
 }
