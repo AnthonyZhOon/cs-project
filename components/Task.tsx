@@ -149,14 +149,14 @@ export default async function TaskComponent({
 	return (
 		// Add an outline to the task component
 		<ComponentBox title={taskTitle} className={`max-w-sm ${className}`}>
-			<div className="task-details p-2 mb-2  border-gray-300 rounded-lg">
-				<Status status={task.status} className="mb-2" />
-				<Priority priority={task.priority} className="mb-2" />
+			<div className="task-details p-2 mb-2 space-y-0.5 border-gray-300 rounded-lg">
+				<Status status={task.status} />
+				<Priority priority={task.priority} />
 				<Tags tags={task.tags.map(tag => tag.name)} />
-				<p className="text-sm text-gray-800 leading-relaxed">
+				<p className="text-sm text-gray-800 leading-relaxed mb-1">
 					{task.description}
 				</p>
-				// Footer for assignees and due date
+				{/* Footer for assignees and due date */}
 				<div className="flex justify-between items-center text-sm text-gray-600">
 					<span>{task.assignees.map(a => a.name).join(', ')}</span>
 					<span>{task?.deadline?.toLocaleString() ?? 'No due date set'}</span>
