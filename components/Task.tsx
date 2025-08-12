@@ -1,8 +1,8 @@
 import ComponentBox from '@/components/ComponentBox';
 
-import type {Task} from '@/lib/types';
+import type {Task, TaskWithAssignessAndTags} from '@/lib/types';
 
-export const exampleTask: Task = {
+export const exampleTask: TaskWithAssignessAndTags & {} = {
 	id: '1',
 	title: 'Complete the project report',
 	description:
@@ -12,6 +12,11 @@ export const exampleTask: Task = {
 	deadline: new Date('2023-10-31T23:59:59'),
 	visibility: 'MEMBER',
 	workspaceId: 'workspace-123',
+	assignees: [
+		{name: 'John Doe', id: '0', email: 'jdoe@mail.com'},
+		{name: 'Jane Smith', id: '1', email: 'jsmith@mail.com'},
+	],
+	tags: [{name: 'report'}, {name: 'project'}, {name: 'deadline'}],
 };
 
 function LeftRight({
@@ -30,7 +35,7 @@ function LeftRight({
 			{typeof text === 'string' ? (
 				<span className={`text-sm font-medium ${className}`}>{text}</span>
 			) : (
-				text
+				<div>{text}</div>
 			)}
 		</div>
 	);
@@ -134,7 +139,7 @@ export default async function TaskComponent({
 	task,
 	className = '',
 }: {
-	task: Task;
+	task: NonNullable<TaskWithAssignessAndTags>;
 	className?: string;
 }) {
 	// TODO: Get tags in the task object from API
@@ -144,24 +149,17 @@ export default async function TaskComponent({
 	return (
 		// Add an outline to the task component
 		<ComponentBox title={taskTitle} className={`max-w-sm ${className}`}>
-			<div className="task-details p-4 mb-2  border-gray-300 rounded-lg">
+			<div className="task-details p-2 mb-2  border-gray-300 rounded-lg">
 				<Status status={task.status} className="mb-2" />
 				<Priority priority={task.priority} className="mb-2" />
-				<Tags
-					tags={
-						/* TODO: Include Tags in API's Task object; task.tags || [] */ [
-							'backend',
-						]
-					}
-				/>
+				<Tags tags={task.tags.map(tag => tag.name)} />
 				<p className="text-sm text-gray-800 leading-relaxed">
 					{task.description}
 				</p>
+				// Footer for assignees and due date
 				<div className="flex justify-between items-center text-sm text-gray-600">
-					<span>{/* TODO: Where is this field*/ 'MISSING_ASSINGED_TO'}</span>
-					<span>
-						{task.deadline ? task.deadline.toLocaleString() : 'No due date set'}
-					</span>
+					<span>{task.assignees.map(a => a.name).join(', ')}</span>
+					<span>{task?.deadline?.toLocaleString() ?? 'No due date set'}</span>
 				</div>
 			</div>
 		</ComponentBox>
