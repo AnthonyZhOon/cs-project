@@ -18,7 +18,7 @@ export const exampleTask: NonNullable<TaskWithAssignessAndTags> = {
 	tags: [{name: 'report'}, {name: 'project'}, {name: 'deadline'}],
 };
 
-function LeftRightLabelContents({
+const LeftRightLabelContents = ({
 	label,
 	text,
 	className = '',
@@ -26,28 +26,26 @@ function LeftRightLabelContents({
 	label: string;
 	text: string | React.ReactNode;
 	className?: string;
-}) {
-	return (
-		<div className="flex justify-between items-center mb-1">
-			<span className="text-sm text-gray-600">{label}</span>
+}) => (
+	<div className="flex justify-between items-center mb-1">
+		<span className="text-sm text-gray-600">{label}</span>
 
-			{typeof text === 'string' ? (
-				<span className={`text-sm font-medium ${className}`}>{text}</span>
-			) : (
-				<div>{text}</div>
-			)}
-		</div>
-	);
-}
+		{typeof text === 'string' ? (
+			<span className={`text-sm font-medium ${className}`}>{text}</span>
+		) : (
+			<div>{text}</div>
+		)}
+	</div>
+);
 
-function Status({
+const Status = ({
 	status,
 	className = '',
 }: {
 	status: Task['status'];
 	className?: string;
-}) {
-	function statusText(status: Task['status']): string {
+}) => {
+	const statusText = (status: Task['status']): string => {
 		switch (status) {
 			case 'TODO':
 				return '📝 Todo';
@@ -56,7 +54,7 @@ function Status({
 			case 'COMPLETE':
 				return '✅ Complete';
 		}
-	}
+	};
 	const getStatusColor = (status: Task['status']) => {
 		switch (status) {
 			case 'COMPLETE':
@@ -74,15 +72,15 @@ function Status({
 			className={`${getStatusColor(status)} ${className}`}
 		/>
 	);
-}
+};
 
-function Priority({
+const Priority = ({
 	priority,
 	className = '',
 }: {
 	priority: Task['priority'];
 	className?: string;
-}) {
+}) => {
 	const getPriorityColor = (priority: Task['priority']) => {
 		switch (priority) {
 			case 'HIGH':
@@ -115,24 +113,22 @@ function Priority({
 			className={`${getPriorityColor(priority)} ${className}`}
 		/>
 	);
-}
+};
 
-function Tags({tags}: {tags: string[]}) {
-	return (
-		<LeftRightLabelContents
-			label="Tags"
-			text={tags.map((tag, index) => (
-				<span
-					key={index}
-					className="inline-block bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs mr-1"
-				>
-					{tag.trim()}
-				</span>
-			))}
-			className="text-gray-600"
-		/>
-	);
-}
+const Tags = ({tags}: {tags: string[]}) => (
+	<LeftRightLabelContents
+		label="Tags"
+		text={tags.map((tag, index) => (
+			<span
+				key={index}
+				className="inline-block bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs mr-1"
+			>
+				{tag.trim()}
+			</span>
+		))}
+		className="text-gray-600"
+	/>
+);
 
 export default function TaskComponent({
 	task,

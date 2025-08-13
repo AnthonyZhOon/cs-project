@@ -1,7 +1,7 @@
+import Link from 'next/link';
 import ComponentBox from '@/components/ComponentBox';
 import Task, {exampleTask} from '@/components/Task';
 import prisma from '@/lib/prisma';
-import Link from 'next/link';
 
 // const getFeed = () => {
 // 	const feed = [

@@ -84,11 +84,18 @@ export const updateWorkspace = async (
 
 // #region Tasks & Events
 
-export const getTask = async (id: Id) =>
+export const getTask = async (id: Id): Promise<Task | null> =>
 	// TODO: only select properties that are needed
 	prisma.task.findUnique({where: {id}});
 
-export const getTaskWithAssigneesAndTags = async (id: Id) =>
+export const getTaskWithAssigneesAndTags = async (
+	id: Id,
+): Promise<Prisma.TaskGetPayload<{
+	include: {
+		assignees: true;
+		tags: true;
+	};
+}> | null> =>
 	// TODO: only select properties that are needed
 	prisma.task.findUnique({where: {id}, include: {assignees: true, tags: true}});
 

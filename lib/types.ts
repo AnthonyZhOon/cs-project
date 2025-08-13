@@ -1,10 +1,11 @@
+import type {getTaskWithAssigneesAndTags} from '@/lib/api';
 import type {WorkspaceMemberRole} from './generated/prisma';
-import {getTaskWithAssigneesAndTags} from '@/lib/api';
 
 export type {
 	Event,
 	Priority,
 	Task,
+	Tag,
 	TaskStatus,
 	User,
 	Workspace,
