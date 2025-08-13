@@ -75,5 +75,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
             # body: `🚀 Preview deployment is ready! Visit: ${{ steps.deploy.outputs.deploy_url }}`
-            body: "🚀 Preview deployment is ready! Visit: https://cs-project-three.vercel.app/"
+              body: "🚀 Preview deployment is ready! Visit: https://cs-project-three.vercel.app/"
             });
