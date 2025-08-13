@@ -1,8 +1,7 @@
 import ComponentBox from '@/components/ComponentBox';
-
 import type {Task, TaskWithAssignessAndTags} from '@/lib/types';
 
-export const exampleTask: TaskWithAssignessAndTags & {} = {
+export const exampleTask: NonNullable<TaskWithAssignessAndTags> = {
 	id: '1',
 	title: 'Complete the project report',
 	description:
@@ -19,7 +18,7 @@ export const exampleTask: TaskWithAssignessAndTags & {} = {
 	tags: [{name: 'report'}, {name: 'project'}, {name: 'deadline'}],
 };
 
-function LeftRight({
+function LeftRightLabelContents({
 	label,
 	text,
 	className = '',
@@ -69,7 +68,7 @@ function Status({
 		}
 	};
 	return (
-		<LeftRight
+		<LeftRightLabelContents
 			label="Status"
 			text={statusText(status)}
 			className={`${getStatusColor(status)} ${className}`}
@@ -110,7 +109,7 @@ function Priority({
 		}
 	};
 	return (
-		<LeftRight
+		<LeftRightLabelContents
 			label="Priority"
 			text={priorityText(priority)}
 			className={`${getPriorityColor(priority)} ${className}`}
@@ -120,7 +119,7 @@ function Priority({
 
 function Tags({tags}: {tags: string[]}) {
 	return (
-		<LeftRight
+		<LeftRightLabelContents
 			label="Tags"
 			text={tags.map((tag, index) => (
 				<span
@@ -135,14 +134,13 @@ function Tags({tags}: {tags: string[]}) {
 	);
 }
 
-export default async function TaskComponent({
+export default function TaskComponent({
 	task,
 	className = '',
 }: {
 	task: NonNullable<TaskWithAssignessAndTags>;
 	className?: string;
 }) {
-	// TODO: Get tags in the task object from API
 	const taskIcon = '📋';
 	const taskTitle = `${taskIcon} ${task.title}`;
 
@@ -159,7 +157,7 @@ export default async function TaskComponent({
 				{/* Footer for assignees and due date */}
 				<div className="flex justify-between items-center text-sm text-gray-600">
 					<span>{task.assignees.map(a => a.name).join(', ')}</span>
-					<span>{task?.deadline?.toLocaleString() ?? 'No due date set'}</span>
+					<span>{task.deadline?.toLocaleString() ?? 'No due date set'}</span>
 				</div>
 			</div>
 		</ComponentBox>
