@@ -243,12 +243,12 @@ export const createAPI = (prisma: PrismaClient) => {
 		getTask: async (id: Id) =>
 			// TODO: only select properties that are needed
 			prisma.task.findUnique({where: {id}}),
-			getTaskWithAssigneesAndTags: async (
-	id: Id,
-) =>
-	// TODO: only select properties that are needed
-	prisma.task.findUnique({where: {id}, include: {assignees: true, tags: true}}),
-
+		getTaskWithAssigneesAndTags: async (id: Id) =>
+			// TODO: only select properties that are needed
+			prisma.task.findUnique({
+				where: {id},
+				include: {assignees: true, tags: true},
+			}),
 
 		getEvent: async (id: Id) =>
 			// TODO: only select properties that are needed
