@@ -1,4 +1,4 @@
-import {PrismaClient} from '../app/generated/prisma';
+import {PrismaClient} from '../lib/generated/prisma';
 
 const prisma = new PrismaClient();
 
@@ -17,11 +17,8 @@ const truncateAllTables = async (): Promise<void> => {
 			console.log('Truncating tables...');
 
 			// First level: Tables without foreign keys others depend on
-			await tx.taskTag.deleteMany({});
+			await tx.tag.deleteMany({});
 			console.log('- Truncated TaskTag table');
-
-			await tx.eventTag.deleteMany({});
-			console.log('- Truncated EventTag table');
 
 			await tx.workspaceInvite.deleteMany({});
 			console.log('- Truncated WorkspaceInvite table');

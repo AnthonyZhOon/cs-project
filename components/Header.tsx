@@ -11,6 +11,12 @@ export default function Header() {
 			<Link href="/" className="bold" data-active={isActive('/')}>
 				Feed
 			</Link>
+
+			<Link href="/tasks/new" className="bold">
+				Create Task
+			</Link>
+
+
 			<style jsx>{`
 				.bold {
 					font-weight: bold;

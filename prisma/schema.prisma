@@ -4,13 +4,18 @@ datasource db {
   directUrl = env("NEON_DATABASE_URL_UNPOOLED")
 }
 
-generator dbml {
-  provider = "prisma-dbml-generator"
-}
+/**
+ * Error:
+ * Cannot read properties of undefined (reading 'type')
+ */
+// generator dbml {
+//   provider = "prisma-dbml-generator"
+// }
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
+  provider        = "prisma-client-js"
+  output          = "../lib/generated/prisma"
+  previewFeatures = ["strictUndefinedChecks"]
 }
 
 model User {
@@ -32,7 +37,7 @@ model Task {
   status      TaskStatus          @default(TODO)
   deadline    DateTime?
   priority    Priority?
-  tags        TaskTag[]
+  tags        Tag[]
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -50,7 +55,7 @@ model Event {
   visibility  WorkspaceMemberRole @default(MEMBER)
   start       DateTime
   end         DateTime
-  tags        EventTag[]
+  tags        Tag[]
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -58,20 +63,10 @@ model Event {
   attendees User[]
 }
 
-model TaskTag {
-  tag    String
-  taskId String
-  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  @@unique([tag, taskId])
-}
-
-model EventTag {
-  tag     String
-  eventId String
-  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@unique([tag, eventId])
+model Tag {
+  name   String  @id
+  tasks  Task[]
+  events Event[]
 }
 
 model Workspace {

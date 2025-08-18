@@ -30,7 +30,7 @@ Populate dependencies
 Vercel Setup
 Get token API token from discord group:
 
-- `pnpx vercel pull --environment=development --token=$TOKEN`
-- `pnpx vercel env pull .env --token=$TOKEN` # Populate the `.env` file with the APIs needed to connect with the database, etc.
+- `pnpx vercel pull --environment=production --token=$TOKEN`
+- `pnpx vercel env pull .env --environment=production --token=$TOKEN` # Populate the `.env` file with the APIs needed to connect with the database, etc.
   - Providing the database_url environment variables configured in the Prisma schema
 - `pnpm run dev`

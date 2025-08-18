@@ -1,10 +1,9 @@
 {
 	"compilerOptions": {
-		"target": "es6",
-		"lib": ["dom", "dom.iterable", "esnext"],
+		"target": "es2024",
+		"lib": ["ES2024", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
 		"allowJs": true,
 		"skipLibCheck": true,
-		"strict": false,
 		"forceConsistentCasingInFileNames": true,
 		"noEmit": true,
 		"esModuleInterop": true,
@@ -26,7 +25,16 @@
 			"@/components/*": ["components/*"],
 			"@/lib/*": ["lib/*"],
 			"@/styles/*": ["styles/*"]
-		}
+		},
+
+		"allowUnreachableCode": false,
+		"allowUnusedLabels": false,
+		"exactOptionalPropertyTypes": true,
+		"noImplicitOverride": true,
+		"noUncheckedIndexedAccess": true,
+		// "noUnusedLocals": true,
+		// "noUnusedParameters": true,
+		"strict": true
 	},
 	"exclude": ["node_modules"],
 	"include": ["**/*.ts", "**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts"]

@@ -26,7 +26,7 @@ const next =
 	);
 
 export default tseslint.config(
-	globalIgnores(['.next/', 'app/generated/']),
+	globalIgnores(['.next/', 'lib/generated/']),
 	eslint.configs.recommended,
 	tseslint.configs.strict,
 	tseslint.configs.stylistic,

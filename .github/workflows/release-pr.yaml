@@ -15,39 +15,15 @@ jobs:
   setup-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
+          run_install: true
+      - uses: actions/setup-node@v4
         with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Vercel CLI
-        run: pnpm add --global vercel@latest
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
 
       - name: Deploy to Vercel
         id: deploy
@@ -56,10 +32,10 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          vercel pull --yes --environment=production --token=${{ env.VERCEL_TOKEN }}
-          vercel env pull .env --token=${{ env.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ env.VERCEL_TOKEN }}
-          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ env.VERCEL_TOKEN }})
+          pnpm vercel pull --yes --environment=production --token=${{ env.VERCEL_TOKEN }}
+          pnpm vercel env pull .env --token=${{ env.VERCEL_TOKEN }}
+          pnpm vercel build --prod --token=${{ env.VERCEL_TOKEN }}
+          DEPLOY_URL=$(pnpm vercel deploy --prebuilt --prod --token=${{ env.VERCEL_TOKEN }})
           echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
           echo "Preview URL: $DEPLOY_URL"
 
@@ -74,6 +50,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-            # body: `🚀 Preview deployment is ready! Visit: ${{ steps.deploy.outputs.deploy_url }}`
-            body: `🚀 Preview deployment is ready! Visit: https://cs-project-three.vercel.app/`
+              body: "🚀 Preview deployment is ready! Visit: https://cs-project-three.vercel.app/"
             });
