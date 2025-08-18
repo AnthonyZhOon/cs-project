@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import ComponentBox from '@/components/ComponentBox';
-import Task, {exampleTask} from '@/components/Task';
+import Task, { exampleTask } from '@/components/Task';
+import UpcomingBox from '@/components/UpcomingBox';
 import prisma from '@/lib/prisma';
 
 // const getFeed = () => {
@@ -35,6 +36,27 @@ const getUsers = async () => {
 	const users = await prisma.user.findMany();
 	return users;
 };
+
+const exampleTasks = [
+	{
+		name: 'Task 1',
+		date: new Date('01-01-01'),
+		url: '',
+		complete: true,
+	},
+	{
+		name: 'Task 2',
+		date: new Date('02-02-02'),
+		url: '',
+		complete: false,
+	},
+	{
+		name: 'Task 3',
+		date: new Date('03-03-03'),
+		url: '',
+		complete: false,
+	},
+];
 
 export default async function Blog() {
 	const users = await getUsers();
@@ -76,6 +98,12 @@ export default async function Blog() {
 					</ul>
 				</ComponentBox>
 			</div>
+
+			{/* Example Upcoming Box */}
+			<div className="w-sm mt-2">
+				<UpcomingBox itemType="Task" items={exampleTasks} />
+			</div>
+
 			<Task task={exampleTask} className="mt-4" />
 		</div>
 	);
