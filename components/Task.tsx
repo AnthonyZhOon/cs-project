@@ -1,8 +1,8 @@
 import ComponentBox from '@/components/ComponentBox';
 import Tags from '@/components/Tags';
-import type {Task, TaskWithAssignessAndTags} from '@/lib/types';
+import type {Task, TaskWithAssigneesAndTags} from '@/lib/types';
 
-export const exampleTask: NonNullable<TaskWithAssignessAndTags> = {
+export const exampleTask: NonNullable<TaskWithAssigneesAndTags> = {
 	id: '1',
 	title: 'Complete the project report',
 	description:
@@ -128,7 +128,7 @@ export default function TaskComponent({
 	task,
 	className = '',
 }: {
-	task: NonNullable<TaskWithAssignessAndTags>;
+	task: NonNullable<TaskWithAssigneesAndTags>;
 	className?: string;
 }) {
 	const taskIcon = '📋';
