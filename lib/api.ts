@@ -88,6 +88,17 @@ export const getTask = async (id: Id): Promise<Task | null> =>
 	// TODO: only select properties that are needed
 	prisma.task.findUnique({where: {id}});
 
+export const getTaskWithAssigneesAndTags = async (
+	id: Id,
+): Promise<Prisma.TaskGetPayload<{
+	include: {
+		assignees: true;
+		tags: true;
+	};
+}> | null> =>
+	// TODO: only select properties that are needed
+	prisma.task.findUnique({where: {id}, include: {assignees: true, tags: true}});
+
 export const getEvent = async (id: Id): Promise<Event | null> =>
 	// TODO: only select properties that are needed
 	prisma.event.findUnique({where: {id}});
@@ -143,14 +154,14 @@ const checkWorkspaceMembers = async (
 					new Error(
 						`${userType} ${id} is not a member of workspace ${workspaceId}`,
 					),
-			  ]
+				]
 			: compareRoles(member.role, visibility) < 0
-			? [
-					new Error(
-						`${userType} ${id} does not have sufficient permissions (${member.role} < ${visibility})`,
-					),
-			  ]
-			: [];
+				? [
+						new Error(
+							`${userType} ${id} does not have sufficient permissions (${member.role} < ${visibility})`,
+						),
+					]
+				: [];
 	});
 };
 
@@ -173,12 +184,12 @@ const checkTaskDependencies = async (
 		return !dep
 			? [new Error(`Dependent task ${id} is not in workspace ${workspaceId}`)]
 			: compareRoles(dep.visibility, visibility) < 0
-			? [
-					new Error(
-						`Dependent task ${id} does not have sufficient visibility (${dep.visibility} < ${visibility})`,
-					),
-			  ]
-			: [];
+				? [
+						new Error(
+							`Dependent task ${id} does not have sufficient visibility (${dep.visibility} < ${visibility})`,
+						),
+					]
+				: [];
 	});
 };
 
@@ -200,12 +211,12 @@ const checkTaskParents = async (
 		return !par
 			? [new Error(`Parent task ${id} is not in workspace ${workspaceId}`)]
 			: compareRoles(par.visibility, visibility) > 0
-			? [
-					new Error(
-						`Task does not have sufficient visibility for parent task ${id} (${par.visibility} > ${visibility})`,
-					),
-			  ]
-			: [];
+				? [
+						new Error(
+							`Task does not have sufficient visibility for parent task ${id} (${par.visibility} > ${visibility})`,
+						),
+					]
+				: [];
 	});
 };
 
@@ -236,7 +247,7 @@ const checkTask = async (
 							visibility,
 							assignees,
 						),
-				  ]
+					]
 				: []),
 			...(dependencies
 				? [checkTaskDependencies(prisma, workspaceId, visibility, dependencies)]
