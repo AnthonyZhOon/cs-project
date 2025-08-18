@@ -1,4 +1,5 @@
 import ComponentBox from '@/components/ComponentBox';
+import Tags from '@/components/Tags';
 import type {Task, TaskWithAssignessAndTags} from '@/lib/types';
 
 export const exampleTask: NonNullable<TaskWithAssignessAndTags> = {
@@ -115,17 +116,10 @@ const Priority = ({
 	);
 };
 
-const Tags = ({tags}: {tags: string[]}) => (
+const TagsBox = ({tags}: {tags: string[]}) => (
 	<LeftRightLabelContents
 		label="Tags"
-		text={tags.map((tag, index) => (
-			<span
-				key={index}
-				className="inline-block bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs mr-1"
-			>
-				{tag.trim()}
-			</span>
-		))}
+		text={Tags(tags)}
 		className="text-gray-600"
 	/>
 );
@@ -146,7 +140,7 @@ export default function TaskComponent({
 			<div className="task-details p-2 mb-2 space-y-0.5 border-gray-300 rounded-lg">
 				<Status status={task.status} />
 				<Priority priority={task.priority} />
-				<Tags tags={task.tags.map(tag => tag.name)} />
+				<TagsBox tags={task.tags.map(tag => tag.name)} />
 				<p className="text-sm text-gray-800 leading-relaxed mb-1">
 					{task.description}
 				</p>
