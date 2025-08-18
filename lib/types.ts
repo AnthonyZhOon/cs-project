@@ -1,4 +1,4 @@
-import type {getTaskWithAssigneesAndTags} from '@/lib/api';
+import type api from '@/lib/api';
 import type {WorkspaceMemberRole} from './generated/prisma';
 
 export type {
@@ -15,8 +15,8 @@ export type {
 } from './generated/prisma';
 
 export type Id = string;
-export type TaskWithAssignessAndTags = Awaited<
-	ReturnType<typeof getTaskWithAssigneesAndTags>
+export type TaskWithAssigneesAndTags = Awaited<
+	ReturnType<typeof api.getTaskWithAssigneesAndTags>
 >;
 
 export const roleRank = (role: WorkspaceMemberRole): number => {

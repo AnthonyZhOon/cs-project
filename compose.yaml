@@ -1,0 +1,12 @@
+services:
+  db:
+    image: postgres:17
+    container_name: cs-project-db
+    environment:
+      - POSTGRES_USER=prisma
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=dev
+    ports:
+      - 54320:5432
+    volumes:
+      - ./db:/var/lib/postgresql/data

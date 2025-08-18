@@ -11,7 +11,7 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 export default prisma;
 
-export {Prisma} from './generated/prisma';
+export {Prisma, type PrismaClient} from './generated/prisma';
 
 export type TransactionClient = Parameters<
 	Parameters<PrismaClient['$transaction']>[0]
