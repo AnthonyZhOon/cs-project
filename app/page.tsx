@@ -1,6 +1,7 @@
 import ComponentBox from '@/components/ComponentBox'
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
+import TaskSummaryChart  from '@/components/TaskSummary';
 
 // const getFeed = () => {
 // 	const feed = [
@@ -62,7 +63,14 @@ export default async function Blog() {
 					</li>
 				))}
 			</ol>
-
+			{/* Example Chart */}
+			<div className="max-w-sm mt-6">
+				<TaskSummaryChart
+					todo={30}
+					inProgress={40}
+					done={30}
+        			/>
+      		</div>
 			{/* Example Component Box */}
 			<div className="w-sm">
 				<ComponentBox title="Title">
@@ -75,6 +83,7 @@ export default async function Blog() {
 						<li>Item 4</li>
 					</ul>
 				</ComponentBox>
+				
 			</div>
 		</div>
 	);
