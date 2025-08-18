@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
-		"target": "es6",
-		"lib": ["dom", "dom.iterable", "esnext"],
+		"target": "es2024",
+		"lib": ["ES2024", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
 		"allowJs": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
