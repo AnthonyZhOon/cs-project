@@ -16,24 +16,45 @@ const {id: bob} = await prisma.user.findFirstOrThrow({
 	where: {name: 'Bob'},
 });
 
+const {id: workspaceId} = await prisma.workspace.findFirstOrThrow({
+	select: {id: true},
+});
+
 describe('Tasks', () => {
-	test('getTasks', () =>
-		expect(api.getTasks(alice)).resolves.toMatchObject([
-			{
-				deadline: new Date('2025-08-24T14:00:00.000Z'),
-				description: null,
-				priority: null,
-				status: 'TODO',
-				title: 'Alice Task 1',
-				visibility: 'MEMBER',
-			},
-			{
-				deadline: new Date('2025-08-31T14:00:00.000Z'),
-				description: null,
-				priority: null,
-				status: 'TODO',
-				title: 'Alice Task 2',
-				visibility: 'MEMBER',
-			},
-		]));
+	describe('getTasks', () => {
+		test('should return only user’s tasks', () =>
+			expect(api.getTasks(alice)).resolves.toMatchObject([
+				{
+					deadline: new Date('2025-08-24T14:00:00.000Z'),
+					description: null,
+					priority: null,
+					status: 'TODO',
+					title: 'Alice Task 1',
+					visibility: 'MEMBER',
+				},
+				{
+					deadline: new Date('2025-08-31T14:00:00.000Z'),
+					description: null,
+					priority: null,
+					status: 'TODO',
+					title: 'Alice Task 2',
+					visibility: 'MEMBER',
+				},
+			]));
+	});
+
+	describe('createTask', () => {
+		test('supports tasks having the same tags', async () => {
+			await api.createTask({
+				workspaceId,
+				title: 'Task 1',
+				tags: ['tag1', 'tag2'],
+			});
+			await api.createTask({
+				workspaceId,
+				title: 'Task 2',
+				tags: ['tag1', 'tag3'],
+			});
+		});
+	});
 });
