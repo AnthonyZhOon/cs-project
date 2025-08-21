@@ -293,7 +293,12 @@ export const createAPI = (prisma: PrismaClient) => {
 					select: {id: true},
 					data: {
 						workspace: {connect: {id: workspaceId}},
-						tags: {create: tags.map(name => ({name}))},
+						tags: {
+							connectOrCreate: tags.map(name => ({
+								where: {name},
+								create: {name},
+							})),
+						},
 						assignees: {connect: assignees.map(id => ({id}))},
 						dependencies: {connect: dependencies.map(id => ({id}))},
 						parents: {connect: parents.map(id => ({id}))},
