@@ -35,7 +35,7 @@ export default async (prisma: PrismaClient): Promise<void> => {
 		data: {
 			workspaceId,
 			title: 'Alice Task 1',
-			deadline: new Date(2025, 7, 25),
+			deadline: new Date('2025-08-24'),
 			assignees: {connect: {id: alice}},
 		},
 	});
@@ -43,7 +43,7 @@ export default async (prisma: PrismaClient): Promise<void> => {
 		data: {
 			workspaceId,
 			title: 'Alice Task 2',
-			deadline: new Date(2025, 8, 1),
+			deadline: new Date('2025-08-31'),
 			assignees: {connect: {id: alice}},
 		},
 	});

@@ -25,7 +25,7 @@ describe('Tasks', () => {
 		test('should return only user’s tasks', () =>
 			expect(api.getTasks(alice)).resolves.toMatchObject([
 				{
-					deadline: new Date('2025-08-24T14:00:00.000Z'),
+					deadline: new Date('2025-08-24'),
 					description: null,
 					priority: null,
 					status: 'TODO',
@@ -33,7 +33,7 @@ describe('Tasks', () => {
 					visibility: 'MEMBER',
 				},
 				{
-					deadline: new Date('2025-08-31T14:00:00.000Z'),
+					deadline: new Date('2025-08-31'),
 					description: null,
 					priority: null,
 					status: 'TODO',
