@@ -32,7 +32,6 @@ export default function NewTaskPage() {
 					label="Title"
 					placeholder="Enter task title"
 					required
-					minLength={1}
 				/>
 				{/* <Input name="tags" label="Tags" placeholder="Add a tag" type="text" /> */}
 				{/* <Select name="assignee" label="Assign">
