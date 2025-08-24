@@ -145,7 +145,7 @@ export const createAPI = (prisma: PrismaClient) => {
 			dependencies,
 			parents,
 		}: {
-			title: string;
+			title?: string | undefined;
 			workspaceId: Id;
 			visibility: WorkspaceMemberRole;
 			assignees?: Id[] | undefined;
@@ -155,7 +155,9 @@ export const createAPI = (prisma: PrismaClient) => {
 	): Promise<Error[]> =>
 		(
 			await Promise.all([
-				...(!title ? [new Error('Title must not be empty')] : []),
+				...(title !== undefined && !title
+					? [new Error('Title must not be empty')]
+					: []),
 				...(assignees
 					? [
 							checkWorkspaceMembers(
@@ -322,6 +324,7 @@ export const createAPI = (prisma: PrismaClient) => {
 				assignees,
 				dependencies,
 				parents,
+				title,
 				...rest
 			}: Partial<Omit<CreateTaskArgs, 'workspaceId'>>,
 		): Promise<void> =>
@@ -331,6 +334,7 @@ export const createAPI = (prisma: PrismaClient) => {
 					where: {id},
 				});
 				const errors = await checkTask(prisma, {
+					title,
 					workspaceId,
 					visibility,
 					assignees,
@@ -349,6 +353,7 @@ export const createAPI = (prisma: PrismaClient) => {
 							connect: dependencies?.map(id => ({id})) ?? Prisma.skip,
 						},
 						parents: {connect: parents?.map(id => ({id})) ?? Prisma.skip},
+						...(title !== undefined ? {title} : {}),
 						...rest,
 					},
 				});
