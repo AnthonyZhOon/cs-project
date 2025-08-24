@@ -138,12 +138,14 @@ export const createAPI = (prisma: PrismaClient) => {
 	const checkTask = async (
 		prisma: TransactionClient,
 		{
+			title,
 			workspaceId,
 			visibility,
 			assignees,
 			dependencies,
 			parents,
 		}: {
+			title: string;
 			workspaceId: Id;
 			visibility: WorkspaceMemberRole;
 			assignees?: Id[] | undefined;
@@ -153,6 +155,7 @@ export const createAPI = (prisma: PrismaClient) => {
 	): Promise<Error[]> =>
 		(
 			await Promise.all([
+				...(!title ? [new Error('Title must not be empty')] : []),
 				...(assignees
 					? [
 							checkWorkspaceMembers(
@@ -277,10 +280,12 @@ export const createAPI = (prisma: PrismaClient) => {
 			dependencies = [],
 			parents = [],
 			visibility = 'MEMBER',
+			title,
 			...rest
 		}: CreateTaskArgs): Promise<Id> =>
 			prisma.$transaction(async prisma => {
 				const errors = await checkTask(prisma, {
+					title,
 					workspaceId,
 					visibility,
 					assignees,
@@ -303,6 +308,7 @@ export const createAPI = (prisma: PrismaClient) => {
 						dependencies: {connect: dependencies.map(id => ({id}))},
 						parents: {connect: parents.map(id => ({id}))},
 						visibility,
+						title,
 						...rest,
 					},
 				});
