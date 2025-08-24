@@ -26,7 +26,7 @@ export default function NewTaskPage() {
 						type: 'select',
 						options: ['Low', 'Medium', 'High'],
 					},
-					{name: 'dueDate', label: 'Due date', type: 'date'},
+					{name: 'dueDate', label: 'Due date', type: 'datetime'},
 					{
 						name: 'dependency',
 						label: 'Task Dependency',

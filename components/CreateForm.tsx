@@ -9,7 +9,7 @@ type FieldProps = {
 			type: 'text' | 'textarea';
 			placeholder: string;
 	  }
-	| {type: 'date'}
+	| {type: 'datetime'}
 	| {
 			type: 'select';
 			options: string[];
@@ -28,10 +28,10 @@ const Field = (field: FieldProps) => {
 				/>
 			);
 
-		case 'date':
+		case 'datetime':
 			return (
 				<input
-					type="date"
+					type="datetime-local"
 					name={field.name}
 					className="w-full border p-2 rounded"
 				/>
