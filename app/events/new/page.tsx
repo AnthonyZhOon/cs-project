@@ -30,7 +30,6 @@ export default function NewEventPage() {
 					placeholder="Enter the event title"
 					type="text"
 					required
-					minLength={1}
 				/>
 				{/* <Input name="tags" label="Tags" placeholder="Add a tag" type="text" /> */}
 				{/* <Input name="attendee" label="Attendee" placeholder="Add an attendee" type="text" /> */}
