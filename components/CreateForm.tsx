@@ -1,18 +1,59 @@
 'use client';
 
-type FieldType = 'text' | 'textarea' | 'select' | 'date';
 
-interface FieldConfig {
+type FieldProps = {
 	name: string;
 	label: string;
-	placeholder?: string;
-	type: FieldType;
-	options?: string[];
-}
+} & (
+	| {
+			type: 'text' | 'textarea';
+			placeholder: string;
+	  }
+	| {
+			type: 'select';
+			options: string[];
+	  }
+	| {
+			type: 'date';
+	  }
+);
+
+const Field = (field: FieldProps) => {
+	switch (field.type) {
+		case 'text':
+			return (
+				<input
+					type="text"
+					placeholder={field.placeholder}
+					className="w-full border p-2 rounded"
+				/>
+			);
+
+		case 'textarea':
+			return (
+				<textarea
+					placeholder={field.placeholder}
+					className="w-full border p-2 rounded min-h-[100px]"
+				/>
+			);
+
+		case 'select':
+			return (
+				<select className="w-full border p-2 rounded">
+					{field.options.map(opt => (
+						<option key={opt}>{opt}</option>
+					))}
+				</select>
+			);
+
+		case 'date':
+			return <input type="date" className="w-full border p-2 rounded" />;
+	}
+};
 
 interface CreateFormProps {
 	title: string;
-	fields: FieldConfig[];
+	fields: FieldProps[];
 	submitText?: string;
 }
 
@@ -28,33 +69,7 @@ export default function CreateForm({
 			{fields.map(field => (
 				<div key={field.name}>
 					<div className="block font-bold mb-1">{field.label}</div>
-
-					{field.type === 'text' && (
-						<input
-							type="text"
-							placeholder={field.placeholder}
-							className="w-full border p-2 rounded"
-						/>
-					)}
-
-					{field.type === 'textarea' && (
-						<textarea
-							placeholder={field.placeholder}
-							className="w-full border p-2 rounded min-h-[100px]"
-						/>
-					)}
-
-					{field.type === 'select' && (
-						<select className="w-full border p-2 rounded">
-							{field.options?.map(opt => (
-								<option key={opt}>{opt}</option>
-							))}
-						</select>
-					)}
-
-					{field.type === 'date' && (
-						<input type="date" className="w-full border p-2 rounded" />
-					)}
+					<Field {...field} />
 				</div>
 			))}
 
