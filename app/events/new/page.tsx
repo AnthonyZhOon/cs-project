@@ -20,8 +20,8 @@ export default function NewEventPage() {
 						placeholder: 'Add an attendee',
 						type: 'text',
 					},
-					{name: 'startDate', label: 'Start date', type: 'date'},
-					{name: 'endDate', label: 'End date', type: 'date'},
+					{name: 'startDate', label: 'Start date', type: 'datetime'},
+					{name: 'endDate', label: 'End date', type: 'datetime'},
 					{
 						name: 'description',
 						label: 'Description',
