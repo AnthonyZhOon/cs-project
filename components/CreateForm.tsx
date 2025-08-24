@@ -9,12 +9,10 @@ type FieldProps = {
 			type: 'text' | 'textarea';
 			placeholder: string;
 	  }
+	| {type: 'date'}
 	| {
 			type: 'select';
 			options: string[];
-	  }
-	| {
-			type: 'date';
 	  }
 );
 
@@ -24,7 +22,17 @@ const Field = (field: FieldProps) => {
 			return (
 				<input
 					type="text"
+					name={field.name}
 					placeholder={field.placeholder}
+					className="w-full border p-2 rounded"
+				/>
+			);
+
+		case 'date':
+			return (
+				<input
+					type="date"
+					name={field.name}
 					className="w-full border p-2 rounded"
 				/>
 			);
@@ -32,6 +40,7 @@ const Field = (field: FieldProps) => {
 		case 'textarea':
 			return (
 				<textarea
+					name={field.name}
 					placeholder={field.placeholder}
 					className="w-full border p-2 rounded min-h-[100px]"
 				/>
@@ -39,15 +48,12 @@ const Field = (field: FieldProps) => {
 
 		case 'select':
 			return (
-				<select className="w-full border p-2 rounded">
+				<select name={field.name} className="w-full border p-2 rounded">
 					{field.options.map(opt => (
 						<option key={opt}>{opt}</option>
 					))}
 				</select>
 			);
-
-		case 'date':
-			return <input type="date" className="w-full border p-2 rounded" />;
 	}
 };
 
@@ -68,8 +74,10 @@ export default function CreateForm({
 
 			{fields.map(field => (
 				<div key={field.name}>
-					<div className="block font-bold mb-1">{field.label}</div>
-					<Field {...field} />
+					<label className="block font-bold mb-1">
+						{field.label}
+						<Field {...field} />
+					</label>
 				</div>
 			))}
 
