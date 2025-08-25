@@ -1,6 +1,6 @@
+import {redirect} from 'next/navigation';
 import CreateForm from '@/components/CreateForm';
 import Input from '@/components/inputs/Input';
-import Select from '@/components/inputs/Select';
 import Textarea from '@/components/inputs/Textarea';
 import api from '@/lib/api';
 import {getWorkspaceId} from '@/lib/util';
@@ -20,8 +20,8 @@ export default function NewEventPage() {
 						start: new Date(formData.get('start') as string),
 						end: new Date(formData.get('end') as string),
 					});
-					// TODO: do something useful
-					console.log(`Created event ${id}`);
+					// TODO: redirect to event page
+					redirect('/');
 				}}
 			>
 				<Input
