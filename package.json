@@ -5,6 +5,7 @@
 	"publishConfig": {
 		"access": "restricted"
 	},
+	"packageManager": "pnpm@10.15.0",
 	"engines": {
 		"node": ">=22",
 		"pnpm": ">=10"
