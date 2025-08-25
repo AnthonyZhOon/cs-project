@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import ComponentBox from '@/components/ComponentBox';
-import Task, { exampleTask } from '@/components/Task';
+import Task, {exampleTask} from '@/components/Task';
 import UpcomingBox from '@/components/UpcomingBox';
 import prisma from '@/lib/prisma';
+import Calendar from '@/components/Calendar';
 
 // const getFeed = () => {
 // 	const feed = [
@@ -102,6 +103,13 @@ export default async function Blog() {
 			{/* Example Upcoming Box */}
 			<div className="w-sm mt-2">
 				<UpcomingBox itemType="Task" items={exampleTasks} />
+			</div>
+
+			<div>
+				<Calendar
+					className="w-sm"
+					markedDates={[new Date('2025-08-20')]}
+				></Calendar>
 			</div>
 
 			<Task task={exampleTask} className="mt-4" />
