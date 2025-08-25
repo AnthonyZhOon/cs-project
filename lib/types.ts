@@ -1,17 +1,17 @@
 import type api from '@/lib/api';
 import type {WorkspaceMemberRole} from './generated/prisma';
 
-export type {
-	Event,
+export {
 	Priority,
-	Task,
-	Tag,
 	TaskStatus,
-	User,
-	Workspace,
-	WorkspaceInvite,
-	WorkspaceMember,
 	WorkspaceMemberRole,
+	type Event,
+	type Task,
+	type Tag,
+	type User,
+	type Workspace,
+	type WorkspaceInvite,
+	type WorkspaceMember,
 } from './generated/prisma';
 
 export type Id = string;

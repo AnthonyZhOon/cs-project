@@ -16,7 +16,11 @@ export const exampleTask: NonNullable<TaskWithAssigneesAndTags> = {
 		{name: 'John Doe', id: '0', email: 'jdoe@mail.com'},
 		{name: 'Jane Smith', id: '1', email: 'jsmith@mail.com'},
 	],
-	tags: [{name: 'report'}, {name: 'project'}, {name: 'deadline'}],
+	tags: [
+		{name: 'report', id: '1', workspaceId: 'workspace-123'},
+		{name: 'project', id: '2', workspaceId: 'workspace-123'},
+		{name: 'deadline', id: '3', workspaceId: 'workspace-123'},
+	],
 };
 
 const LeftRightLabelContents = ({

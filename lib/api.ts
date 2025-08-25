@@ -138,12 +138,14 @@ export const createAPI = (prisma: PrismaClient) => {
 	const checkTask = async (
 		prisma: TransactionClient,
 		{
+			title,
 			workspaceId,
 			visibility,
 			assignees,
 			dependencies,
 			parents,
 		}: {
+			title?: string | undefined;
 			workspaceId: Id;
 			visibility: WorkspaceMemberRole;
 			assignees?: Id[] | undefined;
@@ -153,6 +155,9 @@ export const createAPI = (prisma: PrismaClient) => {
 	): Promise<Error[]> =>
 		(
 			await Promise.all([
+				...(title !== undefined && !title
+					? [new Error('Title must not be empty')]
+					: []),
 				...(assignees
 					? [
 							checkWorkspaceMembers(
@@ -270,6 +275,16 @@ export const createAPI = (prisma: PrismaClient) => {
 				orderBy: [{start: 'asc'}, {end: 'asc'}],
 			}),
 
+		/** Sorted in ascending order */
+		getTags: async (workspaceId: Id) =>
+			(
+				await prisma.tag.findMany({
+					where: {workspaceId},
+					select: {name: true},
+					orderBy: {name: 'asc'},
+				})
+			).map(t => t.name),
+
 		createTask: async ({
 			workspaceId,
 			tags = [],
@@ -277,10 +292,12 @@ export const createAPI = (prisma: PrismaClient) => {
 			dependencies = [],
 			parents = [],
 			visibility = 'MEMBER',
+			title,
 			...rest
 		}: CreateTaskArgs): Promise<Id> =>
 			prisma.$transaction(async prisma => {
 				const errors = await checkTask(prisma, {
+					title,
 					workspaceId,
 					visibility,
 					assignees,
@@ -295,14 +312,15 @@ export const createAPI = (prisma: PrismaClient) => {
 						workspace: {connect: {id: workspaceId}},
 						tags: {
 							connectOrCreate: tags.map(name => ({
-								where: {name},
-								create: {name},
+								where: {workspaceId_name: {workspaceId, name}},
+								create: {workspaceId, name},
 							})),
 						},
 						assignees: {connect: assignees.map(id => ({id}))},
 						dependencies: {connect: dependencies.map(id => ({id}))},
 						parents: {connect: parents.map(id => ({id}))},
 						visibility,
+						title,
 						...rest,
 					},
 				});
@@ -316,6 +334,7 @@ export const createAPI = (prisma: PrismaClient) => {
 				assignees,
 				dependencies,
 				parents,
+				title,
 				...rest
 			}: Partial<Omit<CreateTaskArgs, 'workspaceId'>>,
 		): Promise<void> =>
@@ -325,6 +344,7 @@ export const createAPI = (prisma: PrismaClient) => {
 					where: {id},
 				});
 				const errors = await checkTask(prisma, {
+					title,
 					workspaceId,
 					visibility,
 					assignees,
@@ -337,12 +357,17 @@ export const createAPI = (prisma: PrismaClient) => {
 					select: {id: true},
 					where: {id},
 					data: {
-						tags: {set: tags?.map(name => ({name})) ?? Prisma.skip},
+						tags: {
+							set:
+								tags?.map(name => ({workspaceId_name: {workspaceId, name}})) ??
+								Prisma.skip,
+						},
 						assignees: {connect: assignees?.map(id => ({id})) ?? Prisma.skip},
 						dependencies: {
 							connect: dependencies?.map(id => ({id})) ?? Prisma.skip,
 						},
 						parents: {connect: parents?.map(id => ({id})) ?? Prisma.skip},
+						...(title !== undefined ? {title} : {}),
 						...rest,
 					},
 				});
@@ -359,7 +384,12 @@ export const createAPI = (prisma: PrismaClient) => {
 				select: {id: true},
 				data: {
 					workspace: {connect: {id: workspaceId}},
-					tags: {create: tags.map(name => ({name}))},
+					tags: {
+						connectOrCreate: tags.map(name => ({
+							where: {workspaceId_name: {workspaceId, name}},
+							create: {workspaceId, name},
+						})),
+					},
 					attendees: {connect: attendees.map(id => ({id}))},
 					...rest,
 				},
@@ -370,18 +400,27 @@ export const createAPI = (prisma: PrismaClient) => {
 		updateEvent: async (
 			id: Id,
 			{tags, attendees, ...rest}: Partial<Omit<CreateEventArgs, 'workspaceId'>>,
-		): Promise<void> => {
-			// TODO: check attendees have access to event
-			await prisma.event.update({
-				select: {id: true},
-				where: {id},
-				data: {
-					tags: {set: tags?.map(name => ({name})) ?? Prisma.skip},
-					attendees: {connect: attendees?.map(id => ({id})) ?? Prisma.skip},
-					...rest,
-				},
-			});
-		},
+		): Promise<void> =>
+			prisma.$transaction(async prisma => {
+				// TODO: check attendees have access to event
+				const {workspaceId} = await prisma.task.findUniqueOrThrow({
+					select: {workspaceId: true},
+					where: {id},
+				});
+				await prisma.event.update({
+					select: {id: true},
+					where: {id},
+					data: {
+						tags: {
+							set:
+								tags?.map(name => ({workspaceId_name: {workspaceId, name}})) ??
+								Prisma.skip,
+						},
+						attendees: {connect: attendees?.map(id => ({id})) ?? Prisma.skip},
+						...rest,
+					},
+				});
+			}),
 
 		// #endregion
 	};

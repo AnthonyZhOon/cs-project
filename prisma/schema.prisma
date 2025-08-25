@@ -16,6 +16,7 @@ generator client {
   provider        = "prisma-client-js"
   output          = "../lib/generated/prisma"
   previewFeatures = ["strictUndefinedChecks"]
+  binaryTargets   = ["native", "rhel-openssl-3.0.x"]
 }
 
 model User {
@@ -64,9 +65,14 @@ model Event {
 }
 
 model Tag {
-  name   String  @id
-  tasks  Task[]
-  events Event[]
+  id          String    @id @default(cuid(2))
+  workspaceId String
+  name        String
+  tasks       Task[]
+  events      Event[]
+  Workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name])
 }
 
 model Workspace {
@@ -79,6 +85,7 @@ model Workspace {
 
   tasks   Task[]
   events  Event[]
+  tags    Tag[]
   invites WorkspaceInvite[]
 }
 
