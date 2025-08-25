@@ -22,7 +22,7 @@ export default function NewTaskPage() {
 						title: formData.get('title') as string,
 						description: formData.get('description') as string,
 						...(priority ? {priority} : {}),
-						...(deadline ? {deadline: new Date(deadline as string)} : {}),
+						...(deadline ? {deadline: new Date(deadline)} : {}),
 					});
 					// TODO: redirect to task page
 					redirect('/');
