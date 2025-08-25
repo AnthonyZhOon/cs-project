@@ -1,4 +1,5 @@
-import type {PrismaClient} from '@/lib/generated/prisma';
+import type {Id} from '@/lib/types';
+import type {PrismaClient} from '@/lib/prisma';
 
 export default async (prisma: PrismaClient): Promise<void> => {
 	const {id: alice} = await prisma.user.create({
@@ -31,11 +32,20 @@ export default async (prisma: PrismaClient): Promise<void> => {
 		select: {id: true},
 	});
 
+	// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+	const tags = (...tags: readonly string[]) => ({
+		connectOrCreate: tags.map(name => ({
+			where: {workspaceId_name: {workspaceId, name}},
+			create: {workspaceId, name},
+		})),
+	});
+
 	await prisma.task.create({
 		data: {
 			workspaceId,
 			title: 'Alice Task 1',
 			deadline: new Date('2025-08-24'),
+			tags: tags('tag1', 'tag2'),
 			assignees: {connect: {id: alice}},
 		},
 	});
@@ -44,6 +54,7 @@ export default async (prisma: PrismaClient): Promise<void> => {
 			workspaceId,
 			title: 'Alice Task 2',
 			deadline: new Date('2025-08-31'),
+			tags: tags('tag2', 'tag3'),
 			assignees: {connect: {id: alice}},
 		},
 	});

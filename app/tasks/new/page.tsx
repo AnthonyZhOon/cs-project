@@ -2,12 +2,13 @@ import {redirect} from 'next/navigation';
 import CreateForm from '@/components/CreateForm';
 import Input from '@/components/inputs/Input';
 import Select from '@/components/inputs/Select';
+import TagsInput from '@/components/inputs/TagsInput';
 import Textarea from '@/components/inputs/Textarea';
 import api from '@/lib/api';
 import {Priority} from '@/lib/types';
 import {getWorkspaceId} from '@/lib/util';
 
-export default function NewTaskPage() {
+export default async function NewTaskPage() {
 	return (
 		<div className="max-w-3xl mx-auto p-4">
 			<CreateForm
@@ -21,6 +22,7 @@ export default function NewTaskPage() {
 						workspaceId: await getWorkspaceId(),
 						title: formData.get('title') as string,
 						description: formData.get('description') as string,
+						tags: formData.getAll('tags') as string[],
 						...(priority ? {priority} : {}),
 						...(deadline ? {deadline: new Date(deadline)} : {}),
 					});
@@ -34,7 +36,10 @@ export default function NewTaskPage() {
 					placeholder="Enter task title"
 					required
 				/>
-				{/* <Input name="tags" label="Tags" placeholder="Add a tag" type="text" /> */}
+				<TagsInput
+					name="tags"
+					options={await api.getTags(await getWorkspaceId())}
+				/>
 				{/* <Select name="assignee" label="Assign">
 					<option>User 1</option>
 					<option>User 2</option>
