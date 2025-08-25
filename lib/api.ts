@@ -255,7 +255,7 @@ export const createAPI = (prisma: PrismaClient) => {
 			prisma.event.findUnique({where: {id}}),
 
 		/** Sorted by deadline in ascending order */
-		getTasks: (user: Id) =>
+		getTasks: async (user: Id) =>
 			prisma.task.findMany({
 				where: {assignees: {some: {id: user}}},
 				// TODO: only select properties that are needed
@@ -263,7 +263,7 @@ export const createAPI = (prisma: PrismaClient) => {
 			}),
 
 		/** Sorted by start time and then end time in ascending order */
-		getEvents: (user: Id) =>
+		getEvents: async (user: Id) =>
 			prisma.event.findMany({
 				where: {attendees: {some: {id: user}}},
 				// TODO: only select properties that are needed

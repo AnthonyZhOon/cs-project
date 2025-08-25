@@ -106,6 +106,7 @@ export default tseslint.config(
 			'@typescript-eslint/no-unused-vars': 1,
 			// Use non-strict rules (allow e.g. numbers)
 			'@typescript-eslint/restrict-template-expressions': [2, {}],
+			'@typescript-eslint/promise-function-async': 1,
 			'@typescript-eslint/strict-boolean-expressions': 2,
 		},
 	},
