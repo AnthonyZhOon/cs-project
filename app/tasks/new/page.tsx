@@ -1,3 +1,4 @@
+import {redirect} from 'next/navigation';
 import CreateForm from '@/components/CreateForm';
 import Input from '@/components/inputs/Input';
 import Select from '@/components/inputs/Select';
@@ -23,8 +24,8 @@ export default function NewTaskPage() {
 						...(priority ? {priority} : {}),
 						...(deadline ? {deadline: new Date(deadline as string)} : {}),
 					});
-					// TODO: do something useful
-					console.log(`Created task ${id}`);
+					// TODO: redirect to task page
+					redirect('/');
 				}}
 			>
 				<Input
