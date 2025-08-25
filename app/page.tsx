@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import ComponentBox from '@/components/ComponentBox';
-import TaskSummaryChart from '@/components/TaskSummary';
 import Task, {exampleTask} from '@/components/Task';
+import TaskSummaryChart from '@/components/TaskSummary';
 import UpcomingBox from '@/components/UpcomingBox';
 import prisma from '@/lib/prisma';
 

@@ -212,7 +212,7 @@ export const createAPI = (prisma: PrismaClient) => {
 		getWorkspaceMembers: async (id: Id) =>
 			// TODO: only select properties that are needed
 			prisma.workspace.findUnique({where: {id}, include: {members: true}}),
-		getWorkspaces: (user: Id) =>
+		getWorkspaces: async (user: Id) =>
 			// TODO: only select properties that are needed
 			prisma.workspace.findMany({where: {members: {some: {userId: user}}}}),
 		createWorkspace: async ({
