@@ -1,9 +1,10 @@
 import Link from 'next/link';
+import Calendar from '@/components/Calendar';
 import ComponentBox from '@/components/ComponentBox';
 import Task, {exampleTask} from '@/components/Task';
+import TaskSummaryChart from '@/components/TaskSummary';
 import UpcomingBox from '@/components/UpcomingBox';
 import prisma from '@/lib/prisma';
-import Calendar from '@/components/Calendar';
 
 // const getFeed = () => {
 // 	const feed = [
@@ -86,7 +87,10 @@ export default async function Blog() {
 					</li>
 				))}
 			</ol>
-
+			{/* Example Chart */}
+			<div className="max-w-sm mt-6">
+				<TaskSummaryChart todo={30} inProgress={40} done={30} />
+			</div>
 			{/* Example Component Box */}
 			<div className="w-sm">
 				<ComponentBox title="Title">

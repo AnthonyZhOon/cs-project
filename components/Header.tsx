@@ -16,7 +16,6 @@ export default function Header() {
 				Create Task
 			</Link>
 
-
 			<style jsx>{`
 				.bold {
 					font-weight: bold;
