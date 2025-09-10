@@ -6,11 +6,12 @@ import prisma, {
 	type TransactionClient,
 } from './prisma';
 import {
+	WorkspaceMemberRole,
 	compareRoles,
 	type Id,
 	type Priority,
 	type TaskStatus,
-	type WorkspaceMemberRole,
+	type User,
 } from './types';
 
 interface CreateUserArgs {
@@ -284,6 +285,27 @@ export const createAPI = (prisma: PrismaClient) => {
 					orderBy: {name: 'asc'},
 				})
 			).map(t => t.name),
+
+		getAvailableMembers: async (
+			workspaceId: Id,
+			visibility: WorkspaceMemberRole = WorkspaceMemberRole.MEMBER,
+		): Promise<Pick<User, 'id' | 'name'>[]> =>
+			(
+				await prisma.workspaceMember.findMany({
+					select: {userId: true, user: {select: {name: true}}},
+					where: {
+						workspaceId,
+						role: {
+							in: [
+								WorkspaceMemberRole.MANAGER,
+								...(visibility === WorkspaceMemberRole.MEMBER
+									? [WorkspaceMemberRole.MEMBER]
+									: []),
+							],
+						},
+					},
+				})
+			).map(m => ({id: m.userId, name: m.user.name})),
 
 		createTask: async ({
 			workspaceId,
