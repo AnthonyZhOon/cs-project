@@ -62,7 +62,7 @@ const exampleTasks = [
 
 export default async function Blog() {
   const users = await getUsers();
-  // eslint-disable-next-line
+   
   const session = await auth0.getSession();
   console.log(session);
   if (session === null) {

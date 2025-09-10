@@ -1,5 +1,5 @@
-import { createAPI } from '@/lib/api';
-import type { PrismaClient } from '@/lib/prisma';
+import {createAPI} from '@/lib/api';
+import type {PrismaClient} from '@/lib/prisma';
 
 const base = async (prisma: PrismaClient): Promise<void> => {
   const { id: alice } = await prisma.user.create({

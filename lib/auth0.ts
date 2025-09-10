@@ -10,5 +10,5 @@ const options: Auth0ClientOptions = {
   secret,
 };
 
-// eslint-disable-next-line
+ 
 export const auth0: Auth0Client = new Auth0Client(options);
