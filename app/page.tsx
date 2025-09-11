@@ -66,9 +66,6 @@ export default async function Blog() {
 	const session = await auth0.getSession();
 	// TODO: Handle null session better, should be middleware protected
 	if (session === null) return <div>Not logged in for some reason??</div>;
-
-	console.log(session);
-
 	// const feed = getFeed()
 	return (
 		<div className="p-2">
