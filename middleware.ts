@@ -1,8 +1,25 @@
+import {NextResponse} from 'next/server';
 import {auth0} from './lib/auth0';
-import type {NextRequest, NextResponse} from 'next/server';
+import type {NextRequest} from 'next/server';
 
-export const middleware = async (request: NextRequest): Promise<NextResponse> =>
-	auth0.middleware(request);
+export const middleware = async (
+	request: NextRequest,
+): Promise<NextResponse> => {
+	const authRes = auth0.middleware(request);
+	if (request.nextUrl.pathname.startsWith('/auth')) return authRes;
+
+	const session = await auth0.getSession(request);
+
+	if (!session) {
+		// user is not authenticated, redirect to login page
+		return NextResponse.redirect(
+			new URL('/auth/login', request.nextUrl.origin),
+		);
+	}
+
+	// the headers from the auth middleware should always be returned
+	return authRes;
+};
 
 export const config = {
 	matcher: [
