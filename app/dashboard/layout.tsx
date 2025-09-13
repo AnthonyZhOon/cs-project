@@ -20,32 +20,7 @@ export default function DashboardLayout({children}: {children: ReactNode}) {
 					</div>
 
 					<div className="flex items-center gap-3">
-						<Link
-							href="/messages"
-							aria-label="Messages"
-							className="p-2 rounded-lg border hover:bg-gray-50"
-						>
-							{/* envelope icon */}
-							<svg
-								width="20"
-								height="20"
-								viewBox="0 0 24 24"
-								fill="none"
-								aria-hidden
-							>
-								<path
-									d="M4 6h16v12H4z"
-									stroke="currentColor"
-									strokeWidth="1.5"
-								/>
-								<path
-									d="m4 7 8 6 8-6"
-									stroke="currentColor"
-									strokeWidth="1.5"
-									fill="none"
-								/>
-							</svg>
-						</Link>
+	
 						<Link
 							href="/profile"
 							aria-label="Profile"

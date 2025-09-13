@@ -78,6 +78,24 @@ export default async function Blog() {
 				>
 					Create Event
 				</Link>
+				<Link href="/auth/signup" className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800">
+					Signup
+				</Link>
+				<Link
+				href="/auth/createWorkspace"
+				className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
+				>
+					Create Workspace
+				</Link>
+				<Link
+				href="/auth/invitation"
+				className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
+				>
+					Invitation
+				</Link>
+				<Link href="/dashboard" className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800">
+					Dashboard
+				</Link>
 			</div>
 
 			<ol className="list-decimal list-inside font-[family-name:var(--font-geist-sans)]">
