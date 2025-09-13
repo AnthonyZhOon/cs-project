@@ -23,9 +23,11 @@ export default async function NewTaskPage() {
 						title: formData.get('title') as string,
 						description: formData.get('description') as string,
 						tags: formData.getAll('tags') as string[],
+						assignees: formData.getAll('assignees') as string[],
 						...(priority ? {priority} : {}),
 						...(deadline ? {deadline: new Date(deadline)} : {}),
 					});
+					console.log(id);
 					// TODO: redirect to task page
 					redirect('/');
 				}}
@@ -40,10 +42,11 @@ export default async function NewTaskPage() {
 					name="tags"
 					options={await api.getTags(await getWorkspaceId())}
 				/>
-				{/* <Select name="assignee" label="Assign">
-					<option>User 1</option>
-					<option>User 2</option>
-				</Select> */}
+				<Select name="assignees" label="Assignees" multiple>
+					{...(await api.getAvailableMembers(await getWorkspaceId())).map(
+						({id, name}) => <option value={id}>{name}</option>,
+					)}
+				</Select>
 				<Select name="priority" label="Priority">
 					<option value="">Select&hellip;</option>
 					<option value={Priority.LOW}>Low</option>
