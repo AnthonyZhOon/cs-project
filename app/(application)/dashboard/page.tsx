@@ -1,7 +1,7 @@
-import UpcomingBox from '@/components/UpcomingBox';
-import TaskSummary from '@/components/TaskSummary';
-import ComponentBox from '@/components/ComponentBox';
 import Calendar from '@/components/Calendar';
+import ComponentBox from '@/components/ComponentBox';
+import TaskSummary from '@/components/TaskSummary';
+import UpcomingBox from '@/components/UpcomingBox';
 
 const exampleTasks = [
 	{name: 'Task 1', date: new Date(), url: '#', complete: true},

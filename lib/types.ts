@@ -1,5 +1,6 @@
+import {$Enums, type WorkspaceMemberRole} from './generated/prisma';
 import type api from '@/lib/api';
-import type {WorkspaceMemberRole} from './generated/prisma';
+import type {Priority} from './generated/prisma';
 
 export {
 	Priority,
@@ -27,6 +28,9 @@ export const roleRank = (role: WorkspaceMemberRole): number => {
 			return 1;
 	}
 };
+
+export const priorityFromString = (s: string): Priority | undefined =>
+	Object.keys($Enums.Priority).includes(s) ? (s as Priority) : undefined;
 
 export const compareRoles = (
 	x: WorkspaceMemberRole,

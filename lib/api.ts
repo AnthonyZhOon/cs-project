@@ -215,8 +215,11 @@ export const createAPI = (prisma: PrismaClient) => {
 			// TODO: only select properties that are needed
 			prisma.workspace.findUnique({where: {id}}),
 		getWorkspaceMembers: async (id: Id) =>
-			// TODO: only select properties that are needed
-			prisma.workspace.findUnique({where: {id}, include: {members: true}}),
+			// Include member.user so callers can access user names without extra queries
+			prisma.workspace.findUnique({
+				where: {id},
+				include: {members: {include: {user: {select: {id: true, name: true}}}}},
+			}),
 		getWorkspaces: async (user: Id) =>
 			// TODO: only select properties that are needed
 			prisma.workspace.findMany({where: {members: {some: {userId: user}}}}),
@@ -260,22 +263,55 @@ export const createAPI = (prisma: PrismaClient) => {
 			prisma.event.findUnique({where: {id}}),
 
 		/** Sorted by deadline in ascending order */
-		getTasks: async (user: Id) =>
+		getTasks: async ({
+			workspaceId,
+			priority,
+			tag,
+			assigneeName,
+		}: {
+			workspaceId: Id;
+			priority?: Priority | undefined;
+			tag?: string | undefined;
+			assigneeName?: string | undefined;
+		}) =>
 			prisma.task.findMany({
-				where: {assignees: {some: {id: user}}},
-				// TODO: only select properties that are needed
+				where: {
+					workspaceId,
+					...(priority ? {priority} : {}),
+					...(tag !== undefined && tag !== ''
+						? {tags: {some: {name: tag}}}
+						: {}),
+					...(assigneeName !== undefined && assigneeName !== ''
+						? {assignees: {some: {name: assigneeName}}}
+						: {}),
+				},
+				include: {assignees: true, tags: true},
 				orderBy: {deadline: 'asc'},
 			}),
 
 		/** Sorted by start time and then end time in ascending order */
-		getEvents: async (user: Id) =>
+		getEvents: async ({
+			workspaceId,
+			tag,
+			attendeeName,
+		}: {
+			workspaceId: Id;
+			tag?: string | undefined;
+			attendeeName?: string | undefined;
+		}) =>
 			prisma.event.findMany({
-				where: {attendees: {some: {id: user}}},
-				// TODO: only select properties that are needed
+				where: {
+					workspaceId,
+					...(tag !== undefined ? {tags: {some: {name: tag}}} : {}),
+					...(attendeeName !== undefined
+						? {attendees: {some: {name: attendeeName}}}
+						: {}),
+				},
+				include: {attendees: true, tags: true},
 				orderBy: [{start: 'asc'}, {end: 'asc'}],
 			}),
 
-		/** Sorted in ascending order */
+		/** Sorted in ascending order; requires workspace scope. */
 		getTags: async (workspaceId: Id) =>
 			(
 				await prisma.tag.findMany({
@@ -403,7 +439,7 @@ export const createAPI = (prisma: PrismaClient) => {
 		): Promise<void> =>
 			prisma.$transaction(async prisma => {
 				// TODO: check attendees have access to event
-				const {workspaceId} = await prisma.task.findUniqueOrThrow({
+				const {workspaceId} = await prisma.event.findUniqueOrThrow({
 					select: {workspaceId: true},
 					where: {id},
 				});
@@ -421,6 +457,10 @@ export const createAPI = (prisma: PrismaClient) => {
 					},
 				});
 			}),
+
+		// #endregion
+
+		// #region Helpers
 
 		// #endregion
 	};

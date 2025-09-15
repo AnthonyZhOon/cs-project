@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import Calendar from '@/components/Calendar';
 import ComponentBox from '@/components/ComponentBox';
-import Task, {exampleTask} from '@/components/Task';
 import TaskSummaryChart from '@/components/TaskSummary';
 import UpcomingBox from '@/components/UpcomingBox';
 import prisma from '@/lib/prisma';
@@ -115,8 +114,6 @@ export default async function Blog() {
 					markedDates={[new Date('2025-08-20')]}
 				></Calendar>
 			</div>
-
-			<Task task={exampleTask} className="mt-4" />
 		</div>
 	);
 }

@@ -1,37 +1,35 @@
-import TaskComponent, {exampleTask} from '@/components/Task';
-import {Priority} from '@/lib/types';
-import FiltersBar from './filters.client';
-import type {TaskWithAssigneesAndTags} from '@/lib/types';
-
-// Placeholder list used when no tasks are provided to the page
-const placeholderTasks: NonNullable<TaskWithAssigneesAndTags>[] = Array.from({
-	length: 6,
-}).map(
-	(_, i) =>
-		({
-			...exampleTask,
-			id: `${i + 1}`,
-			title: `${exampleTask.title} #${i + 1}`,
-			// ensure a fresh Date instance per item
-			deadline: exampleTask.deadline ? new Date(exampleTask.deadline) : null,
-		}) as NonNullable<TaskWithAssigneesAndTags>,
-);
+import FiltersBar from '@/components/FiltersBar';
+import TaskComponent from '@/components/Task';
+import api from '@/lib/api';
+import {Priority, priorityFromString} from '@/lib/types';
+import {getWorkspaceId} from '@/lib/util';
 
 // Page: accepts tasks if provided, otherwise shows example placeholders so the route renders standalone
 export default async function TasksPage({
 	searchParams,
 }: {
-	searchParams: Promise<Record<string, string | string[] | undefined>>;
+	searchParams: Promise<{priority?: Priority; tag?: string; assignee?: string}>;
 }) {
 	const params = await searchParams;
-	// TODO: Query from database.
-	const list = placeholderTasks;
+	const selectedPriority = params.priority
+		? priorityFromString(params.priority)
+		: undefined;
+	// Extract filters from URL
+	const selectedWorkspace = await getWorkspaceId();
 
-	const selectedPriority =
-		typeof params.priority === 'string' ? params.priority : '';
-	const selectedTag = typeof params.tag === 'string' ? params.tag : '';
-	const selectedAssignee =
-		typeof params.assignee === 'string' ? params.assignee : '';
+	const [tasks, tags, assignees] = await Promise.all([
+		api.getTasks({
+			workspaceId: selectedWorkspace,
+			priority: selectedPriority,
+			tag: params.tag,
+			assigneeName: params.assignee,
+		}),
+		api.getTags(selectedWorkspace),
+		(async () => {
+			const ws = await api.getWorkspaceMembers(selectedWorkspace);
+			return ws?.members.map(m => m.user.name) ?? [];
+		})(),
+	]);
 
 	const priorityOptions: readonly string[] = [
 		'',
@@ -39,42 +37,43 @@ export default async function TasksPage({
 		Priority.MEDIUM,
 		Priority.HIGH,
 	];
-	const tagOptions = [
-		...new Set(list.flatMap(t => t.tags.map(tag => tag.name))),
-	];
-	const assigneeOptions = [
-		...new Set(list.flatMap(t => t.assignees.map(a => a.name))),
-	];
-
-	const filtered = list.filter(t => {
-		const byPriority = selectedPriority
-			? t.priority === selectedPriority
-			: true;
-		const byTag = selectedTag
-			? t.tags.some(tag => tag.name === selectedTag)
-			: true;
-		const byAssignee = selectedAssignee
-			? t.assignees.some(a => a.name === selectedAssignee)
-			: true;
-		return byPriority && byTag && byAssignee;
-	});
 
 	return (
 		<div className="p-4 space-y-4">
 			<FiltersBar
-				selectedPriority={selectedPriority}
-				selectedTag={selectedTag}
-				selectedAssignee={selectedAssignee}
-				priorityOptions={priorityOptions}
-				tagOptions={tagOptions}
-				assigneeOptions={assigneeOptions}
+				filters={[
+					{
+						name: 'priority',
+						label: 'Priority',
+						value: selectedPriority ?? '',
+						options: priorityOptions.map(v =>
+							v ? {value: v, label: v.charAt(0) + v.slice(1).toLowerCase()} : v,
+						),
+					},
+					{
+						name: 'tag',
+						label: 'Tag',
+						value: params.tag ?? '',
+						options: tags,
+					},
+					{
+						name: 'assignee',
+						label: 'Assignee',
+						value: params.assignee ?? '',
+						options: assignees,
+					},
+				]}
 			/>
 
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-				{filtered.map(task => (
-					<TaskComponent key={task.id} task={task} />
-				))}
-			</div>
+			{tasks.length === 0 ? (
+				<p className="text-sm text-gray-600">No tasks found.</p>
+			) : (
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+					{tasks.map(task => (
+						<TaskComponent key={task.id} task={task} />
+					))}
+				</div>
+			)}
 		</div>
 	);
 }
