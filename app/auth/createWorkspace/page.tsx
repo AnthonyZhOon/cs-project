@@ -10,9 +10,13 @@ export default function CreateWorkspacePage() {
 		setMembers([...members, {email: '', role: 'Member'}]);
 	};
 
-	const updateMember = (index: number, field: string, value: string) => {
+	const updateMember = (
+		index: number,
+		field: 'email' | 'role',
+		value: string,
+	) => {
 		const newMembers = [...members];
-		(newMembers[index] as any)[field] = value;
+		newMembers[index]![field] = value;
 		setMembers(newMembers);
 	};
 

@@ -1,8 +1,8 @@
 import {redirect} from 'next/navigation';
 import CreateForm from '@/components/CreateForm';
 import Input from '@/components/inputs/Input';
-import TagsInput from '@/components/inputs/TagsInput';
 import Select from '@/components/inputs/Select';
+import TagsInput from '@/components/inputs/TagsInput';
 import Textarea from '@/components/inputs/Textarea';
 import api from '@/lib/api';
 import {getWorkspaceId} from '@/lib/util';
@@ -42,7 +42,11 @@ export default async function NewEventPage() {
 				/>
 				<Select name="attendees" label="Attendees" multiple>
 					{...(await api.getAvailableMembers(await getWorkspaceId())).map(
-						({id, name}) => <option value={id}>{name}</option>,
+						({id, name}) => (
+							<option key={id} value={id}>
+								{name}
+							</option>
+						),
 					)}
 				</Select>
 				<Input name="start" label="Start date" type="datetime-local" required />

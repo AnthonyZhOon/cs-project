@@ -44,7 +44,11 @@ export default async function NewTaskPage() {
 				/>
 				<Select name="assignees" label="Assignees" multiple>
 					{...(await api.getAvailableMembers(await getWorkspaceId())).map(
-						({id, name}) => <option value={id}>{name}</option>,
+						({id, name}) => (
+							<option key={id} value={id}>
+								{name}
+							</option>
+						),
 					)}
 				</Select>
 				<Select name="priority" label="Priority">
