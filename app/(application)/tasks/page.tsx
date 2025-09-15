@@ -18,20 +18,20 @@ const placeholderTasks: NonNullable<TaskWithAssigneesAndTags>[] = Array.from({
 );
 
 // Page: accepts tasks if provided, otherwise shows example placeholders so the route renders standalone
-export default function TasksPage({
+export default async function TasksPage({
 	searchParams,
 }: {
-	searchParams?: Record<string, string | string[] | undefined>;
+	searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+	const params = await searchParams;
 	// TODO: Query from database.
 	const list = placeholderTasks;
 
 	const selectedPriority =
-		typeof searchParams?.priority === 'string' ? searchParams.priority : '';
-	const selectedTag =
-		typeof searchParams?.tag === 'string' ? searchParams.tag : '';
+		typeof params.priority === 'string' ? params.priority : '';
+	const selectedTag = typeof params.tag === 'string' ? params.tag : '';
 	const selectedAssignee =
-		typeof searchParams?.assignee === 'string' ? searchParams.assignee : '';
+		typeof params.assignee === 'string' ? params.assignee : '';
 
 	const priorityOptions: readonly string[] = [
 		'',
