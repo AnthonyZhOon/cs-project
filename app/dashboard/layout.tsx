@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import {ReactNode} from 'react';
 import ClientSidebar from './sidebar.client';
+import type {ReactNode} from 'react';
 
 export default function DashboardLayout({children}: {children: ReactNode}) {
 	return (

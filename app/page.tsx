@@ -4,8 +4,8 @@ import ComponentBox from '@/components/ComponentBox';
 import Task, {exampleTask} from '@/components/Task';
 import TaskSummaryChart from '@/components/TaskSummary';
 import UpcomingBox from '@/components/UpcomingBox';
+import {auth0} from '@/lib/auth0';
 import prisma from '@/lib/prisma';
-
 // const getFeed = () => {
 // 	const feed = [
 // 		{
@@ -62,6 +62,10 @@ const exampleTasks = [
 
 export default async function Blog() {
 	const users = await getUsers();
+
+	const session = await auth0.getSession();
+	// TODO: Handle null session better, should be middleware protected
+	if (session === null) return <div>Not logged in for some reason??</div>;
 	// const feed = getFeed()
 	return (
 		<div className="p-2">
@@ -78,26 +82,9 @@ export default async function Blog() {
 				>
 					Create Event
 				</Link>
-				<Link href="/auth/signup" className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800">
-					Signup
-				</Link>
-				<Link
-				href="/auth/createWorkspace"
-				className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
-				>
-					Create Workspace
-				</Link>
-				<Link
-				href="/auth/invitation"
-				className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800"
-				>
-					Invitation
-				</Link>
-				<Link href="/dashboard" className="px-3 py-1 bg-white text-black rounded hover:bg-gray-800">
-					Dashboard
-				</Link>
 			</div>
 
+			<h1>{`Hello ${session.user.name}`}</h1>
 			<ol className="list-decimal list-inside font-[family-name:var(--font-geist-sans)]">
 				{users.map(user => (
 					<li key={user.id} className="mb-2">

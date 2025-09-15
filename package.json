@@ -25,6 +25,7 @@
 	},
 	"license": "MIT",
 	"dependencies": {
+		"@auth0/nextjs-auth0": "^4.9.0",
 		"@next/env": "^15.4.6",
 		"@prisma/client": "^6.14.0",
 		"next": "^15.4.6",
