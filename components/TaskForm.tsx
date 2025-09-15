@@ -7,20 +7,18 @@ import Textarea from '@/components/inputs/Textarea';
 import api from '@/lib/api';
 import {Priority} from '@/lib/types';
 import {getWorkspaceId} from '@/lib/util';
+import type {TaskWithAssigneesAndTags} from '@/lib/types';
 
-interface EditTaskPageProps {
-	params: {
-		id: string;
-	};
+interface TaskFormProps {
+	task?: TaskWithAssigneesAndTags;
+	availableTags: string[];
 }
 
-export default async function EditTaskPage({params}: EditTaskPageProps) {
-	const task = await api.getTaskWithAssigneesAndTags(params.id);
-
-	if (!task) redirect('/tasks');
+export default function TaskForm({task, availableTags}: TaskFormProps) {
+	const isEditing = !!task;
 
 	// Format the deadline for datetime-local input
-	const formattedDeadline = task.deadline
+	const formattedDeadline = task?.deadline
 		? new Date(
 				task.deadline.getTime() - task.deadline.getTimezoneOffset() * 60000,
 			)
@@ -31,19 +29,37 @@ export default async function EditTaskPage({params}: EditTaskPageProps) {
 	return (
 		<div className="max-w-3xl mx-auto p-4">
 			<CreateForm
-				formTitle="Edit Task"
-				submitText="Update Task"
-				action={async formData => {
+				formTitle={isEditing ? 'Edit Task' : 'Create Task'}
+				submitText={isEditing ? 'Update Task' : 'Create Task'}
+				deleteAction={
+					isEditing
+						? async () => {
+								'use server';
+								await api.deleteTask(task.id);
+								redirect('/tasks');
+							}
+						: undefined
+				}
+				action={async (formData: FormData) => {
 					'use server';
 					const deadline = formData.get('deadline') as string;
 					const priority = formData.get('priority') as '' | Priority;
-					await api.updateTask(params.id, {
+
+					const taskData = {
 						title: formData.get('title') as string,
 						description: formData.get('description') as string,
 						tags: formData.getAll('tags') as string[],
 						...(priority ? {priority} : {}),
 						...(deadline ? {deadline: new Date(deadline)} : {}),
-					});
+					};
+
+					await (task
+						? api.updateTask(task.id, taskData)
+						: api.createTask({
+								workspaceId: await getWorkspaceId(),
+								...taskData,
+							}));
+
 					redirect('/tasks');
 				}}
 			>
@@ -51,13 +67,13 @@ export default async function EditTaskPage({params}: EditTaskPageProps) {
 					name="title"
 					label="Title"
 					placeholder="Enter task title"
-					defaultValue={task.title}
+					defaultValue={task?.title ?? ''}
 					required
 				/>
 				<TagsInput
 					name="tags"
-					options={await api.getTags(await getWorkspaceId())}
-					defaultValue={task.tags.map(tag => tag.name)}
+					options={availableTags}
+					defaultValue={task?.tags.map(tag => tag.name) ?? []}
 				/>
 				{/* <Select name="assignee" label="Assign">
 					<option>User 1</option>
@@ -66,7 +82,7 @@ export default async function EditTaskPage({params}: EditTaskPageProps) {
 				<Select
 					name="priority"
 					label="Priority"
-					defaultValue={task.priority ?? ''}
+					defaultValue={task?.priority ?? ''}
 				>
 					<option value="">Select&hellip;</option>
 					<option value={Priority.LOW}>Low</option>
@@ -87,7 +103,7 @@ export default async function EditTaskPage({params}: EditTaskPageProps) {
 					name="description"
 					label="Description"
 					placeholder="Enter the description"
-					defaultValue={task.description ?? ''}
+					defaultValue={task?.description ?? ''}
 				/>
 			</CreateForm>
 		</div>

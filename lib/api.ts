@@ -388,6 +388,9 @@ export const createAPI = (prisma: PrismaClient) => {
 					parents,
 				});
 				if (errors.length) throw new AggregateError(errors);
+
+				// Clear existing tasks. We cannot use set, as that won't create the
+				// required tags for us if they don't exist. Couldn't think of a better solution. :shrug:
 				await prisma.task.update({
 					select: {id: true},
 					where: {id},
@@ -419,6 +422,12 @@ export const createAPI = (prisma: PrismaClient) => {
 					},
 				});
 			}),
+
+		deleteTask: async (id: Id): Promise<void> => {
+			await prisma.task.delete({
+				where: {id},
+			});
+		},
 
 		createEvent: async ({
 			workspaceId,

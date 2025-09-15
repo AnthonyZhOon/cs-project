@@ -93,7 +93,7 @@ export default function TaskComponent({
 
 	return (
 		<Link
-			href={`/tasks/${task.id}/edit`}
+			href={`/tasks/${task.id}`}
 			className="block hover:opacity-80 transition-opacity"
 		>
 			{/* Add an outline to the task component */}
@@ -105,9 +105,6 @@ export default function TaskComponent({
 						tags={task.tags.map(tag => tag.name)}
 						className="text-gray-600"
 					/>
-					<p className="text-sm text-gray-800 leading-relaxed mb-1">
-						{task.description}
-					</p>
 					{/* Footer for assignees and due date */}
 					<div className="flex justify-between items-center text-sm text-gray-600">
 						<span>{task.assignees.map(a => a.name).join(', ')}</span>
@@ -115,6 +112,9 @@ export default function TaskComponent({
 							{task.deadline ? formatInstant(task.deadline) : 'No due date set'}
 						</span>
 					</div>
+					<p className="text-sm text-gray-800 leading-relaxed mb-1">
+						{task.description}
+					</p>
 				</div>
 			</ComponentBox>
 		</Link>

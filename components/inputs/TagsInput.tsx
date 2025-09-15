@@ -7,13 +7,15 @@ export default function TagsInput({
 	options,
 	label = 'Tags',
 	placeholder = 'Add a tag',
+	defaultValue = [],
 	...props
 }: React.ComponentPropsWithRef<'input'> & {
 	label?: string;
 	options: string[];
+	defaultValue?: string[];
 }) {
 	const id = useId();
-	const [selected, setSelected] = useState<readonly string[]>([]);
+	const [selected, setSelected] = useState<readonly string[]>(defaultValue);
 	return (
 		<label>
 			{label}
@@ -43,7 +45,9 @@ export default function TagsInput({
 				onKeyDown={e => {
 					if (e.key === 'Enter' && e.currentTarget.value) {
 						e.preventDefault();
-						setSelected([...selected, e.currentTarget.value]);
+						const newTag = e.currentTarget.value.trim();
+						if (newTag && !selected.includes(newTag))
+							setSelected([...selected, newTag]);
 						e.currentTarget.value = '';
 					}
 				}}
