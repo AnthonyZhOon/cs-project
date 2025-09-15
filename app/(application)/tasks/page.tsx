@@ -1,8 +1,10 @@
+import Link from 'next/link';
 import FiltersBar from '@/components/FiltersBar';
 import TaskComponent from '@/components/Task';
 import api from '@/lib/api';
-import {Priority, priorityFromString} from '@/lib/types';
+import {priorityFromString} from '@/lib/types';
 import {getWorkspaceId} from '@/lib/util';
+import type {Priority} from '@/lib/types';
 
 // Page: accepts tasks if provided, otherwise shows example placeholders so the route renders standalone
 export default async function TasksPage({
@@ -31,24 +33,25 @@ export default async function TasksPage({
 		})(),
 	]);
 
-	const priorityOptions: readonly string[] = [
-		'',
-		Priority.LOW,
-		Priority.MEDIUM,
-		Priority.HIGH,
-	];
+	const priorityOptions: string[] = ['High', 'Medium', 'Low'];
 
 	return (
 		<div className="p-4 space-y-4">
+			<div className="flex justify-between items-center">
+				<h1 className="text-2xl font-bold">Tasks</h1>
+				<Link href="/tasks/new">
+					<button className="bg-white hover:bg-gray-50 text-black border border-black px-4 py-2 rounded-lg font-medium transition-colors">
+						New Task
+					</button>
+				</Link>
+			</div>
 			<FiltersBar
 				filters={[
 					{
 						name: 'priority',
 						label: 'Priority',
 						value: selectedPriority ?? '',
-						options: priorityOptions.map(v =>
-							v ? {value: v, label: v.charAt(0) + v.slice(1).toLowerCase()} : v,
-						),
+						options: priorityOptions,
 					},
 					{
 						name: 'tag',

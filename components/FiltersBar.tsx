@@ -3,25 +3,21 @@
 import {useRouter, useSearchParams} from 'next/navigation';
 import Select from '@/components/inputs/Select';
 
-type Option = string | {value: string; label: string};
-
 export interface FilterSpec {
 	name: string;
 	label: string;
 	value?: string;
-	options: Option[] | readonly Option[];
+	options: string[];
 }
 
 // TODO: Fix this garbage
 
 export default function FiltersBar({
 	filters,
-	clearKeys,
 	className = '',
 }: {
 	filters: FilterSpec[];
 	/** keys to clear when pressing "Clear filters"; defaults to all filter names */
-	clearKeys?: string[];
 	className?: string;
 }) {
 	const router = useRouter();
@@ -36,8 +32,7 @@ export default function FiltersBar({
 
 	const clearFilters = () => {
 		const params = new URLSearchParams(searchParams.toString());
-		const keys = clearKeys ?? filters.map(f => f.name);
-		keys.forEach(k => params.delete(k));
+		filters.map(f => f.name).forEach(k => params.delete(k));
 		const q = params.toString();
 		router.replace(q ? `?${q}` : '?', {scroll: false});
 	};
@@ -55,17 +50,11 @@ export default function FiltersBar({
 						onChange={e => updateParam(f.name, e.currentTarget.value)}
 					>
 						<option value="">All</option>
-						{f.options
-							.filter(o => (typeof o === 'string' ? o : o.value))
-							.map(o => {
-								const value = typeof o === 'string' ? o : o.value;
-								const label = typeof o === 'string' ? o : o.label;
-								return (
-									<option key={value} value={value}>
-										{label}
-									</option>
-								);
-							})}
+						{f.options.map(o => (
+							<option key={o} value={o}>
+								{o}
+							</option>
+						))}
 					</Select>
 				</div>
 			))}

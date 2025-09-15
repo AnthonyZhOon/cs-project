@@ -1,4 +1,5 @@
 import Form from 'next/form';
+import Link from 'next/link';
 
 export default function CreateForm({
 	formTitle,
@@ -18,7 +19,11 @@ export default function CreateForm({
 
 				{/* button */}
 				<div className="flex justify-end gap-2 mt-4">
-					<button className="border px-4 py-2 rounded">Cancel</button>
+					<Link href="/tasks">
+						<button type="button" className="border px-4 py-2 rounded">
+							Cancel
+						</button>
+					</Link>
 					<button className="bg-black text-white px-4 py-2 rounded">
 						{submitText}
 					</button>

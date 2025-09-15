@@ -30,7 +30,9 @@ export const roleRank = (role: WorkspaceMemberRole): number => {
 };
 
 export const priorityFromString = (s: string): Priority | undefined =>
-	Object.keys($Enums.Priority).includes(s) ? (s as Priority) : undefined;
+	Object.keys($Enums.Priority).includes(s.toUpperCase())
+		? (s.toUpperCase() as Priority)
+		: undefined;
 
 export const compareRoles = (
 	x: WorkspaceMemberRole,
