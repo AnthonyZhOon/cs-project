@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import ComponentBox from '@/components/ComponentBox';
 import {InfoRow, TagsRow} from '@/components/InfoRow';
 import {formatInstant} from '@/lib/formatTime';
@@ -91,26 +92,31 @@ export default function TaskComponent({
 	const taskTitle = `${taskIcon} ${task.title}`;
 
 	return (
-		// Add an outline to the task component
-		<ComponentBox title={taskTitle} className={`max-w-sm ${className}`}>
-			<div className="p-2 space-y-1">
-				<Status status={task.status} />
-				<Priority priority={task.priority} />
-				<TagsRow
-					tags={task.tags.map(tag => tag.name)}
-					className="text-gray-600"
-				/>
-				<p className="text-sm text-gray-800 leading-relaxed mb-1">
-					{task.description}
-				</p>
-				{/* Footer for assignees and due date */}
-				<div className="flex justify-between items-center text-sm text-gray-600">
-					<span>{task.assignees.map(a => a.name).join(', ')}</span>
-					<span>
-						{task.deadline ? formatInstant(task.deadline) : 'No due date set'}
-					</span>
+		<Link
+			href={`/tasks/${task.id}/edit`}
+			className="block hover:opacity-80 transition-opacity"
+		>
+			{/* Add an outline to the task component */}
+			<ComponentBox title={taskTitle} className={`max-w-sm ${className}`}>
+				<div className="p-2 space-y-1">
+					<Status status={task.status} />
+					<Priority priority={task.priority} />
+					<TagsRow
+						tags={task.tags.map(tag => tag.name)}
+						className="text-gray-600"
+					/>
+					<p className="text-sm text-gray-800 leading-relaxed mb-1">
+						{task.description}
+					</p>
+					{/* Footer for assignees and due date */}
+					<div className="flex justify-between items-center text-sm text-gray-600">
+						<span>{task.assignees.map(a => a.name).join(', ')}</span>
+						<span>
+							{task.deadline ? formatInstant(task.deadline) : 'No due date set'}
+						</span>
+					</div>
 				</div>
-			</div>
-		</ComponentBox>
+			</ComponentBox>
+		</Link>
 	);
 }

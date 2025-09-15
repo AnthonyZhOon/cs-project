@@ -388,21 +388,32 @@ export const createAPI = (prisma: PrismaClient) => {
 					parents,
 				});
 				if (errors.length) throw new AggregateError(errors);
+				await prisma.task.update({
+					select: {id: true},
+					where: {id},
+					data: {tags: {set: []}},
+				});
 
+				// Not sure why but the prisma skip thing was causing an error.
+				// assignees: {connect: assignees?.map(id => ({id})) ?? Prisma.skip},
 				await prisma.task.update({
 					select: {id: true},
 					where: {id},
 					data: {
 						tags: {
-							set:
-								tags?.map(name => ({workspaceId_name: {workspaceId, name}})) ??
-								Prisma.skip,
+							connectOrCreate:
+								tags?.map(name => ({
+									where: {workspaceId_name: {workspaceId, name}},
+									create: {workspaceId, name},
+								})) ?? [],
 						},
-						assignees: {connect: assignees?.map(id => ({id})) ?? Prisma.skip},
-						dependencies: {
-							connect: dependencies?.map(id => ({id})) ?? Prisma.skip,
-						},
-						parents: {connect: parents?.map(id => ({id})) ?? Prisma.skip},
+						...(assignees
+							? {assignees: {connect: assignees.map(id => ({id}))}}
+							: {}),
+						...(dependencies
+							? {dependencies: {connect: dependencies.map(id => ({id}))}}
+							: {}),
+						...(parents ? {parents: {connect: parents.map(id => ({id}))}} : {}),
 						...(title !== undefined ? {title} : {}),
 						...rest,
 					},
