@@ -1,4 +1,4 @@
-'use client';
+import {formatInstant} from '@/lib/formatTime';
 import ComponentBox from './ComponentBox';
 
 interface Item {
@@ -30,7 +30,7 @@ export default function UpcomingBox({
 						</div>
 					)}
 					<div className="grow">{item.name}</div>
-					<div>{item.date.toLocaleDateString()}</div>
+					<div>{formatInstant(item.date)}</div>
 				</div>
 			))}
 		</ComponentBox>

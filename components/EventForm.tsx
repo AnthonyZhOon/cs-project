@@ -4,19 +4,20 @@ import Input from '@/components/inputs/Input';
 import MultiSuggestInput from '@/components/inputs/MultiSuggestInput';
 import Textarea from '@/components/inputs/Textarea';
 import api from '@/lib/api';
-import {getWorkspaceId} from '@/lib/util';
 import type {Event} from '@/lib/types';
 
 interface EventFormProps {
 	event?: Event & {tags: {name: string}[]; attendees: {id: string}[]};
 	availableTags: string[];
 	members: {id: string; name: string}[];
+	workspaceId: string;
 }
 
 export default function EventForm({
 	event,
 	availableTags,
 	members,
+	workspaceId,
 }: EventFormProps) {
 	const isEditing = !!event;
 
@@ -35,7 +36,7 @@ export default function EventForm({
 			<CreateForm
 				formTitle={isEditing ? 'Edit Event' : 'Create Event'}
 				submitText={isEditing ? 'Update Event' : 'Create Event'}
-				cancelHref="/events"
+				cancelHref={`/${workspaceId}/events`}
 				deleteAction={
 					isEditing
 						? async () => {
@@ -61,7 +62,7 @@ export default function EventForm({
 					await (event
 						? api.updateEvent(event.id, payload)
 						: api.createEvent({
-								workspaceId: await getWorkspaceId(),
+								workspaceId,
 								...payload,
 							}));
 

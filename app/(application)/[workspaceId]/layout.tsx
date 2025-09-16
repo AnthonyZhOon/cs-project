@@ -2,13 +2,20 @@ import Link from 'next/link';
 import ClientSidebar from './sidebar.client';
 import type {ReactNode} from 'react';
 
-export default function DashboardLayout({children}: {children: ReactNode}) {
+export default async function DashboardLayout({
+	children,
+	params,
+}: {
+	children: ReactNode;
+	params: Promise<{workspaceId: string}>;
+}) {
+	const {workspaceId} = await params;
 	return (
 		<div className="min-h-screen flex">
 			{/* Sidebar */}
 			<aside className="w-56 shrink-0 border-r bg-white">
 				<div className="p-4 font-semibold">LOGO</div>
-				<ClientSidebar />
+				<ClientSidebar workspaceId={workspaceId} />
 			</aside>
 
 			{/* Main */}

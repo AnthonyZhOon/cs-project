@@ -6,19 +6,20 @@ import Select from '@/components/inputs/Select';
 import Textarea from '@/components/inputs/Textarea';
 import api from '@/lib/api';
 import {Priority, TaskStatus} from '@/lib/types';
-import {getWorkspaceId} from '@/lib/util';
 import type {TaskWithAssigneesAndTags} from '@/lib/types';
 
 interface TaskFormProps {
 	task?: TaskWithAssigneesAndTags;
 	availableTags: string[];
 	members: {id: string; name: string}[];
+	workspaceId: string;
 }
 
 export default function TaskForm({
 	task,
 	availableTags,
 	members,
+	workspaceId,
 }: TaskFormProps) {
 	const isEditing = !!task;
 
@@ -36,7 +37,7 @@ export default function TaskForm({
 			<CreateForm
 				formTitle={isEditing ? 'Edit Task' : 'Create Task'}
 				submitText={isEditing ? 'Update Task' : 'Create Task'}
-				cancelHref="/tasks"
+				cancelHref={`/${workspaceId}/tasks`}
 				deleteAction={
 					isEditing
 						? async () => {
@@ -66,7 +67,7 @@ export default function TaskForm({
 					await (task
 						? api.updateTask(task.id, taskData)
 						: api.createTask({
-								workspaceId: await getWorkspaceId(),
+								workspaceId,
 								...taskData,
 							}));
 

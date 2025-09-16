@@ -5,9 +5,9 @@ import api from '@/lib/api';
 export default async function EditEventPage({
 	params,
 }: {
-	params: Promise<{id: string}>;
+	params: Promise<{id: string; workspaceId: string}>;
 }) {
-	const {id} = await params;
+	const {id, workspaceId} = await params;
 
 	const event = await api.getEventWithAttendeesAndTags(id);
 	if (!event) redirect('/events');
@@ -20,6 +20,11 @@ export default async function EditEventPage({
 		ws?.members.map(m => ({id: m.user.id, name: m.user.name})) ?? [];
 
 	return (
-		<EventForm event={event} availableTags={availableTags} members={members} />
+		<EventForm
+			event={event}
+			availableTags={availableTags}
+			members={members}
+			workspaceId={workspaceId}
+		/>
 	);
 }

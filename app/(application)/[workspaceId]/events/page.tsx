@@ -2,27 +2,28 @@ import Link from 'next/link';
 import EventComponent from '@/components/Event';
 import FiltersBar from '@/components/FiltersBar';
 import api from '@/lib/api';
-import {getWorkspaceId} from '@/lib/util';
 
 export default async function EventsPage({
 	searchParams,
+	params,
 }: {
 	searchParams: Promise<{tag?: string; attendee?: string}>;
+	params: Promise<{workspaceId: string}>;
 }) {
-	const params = await searchParams;
+	const {tag, attendee} = await searchParams;
+	const {workspaceId} = await params;
 
 	// TODO: Get workspaces done.
-	const selectedWorkspace = await getWorkspaceId();
 
 	const [events, allTags, attendees] = await Promise.all([
 		api.getEvents({
-			workspaceId: selectedWorkspace,
-			tag: params.tag,
-			attendeeName: params.attendee,
+			workspaceId,
+			tag,
+			attendeeName: attendee,
 		}),
-		api.getTags(selectedWorkspace),
+		api.getTags(workspaceId),
 		(async () => {
-			const ws = await api.getWorkspaceMembers(selectedWorkspace);
+			const ws = await api.getWorkspaceMembers(workspaceId);
 			return ws?.members.map(m => m.user.name) ?? [];
 		})(),
 	]);
@@ -31,7 +32,7 @@ export default async function EventsPage({
 		<div className="p-4 space-y-4">
 			<div className="flex justify-between items-center">
 				<h1 className="text-2xl font-bold">Events</h1>
-				<Link href="/events/new">
+				<Link href={`/${workspaceId}/events/new`}>
 					<button className="bg-white hover:bg-gray-50 text-black border border-black px-4 py-2 rounded-lg font-medium transition-colors">
 						New Event
 					</button>
@@ -42,13 +43,13 @@ export default async function EventsPage({
 					{
 						name: 'tag',
 						label: 'Tag',
-						value: params.tag ?? '',
+						value: tag ?? '',
 						options: allTags,
 					},
 					{
 						name: 'attendee',
 						label: 'Attendee',
-						value: params.attendee ?? '',
+						value: attendee ?? '',
 						options: attendees,
 					},
 				]}
@@ -61,7 +62,7 @@ export default async function EventsPage({
 					{events.map(event => (
 						<Link
 							key={event.id}
-							href={`/events/${event.id}`}
+							href={`/${workspaceId}/events/${event.id}`}
 							className="block hover:opacity-80 transition-opacity"
 						>
 							<EventComponent

@@ -92,37 +92,31 @@ export default function TaskComponent({
 	const taskTitle = `${taskIcon} ${task.title}`;
 
 	return (
-		<Link
-			href={`/tasks/${task.id}`}
-			className="block hover:opacity-80 transition-opacity"
-		>
-			{/* Add an outline to the task component */}
-			<ComponentBox title={taskTitle} className={`max-w-sm ${className}`}>
-				<div className="p-2 space-y-1">
-					<Status status={task.status} />
-					<Priority priority={task.priority} />
-					{task.tags.length > 0 && (
-						<PillRow
-							label="Tags"
-							tags={task.tags.map(tag => tag.name)}
-							className="text-gray-600"
-						/>
-					)}
+		<ComponentBox title={taskTitle} className={`max-w-sm ${className}`}>
+			<div className="p-2 space-y-1">
+				<Status status={task.status} />
+				<Priority priority={task.priority} />
+				{task.tags.length > 0 && (
 					<PillRow
-						tags={task.assignees.map(a => a.name)}
-						label="Assignees"
+						label="Tags"
+						tags={task.tags.map(tag => tag.name)}
 						className="text-gray-600"
 					/>
-					<p className="text-sm text-gray-800 leading-relaxed">
-						{task.description}
-					</p>
-					{task.deadline != null && (
-						<div className="text-xs text-gray-600">
-							{formatInstant(task.deadline)}
-						</div>
-					)}
-				</div>
-			</ComponentBox>
-		</Link>
+				)}
+				<PillRow
+					tags={task.assignees.map(a => a.name)}
+					label="Assignees"
+					className="text-gray-600"
+				/>
+				<p className="text-sm text-gray-800 leading-relaxed">
+					{task.description}
+				</p>
+				{task.deadline != null && (
+					<div className="text-xs text-gray-600">
+						{formatInstant(task.deadline)}
+					</div>
+				)}
+			</div>
+		</ComponentBox>
 	);
 }

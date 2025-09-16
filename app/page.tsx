@@ -4,6 +4,7 @@ import ComponentBox from '@/components/ComponentBox';
 import TaskSummaryChart from '@/components/TaskSummary';
 import UpcomingBox from '@/components/UpcomingBox';
 import prisma from '@/lib/prisma';
+import {getWorkspaceId} from '@/lib/util';
 
 // const getFeed = () => {
 // 	const feed = [
@@ -61,9 +62,11 @@ const exampleTasks = [
 
 export default async function Blog() {
 	const users = await getUsers();
+	const workspaceId = await getWorkspaceId();
 	// const feed = getFeed()
 	return (
 		<div className="p-2">
+			<Link href={`/${workspaceId}/dashboard`}>TestWorkspace</Link>
 			<div className="mb-4">
 				<Link
 					href="/tasks/new"

@@ -3,32 +3,30 @@ import FiltersBar from '@/components/FiltersBar';
 import TaskComponent from '@/components/Task';
 import api from '@/lib/api';
 import {priorityFromString} from '@/lib/types';
-import {getWorkspaceId} from '@/lib/util';
 import type {Priority} from '@/lib/types';
 
 // Page: accepts tasks if provided, otherwise shows example placeholders so the route renders standalone
 export default async function TasksPage({
 	searchParams,
+	params,
 }: {
 	searchParams: Promise<{priority?: Priority; tag?: string; assignee?: string}>;
+	params: Promise<{workspaceId: string}>;
 }) {
-	const params = await searchParams;
-	const selectedPriority = params.priority
-		? priorityFromString(params.priority)
-		: undefined;
-	// Extract filters from URL
-	const selectedWorkspace = await getWorkspaceId();
+	const {priority, tag, assignee} = await searchParams;
+	const {workspaceId} = await params;
+	const selectedPriority = priority ? priorityFromString(priority) : undefined;
 
 	const [tasks, tags, assignees] = await Promise.all([
 		api.getTasks({
-			workspaceId: selectedWorkspace,
+			workspaceId,
 			priority: selectedPriority,
-			tag: params.tag,
-			assigneeName: params.assignee,
+			tag,
+			assigneeName: assignee,
 		}),
-		api.getTags(selectedWorkspace),
+		api.getTags(workspaceId),
 		(async () => {
-			const ws = await api.getWorkspaceMembers(selectedWorkspace);
+			const ws = await api.getWorkspaceMembers(workspaceId);
 			return ws?.members.map(m => m.user.name) ?? [];
 		})(),
 	]);
@@ -39,7 +37,7 @@ export default async function TasksPage({
 		<div className="p-4 space-y-4">
 			<div className="flex justify-between items-center">
 				<h1 className="text-2xl font-bold">Tasks</h1>
-				<Link href="/tasks/new">
+				<Link href={`/${workspaceId}/tasks/new`}>
 					<button className="bg-white hover:bg-gray-50 text-black border border-black px-4 py-2 rounded-lg font-medium transition-colors">
 						New Task
 					</button>
@@ -56,13 +54,13 @@ export default async function TasksPage({
 					{
 						name: 'tag',
 						label: 'Tag',
-						value: params.tag ?? '',
+						value: tag ?? '',
 						options: tags,
 					},
 					{
 						name: 'assignee',
 						label: 'Assignee',
-						value: params.assignee ?? '',
+						value: assignee ?? '',
 						options: assignees,
 					},
 				]}
@@ -73,7 +71,13 @@ export default async function TasksPage({
 			) : (
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
 					{tasks.map(task => (
-						<TaskComponent key={task.id} task={task} />
+						<Link
+							key={task.id}
+							href={`/${workspaceId}/tasks/${task.id}`}
+							className="block hover:opacity-80 transition-opacity"
+						>
+							<TaskComponent key={task.id} task={task} />
+						</Link>
 					))}
 				</div>
 			)}
