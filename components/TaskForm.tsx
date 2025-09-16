@@ -36,6 +36,7 @@ export default function TaskForm({
 			<CreateForm
 				formTitle={isEditing ? 'Edit Task' : 'Create Task'}
 				submitText={isEditing ? 'Update Task' : 'Create Task'}
+				cancelHref="/tasks"
 				deleteAction={
 					isEditing
 						? async () => {

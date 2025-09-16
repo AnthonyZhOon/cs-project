@@ -261,6 +261,12 @@ export const createAPI = (prisma: PrismaClient) => {
 		getEvent: async (id: Id) =>
 			// TODO: only select properties that are needed
 			prisma.event.findUnique({where: {id}}),
+		getEventWithAttendeesAndTags: async (id: Id) =>
+			// TODO: only select properties that are needed
+			prisma.event.findUnique({
+				where: {id},
+				include: {attendees: true, tags: true},
+			}),
 
 		/** Sorted by deadline in ascending order */
 		getTasks: async ({
@@ -389,14 +395,6 @@ export const createAPI = (prisma: PrismaClient) => {
 				});
 				if (errors.length) throw new AggregateError(errors);
 
-				// Clear existing tasks. We cannot use set, as that won't create the
-				// required tags for us if they don't exist. Couldn't think of a better solution. :shrug:
-				await prisma.task.update({
-					select: {id: true},
-					where: {id},
-					data: {tags: {set: []}},
-				});
-
 				// Not sure why but the prisma skip thing was causing an error.
 				// assignees: {connect: assignees?.map(id => ({id})) ?? Prisma.skip},
 				await prisma.task.update({
@@ -404,6 +402,7 @@ export const createAPI = (prisma: PrismaClient) => {
 					where: {id},
 					data: {
 						tags: {
+							set: [], // Reset tags
 							connectOrCreate:
 								tags?.map(name => ({
 									where: {workspaceId_name: {workspaceId, name}},
@@ -469,15 +468,27 @@ export const createAPI = (prisma: PrismaClient) => {
 					where: {id},
 					data: {
 						tags: {
-							set:
-								tags?.map(name => ({workspaceId_name: {workspaceId, name}})) ??
-								Prisma.skip,
+							set: [],
+							connectOrCreate:
+								tags?.map(name => ({
+									where: {workspaceId_name: {workspaceId, name}},
+									create: {workspaceId, name},
+								})) ?? [],
 						},
-						attendees: {connect: attendees?.map(id => ({id})) ?? Prisma.skip},
+						// When attendees is provided, replace full set
+						...(attendees !== undefined
+							? {attendees: {set: [], connect: attendees.map(id => ({id}))}}
+							: {}),
 						...rest,
 					},
 				});
 			}),
+
+		deleteEvent: async (id: Id): Promise<void> => {
+			await prisma.event.delete({
+				where: {id},
+			});
+		},
 
 		// #endregion
 

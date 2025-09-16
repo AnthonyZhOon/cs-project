@@ -6,11 +6,13 @@ export default function CreateForm({
 	submitText = 'Create',
 	children,
 	deleteAction,
+	cancelHref,
 	...props
 }: React.ComponentPropsWithRef<typeof Form> & {
 	formTitle: string;
 	submitText?: string;
 	deleteAction?: (() => Promise<void>) | undefined;
+	cancelHref: string;
 }) {
 	return (
 		<div className="border border-black rounded-md p-4 space-y-4">
@@ -31,7 +33,7 @@ export default function CreateForm({
 						</button>
 					)}
 					<div className="flex gap-2">
-						<Link href="/tasks">
+						<Link href={cancelHref}>
 							<button type="button" className="border px-4 py-2 rounded">
 								Cancel
 							</button>
