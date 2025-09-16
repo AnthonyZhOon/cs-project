@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import ComponentBox from '@/components/ComponentBox';
 import {InfoRow, PillRow} from '@/components/InfoRow';
 import {formatInstant} from '@/lib/formatTime';
