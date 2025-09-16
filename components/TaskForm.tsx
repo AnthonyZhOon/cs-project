@@ -1,12 +1,11 @@
 import {redirect} from 'next/navigation';
 import CreateForm from '@/components/CreateForm';
 import Input from '@/components/inputs/Input';
-import MembersInput from '@/components/inputs/MembersInput';
+import MultiSuggestInput from '@/components/inputs/MultiSuggestInput';
 import Select from '@/components/inputs/Select';
-import TagsInput from '@/components/inputs/TagsInput';
 import Textarea from '@/components/inputs/Textarea';
 import api from '@/lib/api';
-import {Priority} from '@/lib/types';
+import {Priority, TaskStatus} from '@/lib/types';
 import {getWorkspaceId} from '@/lib/util';
 import type {TaskWithAssigneesAndTags} from '@/lib/types';
 
@@ -50,6 +49,7 @@ export default function TaskForm({
 					'use server';
 					const deadline = formData.get('deadline') as string;
 					const priority = formData.get('priority') as '' | Priority;
+					const status = formData.get('status') as '' | TaskStatus;
 					const assignees = formData.getAll('assignees') as string[];
 
 					const taskData = {
@@ -58,6 +58,7 @@ export default function TaskForm({
 						tags: formData.getAll('tags') as string[],
 						...(assignees.length ? {assignees} : {}),
 						...(priority ? {priority} : {}),
+						...(status ? {status} : {}),
 						...(deadline ? {deadline: new Date(deadline)} : {}),
 					};
 
@@ -78,17 +79,27 @@ export default function TaskForm({
 					defaultValue={task?.title ?? ''}
 					required
 				/>
-				<TagsInput
+				<MultiSuggestInput
 					name="tags"
-					options={availableTags}
+					label="Tags"
+					placeholder="Add a tag"
+					options={availableTags.map(o => ({value: o, label: o}))}
 					defaultValue={task?.tags.map(tag => tag.name) ?? []}
+					allowCreate
 				/>
-				<MembersInput
+				<MultiSuggestInput
 					name="assignees"
 					label="Assignees"
-					options={members}
+					placeholder="Search members…"
+					options={members.map(m => ({value: m.id, label: m.name}))}
 					defaultValue={task?.assignees.map(a => a.id) ?? []}
 				/>
+				<Select name="status" label="Status" defaultValue={task?.status ?? ''}>
+					<option value="">Select&hellip;</option>
+					<option value={TaskStatus.TODO}>To do</option>
+					<option value={TaskStatus.IN_PROGRESS}>In progress</option>
+					<option value={TaskStatus.COMPLETE}>Complete</option>
+				</Select>
 				<Select
 					name="priority"
 					label="Priority"

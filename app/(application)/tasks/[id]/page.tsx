@@ -3,16 +3,15 @@ import TaskForm from '@/components/TaskForm';
 import api from '@/lib/api';
 import {getWorkspaceId} from '@/lib/util';
 
-interface EditTaskPageProps {
-	params: {
-		id: string;
-	};
-}
-
-export default async function EditTaskPage({params}: EditTaskPageProps) {
+export default async function EditTaskPage({
+	params,
+}: {
+	params: Promise<{id: string}>;
+}) {
+	const {id} = await params;
 	const workspaceId = await getWorkspaceId();
 	const [task, availableTags, ws] = await Promise.all([
-		api.getTaskWithAssigneesAndTags(params.id),
+		api.getTaskWithAssigneesAndTags(id),
 		api.getTags(workspaceId),
 		api.getWorkspaceMembers(workspaceId),
 	]);
