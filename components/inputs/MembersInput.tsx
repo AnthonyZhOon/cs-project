@@ -2,47 +2,58 @@
 
 import {useEffect, useMemo, useRef, useState} from 'react';
 
-export default function TagsInput({
+interface Option {
+	id: string;
+	name: string;
+}
+
+export default function MembersInput({
 	name,
 	options,
-	label = 'Tags',
-	placeholder = 'Add a tag',
+	label = 'Members',
+	placeholder = 'Search members…',
 	defaultValue = [],
 	...props
 }: React.ComponentPropsWithRef<'input'> & {
 	label?: string;
-	options: string[];
-	defaultValue?: string[];
+	options: Option[];
+	defaultValue?: string[]; // array of user IDs
 }) {
 	const [query, setQuery] = useState('');
 	const [open, setOpen] = useState(false);
 	const [selected, setSelected] = useState<readonly string[]>(defaultValue);
-	const [activeIndex, setActiveIndex] = useState(-1);
-	const [usedNav, setUsedNav] = useState(false);
+	const [activeIndex, setActiveIndex] = useState(0);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 
-	useEffect(() => setSelected(defaultValue), [defaultValue]);
+	useEffect(() => {
+		setSelected(defaultValue);
+	}, [defaultValue]);
 
-	const filtered = useMemo(() => {
+	const byId = useMemo(() => {
+		const m = new Map<string, Option>();
+		for (const o of options) m.set(o.id, o);
+		return m;
+	}, [options]);
+
+	const filtered = useMemo((): Option[] => {
 		const q = query.trim().toLowerCase();
 		return options.filter(
-			o => !selected.includes(o) && (q === '' || o.toLowerCase().includes(q)),
+			o =>
+				!selected.includes(o.id) &&
+				(q === '' || o.name.toLowerCase().includes(q)),
 		);
 	}, [options, query, selected]);
 
+	// keep active index in bounds when list changes
 	useEffect(() => {
-		if (!usedNav) {
-			setActiveIndex(-1);
-			return;
-		}
 		if (filtered.length === 0) {
-			setActiveIndex(-1);
+			setActiveIndex(0);
 			return;
 		}
-		setActiveIndex(i => (i === -1 ? 0 : Math.min(i, filtered.length - 1)));
-	}, [filtered, usedNav]);
+		setActiveIndex(i => Math.min(i, filtered.length - 1));
+	}, [filtered]);
 
-	// outside click close
+	// basic outside click close
 	useEffect(() => {
 		const onClick = (e: MouseEvent) => {
 			if (!containerRef.current) return;
@@ -52,29 +63,22 @@ export default function TagsInput({
 		return () => document.removeEventListener('mousedown', onClick);
 	}, []);
 
-	const addTag = (value: string) => {
-		const val = value.trim();
-		if (!val) return;
-		if (selected.includes(val)) return;
-		setSelected([...selected, val]);
-	};
-
 	return (
 		<label className="block">
 			{label}
 			<div className="mt-1" ref={containerRef}>
 				<div className="flex flex-wrap gap-2">
-					{selected.map(item => (
+					{selected.map(id => (
 						<span
-							key={item}
+							key={id}
 							className="mt-1 mb-1 flex items-center gap-2 rounded bg-gray-200 text-gray-700 text-sm font-semibold px-3 py-1"
 						>
-							<input type="hidden" name={name} value={item} />
-							{item}
+							<input type="hidden" name={name} value={id} />
+							{byId.get(id)?.name ?? id}
 							<button
 								type="button"
-								aria-label="Remove tag"
-								onClick={() => setSelected(selected.filter(t => t !== item))}
+								aria-label="Remove member"
+								onClick={() => setSelected(selected.filter(x => x !== id))}
 								className="text-gray-500 hover:text-gray-700"
 							>
 								&times;
@@ -91,56 +95,33 @@ export default function TagsInput({
 						onChange={e => {
 							setQuery(e.target.value);
 							setOpen(true);
-							setUsedNav(false);
 						}}
 						onFocus={() => setOpen(true)}
 						onKeyDown={e => {
 							if (e.key === 'ArrowDown') {
 								e.preventDefault();
 								setOpen(true);
-								setUsedNav(true);
-								setActiveIndex(i => {
-									const last = Math.max(0, filtered.length - 1);
-									if (filtered.length === 0) return -1;
-									if (i < 0) return 0;
-									return Math.min(i + 1, last);
-								});
+								setActiveIndex(i =>
+									Math.min(i + 1, Math.max(0, filtered.length - 1)),
+								);
 								return;
 							}
 							if (e.key === 'ArrowUp') {
 								e.preventDefault();
-								setUsedNav(true);
-								setActiveIndex(i => {
-									if (filtered.length === 0) return -1;
-									if (i < 0) return 0;
-									return Math.max(i - 1, 0);
-								});
+								setActiveIndex(i => Math.max(i - 1, 0));
 								return;
 							}
 							if (e.key === 'Enter') {
 								e.preventDefault();
-								const q = query.trim();
-								if (!usedNav) {
-									// create new tag by default when user hasn't navigated
-									if (q.length > 0) {
-										addTag(q);
-										setQuery('');
-										setOpen(true);
-									}
-									return;
-								}
-								if (filtered.length > 0 && activeIndex >= 0) {
+								if (filtered.length > 0) {
 									const pick =
 										filtered[Math.min(activeIndex, filtered.length - 1)];
-									if (typeof pick === 'string' && pick.length > 0) {
-										addTag(pick);
+									if (pick) {
+										setSelected([...selected, pick.id]);
 										setQuery('');
+										// Keep open so Enter can add the next member quickly
 										setOpen(true);
 									}
-								} else if (q.length > 0) {
-									addTag(q);
-									setQuery('');
-									setOpen(true);
 								}
 								return;
 							}
@@ -157,21 +138,20 @@ export default function TagsInput({
 							role="listbox"
 						>
 							{filtered.map((opt, idx) => (
-								<li key={opt}>
+								<li key={opt.id}>
 									<button
 										type="button"
 										role="option"
-										aria-selected={usedNav && idx === activeIndex}
-										className={`w-full text-left px-3 py-2 hover:bg-gray-100 ${usedNav && idx === activeIndex ? 'bg-gray-100' : ''}`}
+										aria-selected={idx === activeIndex}
+										className={`w-full text-left px-3 py-2 hover:bg-gray-100 ${idx === activeIndex ? 'bg-gray-100' : ''}`}
 										onMouseEnter={() => setActiveIndex(idx)}
 										onClick={() => {
-											addTag(opt);
+											setSelected([...selected, opt.id]);
 											setQuery('');
-											// Keep open for rapid multi-add
-											setOpen(true);
+											setOpen(false);
 										}}
 									>
-										{opt}
+										{opt.name}
 									</button>
 								</li>
 							))}

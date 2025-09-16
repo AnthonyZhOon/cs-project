@@ -1,6 +1,7 @@
 import {redirect} from 'next/navigation';
 import CreateForm from '@/components/CreateForm';
 import Input from '@/components/inputs/Input';
+import MembersInput from '@/components/inputs/MembersInput';
 import Select from '@/components/inputs/Select';
 import TagsInput from '@/components/inputs/TagsInput';
 import Textarea from '@/components/inputs/Textarea';
@@ -12,9 +13,14 @@ import type {TaskWithAssigneesAndTags} from '@/lib/types';
 interface TaskFormProps {
 	task?: TaskWithAssigneesAndTags;
 	availableTags: string[];
+	members: {id: string; name: string}[];
 }
 
-export default function TaskForm({task, availableTags}: TaskFormProps) {
+export default function TaskForm({
+	task,
+	availableTags,
+	members,
+}: TaskFormProps) {
 	const isEditing = !!task;
 
 	// Format the deadline for datetime-local input
@@ -44,11 +50,13 @@ export default function TaskForm({task, availableTags}: TaskFormProps) {
 					'use server';
 					const deadline = formData.get('deadline') as string;
 					const priority = formData.get('priority') as '' | Priority;
+					const assignees = formData.getAll('assignees') as string[];
 
 					const taskData = {
 						title: formData.get('title') as string,
 						description: formData.get('description') as string,
 						tags: formData.getAll('tags') as string[],
+						...(assignees.length ? {assignees} : {}),
 						...(priority ? {priority} : {}),
 						...(deadline ? {deadline: new Date(deadline)} : {}),
 					};
@@ -75,10 +83,12 @@ export default function TaskForm({task, availableTags}: TaskFormProps) {
 					options={availableTags}
 					defaultValue={task?.tags.map(tag => tag.name) ?? []}
 				/>
-				{/* <Select name="assignee" label="Assign">
-					<option>User 1</option>
-					<option>User 2</option>
-				</Select> */}
+				<MembersInput
+					name="assignees"
+					label="Assignees"
+					options={members}
+					defaultValue={task?.assignees.map(a => a.id) ?? []}
+				/>
 				<Select
 					name="priority"
 					label="Priority"

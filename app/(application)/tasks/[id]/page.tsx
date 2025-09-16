@@ -10,12 +10,18 @@ interface EditTaskPageProps {
 }
 
 export default async function EditTaskPage({params}: EditTaskPageProps) {
-	const [task, availableTags] = await Promise.all([
+	const workspaceId = await getWorkspaceId();
+	const [task, availableTags, ws] = await Promise.all([
 		api.getTaskWithAssigneesAndTags(params.id),
-		api.getTags(await getWorkspaceId()),
+		api.getTags(workspaceId),
+		api.getWorkspaceMembers(workspaceId),
 	]);
 
 	if (!task) redirect('/tasks');
 
-	return <TaskForm task={task} availableTags={availableTags} />;
+	const members =
+		ws?.members.map(m => ({id: m.user.id, name: m.user.name})) ?? [];
+	return (
+		<TaskForm task={task} availableTags={availableTags} members={members} />
+	);
 }

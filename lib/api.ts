@@ -410,8 +410,9 @@ export const createAPI = (prisma: PrismaClient) => {
 									create: {workspaceId, name},
 								})) ?? [],
 						},
-						...(assignees
-							? {assignees: {connect: assignees.map(id => ({id}))}}
+						// When assignees is provided, replace the full set
+						...(assignees !== undefined
+							? {assignees: {set: [], connect: assignees.map(id => ({id}))}}
 							: {}),
 						...(dependencies
 							? {dependencies: {connect: dependencies.map(id => ({id}))}}
