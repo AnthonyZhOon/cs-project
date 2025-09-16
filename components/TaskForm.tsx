@@ -71,7 +71,7 @@ export default function TaskForm({
 								...taskData,
 							}));
 
-					redirect('/tasks');
+					redirect(`/${workspaceId}/tasks`);
 				}}
 			>
 				<Input

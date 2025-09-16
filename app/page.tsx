@@ -3,6 +3,7 @@ import Calendar from '@/components/Calendar';
 import ComponentBox from '@/components/ComponentBox';
 import TaskSummaryChart from '@/components/TaskSummary';
 import UpcomingBox from '@/components/UpcomingBox';
+import {auth0} from '@/lib/auth0';
 import prisma from '@/lib/prisma';
 import {getWorkspaceId} from '@/lib/util';
 
@@ -63,6 +64,9 @@ const exampleTasks = [
 export default async function Blog() {
 	const users = await getUsers();
 	const workspaceId = await getWorkspaceId();
+	const session = await auth0.getSession();
+	// TODO: Handle null session better, should be middleware protected
+	if (session === null) return <div>Not logged in for some reason??</div>;
 	// const feed = getFeed()
 	return (
 		<div className="p-2">
@@ -82,6 +86,7 @@ export default async function Blog() {
 				</Link>
 			</div>
 
+			<h1>{`Hello ${session.user.name}`}</h1>
 			<ol className="list-decimal list-inside font-[family-name:var(--font-geist-sans)]">
 				{users.map(user => (
 					<li key={user.id} className="mb-2">

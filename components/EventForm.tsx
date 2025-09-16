@@ -66,7 +66,7 @@ export default function EventForm({
 								...payload,
 							}));
 
-					redirect('/events');
+					redirect(`/${workspaceId}/events`);
 				}}
 			>
 				<Input

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import api from '@/lib/api';
 import ClientSidebar from './sidebar.client';
 import type {ReactNode} from 'react';
 
@@ -10,6 +11,7 @@ export default async function DashboardLayout({
 	params: Promise<{workspaceId: string}>;
 }) {
 	const {workspaceId} = await params;
+	const a = await api.getWorkspace(workspaceId);
 	return (
 		<div className="min-h-screen flex">
 			{/* Sidebar */}

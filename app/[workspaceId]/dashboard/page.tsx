@@ -1,5 +1,4 @@
 import Calendar from '@/components/Calendar';
-import ComponentBox from '@/components/ComponentBox';
 import TaskSummary from '@/components/TaskSummary';
 import UpcomingBox from '@/components/UpcomingBox';
 
@@ -28,26 +27,14 @@ const exampleEvents = [
 export default function DashboardPage() {
 	return (
 		<div className="grid grid-cols-12 gap-4 p-6">
-			<section className="col-span-12 lg:col-span-5 space-y-4">
+			<section className="col-span-12 lg:col-span-6 space-y-4">
 				<UpcomingBox itemType="Task" items={exampleTasks} />
 				<TaskSummary />
 			</section>
 
-			<section className="col-span-12 lg:col-span-5 space-y-4">
+			<section className="col-span-12 lg:col-span-6 space-y-4">
 				<UpcomingBox itemType="Event" items={exampleEvents} />
-				<Calendar></Calendar>
-			</section>
-
-			<section className="col-span-12 lg:col-span-2 space-y-4">
-				<ComponentBox title="Reminders">
-					<div className="min-h-[520px] leading-6 text-sm text-gray-700 space-y-2">
-						<p>• Submit report by Friday</p>
-						<p>• Group meeting: Thu 3:00 pm</p>
-						<p>• Follow up with Lauren about APIs</p>
-						<p>• Prepare demo data for dashboard</p>
-						<p className="text-gray-400">…more coming soon</p>
-					</div>
-				</ComponentBox>
+				<Calendar />
 			</section>
 		</div>
 	);
