@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-=======
 import {createAPI} from '@/lib/api';
->>>>>>> main
-import type {PrismaClient} from '@/lib/prisma';
 import {Priority} from '@/lib/types';
+import type {PrismaClient} from '@/lib/prisma';
 
 const base = async (prisma: PrismaClient): Promise<void> => {
 	const {id: alice} = await prisma.user.create({
