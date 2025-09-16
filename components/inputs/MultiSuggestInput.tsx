@@ -7,11 +7,7 @@ export type MultiSuggestOption = Readonly<{
 	label: string;
 }>;
 
-export interface MultiSuggestInputProps
-	extends Omit<
-		React.ComponentPropsWithRef<'input'>,
-		'name' | 'defaultValue' | 'placeholder'
-	> {
+export interface MultiSuggestInputProps {
 	name: string;
 	label?: string;
 	placeholder?: string;
