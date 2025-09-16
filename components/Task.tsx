@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import ComponentBox from '@/components/ComponentBox';
-import {InfoRow, TagsRow} from '@/components/InfoRow';
+import {InfoRow, PillRow} from '@/components/InfoRow';
 import {formatInstant} from '@/lib/formatTime';
 import type {Task, TaskWithAssigneesAndTags} from '@/lib/types';
 
@@ -101,20 +101,26 @@ export default function TaskComponent({
 				<div className="p-2 space-y-1">
 					<Status status={task.status} />
 					<Priority priority={task.priority} />
-					<TagsRow
-						tags={task.tags.map(tag => tag.name)}
+					{task.tags.length > 0 && (
+						<PillRow
+							label="Tags"
+							tags={task.tags.map(tag => tag.name)}
+							className="text-gray-600"
+						/>
+					)}
+					<PillRow
+						tags={task.assignees.map(a => a.name)}
+						label="Assignees"
 						className="text-gray-600"
 					/>
-					{/* Footer for assignees and due date */}
-					<div className="flex justify-between items-center text-sm text-gray-600">
-						<span>{task.assignees.map(a => a.name).join(', ')}</span>
-						<span>
-							{task.deadline ? formatInstant(task.deadline) : 'No due date set'}
-						</span>
-					</div>
-					<p className="text-sm text-gray-800 leading-relaxed mb-1">
+					<p className="text-sm text-gray-800 leading-relaxed">
 						{task.description}
 					</p>
+					{task.deadline != null && (
+						<div className="text-xs text-gray-600">
+							{formatInstant(task.deadline)}
+						</div>
+					)}
 				</div>
 			</ComponentBox>
 		</Link>

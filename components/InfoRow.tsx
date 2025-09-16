@@ -1,34 +1,39 @@
-import Tags from '@/components/Tags';
-import type {ReactNode} from 'react';
-
 export const InfoRow = ({
 	label,
 	text,
 	className = '',
 }: {
 	label: string;
-	text: string | ReactNode;
+	text: string;
 	className?: string;
 }) => (
 	<div className="flex justify-between items-center mb-1">
 		<span className="text-sm text-gray-600">{label}</span>
-		{typeof text === 'string' ? (
-			<span className={`text-sm font-medium ${className}`}>{text}</span>
-		) : (
-			<div>{text}</div>
-		)}
+		<span className={`text-sm font-medium ${className}`}>{text}</span>
 	</div>
 );
 
-export const TagsRow = ({
+export const PillRow = ({
 	tags,
-	className = '',
+	label,
 }: {
 	tags: string[];
+	label: string;
 	className?: string;
-}) => {
-	if (tags.length === 0) return null;
-	return <InfoRow label="Tags" text={Tags(tags)} className={className} />;
-};
+}) => (
+	<div className="flex justify-between items-center mb-1">
+		<span className="text-sm text-gray-600">{label}</span>
+		<div>
+			{tags.map((tag, index) => (
+				<span
+					key={index}
+					className="inline-block bg-blue-200 text-blue-800 px-2 py-1 rounded-full text-xs mr-1"
+				>
+					{tag.trim()}
+				</span>
+			))}
+		</div>
+	</div>
+);
 
 export default InfoRow;
