@@ -22,15 +22,7 @@ export default async function EventsPage({
 			attendeeId: attendee,
 		}),
 		api.getTags(workspaceId),
-		(async () => {
-			const ws = await api.getWorkspaceMembers(workspaceId);
-			return (
-				ws?.members.map(m => ({
-					label: m.user.name,
-					value: m.user.id,
-				})) ?? []
-			);
-		})(),
+		api.getWorkspaceMembers(workspaceId),
 	]);
 
 	return (
@@ -55,7 +47,7 @@ export default async function EventsPage({
 						name: 'attendee',
 						label: 'Attendee',
 						value: attendee ?? '',
-						options: attendees,
+						options: attendees.map(({name, id}) => ({label: name, value: id})),
 					},
 				]}
 			/>

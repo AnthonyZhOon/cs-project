@@ -42,7 +42,7 @@ export default function EventForm({
 						? async () => {
 								'use server';
 								await api.deleteEvent(event.id);
-								redirect('/events');
+								redirect(`/${workspaceId}/events`);
 							}
 						: undefined
 				}

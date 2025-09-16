@@ -1,7 +1,7 @@
 'use client';
-import Link from 'next/link';
 import {useState} from 'react';
 import Input from '@/components/inputs/Input';
+import {createWorkspaceAction} from './actions';
 
 export default function CreateWorkspacePage() {
 	const [members, setMembers] = useState([{email: '', role: 'Member'}]);
@@ -25,7 +25,7 @@ export default function CreateWorkspacePage() {
 			<h2 className="text-xl font-bold mb-2">Welcome !</h2>
 			<h3 className="text-lg mb-6">Create your workspace</h3>
 
-			<form className="space-y-4">
+			<form action={createWorkspaceAction} className="space-y-4">
 				{/* Workspace name */}
 				<Input
 					label="Workspace name"
@@ -66,12 +66,12 @@ export default function CreateWorkspacePage() {
 					</button>
 				</div>
 
-				<Link
-					href="/"
+				<button
+					type="submit"
 					className="block w-full bg-black text-white py-2 rounded mt-4 text-center"
 				>
 					Create
-				</Link>
+				</button>
 			</form>
 		</>
 	);

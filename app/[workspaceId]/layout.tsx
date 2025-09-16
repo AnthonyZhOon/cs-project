@@ -30,6 +30,12 @@ export default async function DashboardLayout({
 
 					<div className="flex items-center gap-3">
 						<Link
+							href="/auth/workspaces"
+							className="px-3 py-2 rounded-lg border hover:bg-gray-50 text-sm text-gray-700"
+						>
+							View workspaces
+						</Link>
+						<Link
 							href="/messages"
 							aria-label="Messages"
 							className="p-2 rounded-lg border hover:bg-gray-50"
