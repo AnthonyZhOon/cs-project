@@ -3,14 +3,14 @@
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 
-const items = [
-	{href: '/dashboard', label: 'Dashboard'},
-	{href: '/tasks', label: 'Tasks'},
-	{href: '/events', label: 'Events'},
-];
-
-export default function ClientSidebar() {
+export default function ClientSidebar({workspaceId}: {workspaceId: string}) {
 	const pathname = usePathname();
+
+	const items = [
+		{href: `/${workspaceId}/dashboard`, label: 'Dashboard'},
+		{href: `/${workspaceId}/tasks`, label: 'Tasks'},
+		{href: `/${workspaceId}/events`, label: 'Events'},
+	];
 
 	return (
 		<nav className="px-2 space-y-1">

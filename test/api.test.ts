@@ -23,11 +23,13 @@ const {id: workspaceId} = await prisma.workspace.findFirstOrThrow({
 describe('Tasks', () => {
 	describe('getTasks', () => {
 		test('should return only user’s tasks', async () => {
-			expect(await api.getTasks(alice)).toMatchObject([
+			expect(
+				await api.getTasks({workspaceId, assigneeId: alice}),
+			).toMatchObject([
 				{
 					deadline: new Date('2025-08-24'),
 					description: null,
-					priority: null,
+					priority: 'HIGH',
 					status: 'TODO',
 					title: 'Alice Task 1',
 					visibility: 'MEMBER',
@@ -35,7 +37,7 @@ describe('Tasks', () => {
 				{
 					deadline: new Date('2025-08-31'),
 					description: null,
-					priority: null,
+					priority: 'MEDIUM',
 					status: 'TODO',
 					title: 'Alice Task 2',
 					visibility: 'MEMBER',
