@@ -5,7 +5,10 @@ export default function Input({
 	return (
 		<label>
 			{label}
-			<select className="w-full border p-2 rounded" {...props}>
+			<select
+				className="w-full border px-2 py-1.5 rounded text-sm leading-tight"
+				{...props}
+			>
 				{props.children}
 			</select>
 		</label>

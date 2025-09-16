@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import Calendar from '@/components/Calendar';
 import ComponentBox from '@/components/ComponentBox';
-import Task, {exampleTask} from '@/components/Task';
 import TaskSummaryChart from '@/components/TaskSummary';
 import UpcomingBox from '@/components/UpcomingBox';
 import {auth0} from '@/lib/auth0';
 import prisma from '@/lib/prisma';
+import {getWorkspaceId} from '@/lib/util';
+
 // const getFeed = () => {
 // 	const feed = [
 // 		{
@@ -62,13 +63,14 @@ const exampleTasks = [
 
 export default async function Blog() {
 	const users = await getUsers();
-
+	const workspaceId = await getWorkspaceId();
 	const session = await auth0.getSession();
 	// TODO: Handle null session better, should be middleware protected
 	if (session === null) return <div>Not logged in for some reason??</div>;
 	// const feed = getFeed()
 	return (
 		<div className="p-2">
+			<Link href={`/${workspaceId}/dashboard`}>TestWorkspace</Link>
 			<div className="mb-4">
 				<Link
 					href="/tasks/new"
@@ -120,8 +122,6 @@ export default async function Blog() {
 					markedDates={[new Date('2025-08-20')]}
 				></Calendar>
 			</div>
-
-			<Task task={exampleTask} className="mt-4" />
 		</div>
 	);
 }

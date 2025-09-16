@@ -1,4 +1,5 @@
 import {createAPI} from '@/lib/api';
+import {Priority} from '@/lib/types';
 import type {PrismaClient} from '@/lib/prisma';
 
 const base = async (prisma: PrismaClient): Promise<void> => {
@@ -46,6 +47,7 @@ const base = async (prisma: PrismaClient): Promise<void> => {
 			title: 'Alice Task 1',
 			deadline: new Date('2025-08-24'),
 			tags: tags('tag1', 'tag2'),
+			priority: Priority.HIGH,
 			assignees: {connect: {id: alice}},
 		},
 	});
@@ -55,6 +57,7 @@ const base = async (prisma: PrismaClient): Promise<void> => {
 			title: 'Alice Task 2',
 			deadline: new Date('2025-08-31'),
 			tags: tags('tag2', 'tag3'),
+			priority: Priority.MEDIUM,
 			assignees: {connect: {id: alice}},
 		},
 	});
@@ -72,6 +75,42 @@ const base = async (prisma: PrismaClient): Promise<void> => {
 			title: 'Bob Task 2',
 			deadline: new Date(2025, 8, 2),
 			assignees: {connect: {id: bob}},
+		},
+	});
+
+	await prisma.event.create({
+		data: {
+			workspaceId,
+			title: 'Weekly Sync',
+			description: 'General club updates and planning',
+			start: new Date('2025-09-16T10:00:00.000Z'),
+			end: new Date('2025-09-16T11:00:00.000Z'),
+			tags: tags('tag1', 'meeting'),
+			attendees: {connect: [{id: alice}, {id: bob}]},
+		},
+	});
+
+	await prisma.event.create({
+		data: {
+			workspaceId,
+			title: 'Sprint Review',
+			description: 'Demo recent progress and gather feedback',
+			start: new Date('2025-09-18T07:00:00.000Z'),
+			end: new Date('2025-09-18T08:00:00.000Z'),
+			tags: tags('tag2', 'review'),
+			attendees: {connect: [{id: alice}]},
+		},
+	});
+
+	await prisma.event.create({
+		data: {
+			workspaceId,
+			title: 'Hack Night',
+			description: 'Casual coding session and pizza',
+			start: new Date('2025-09-20T09:30:00.000Z'),
+			end: new Date('2025-09-20T12:00:00.000Z'),
+			tags: tags('tag3', 'social'),
+			attendees: {connect: [{id: bob}]},
 		},
 	});
 };
@@ -153,16 +192,7 @@ const populateUniversityDramaClub = async (
 	// Create Workspace
 	console.log('Creating workspace...');
 
-	const dramaClubId = await api.createWorkspace({
-		name: 'University Drama Club',
-		owner: theseusId,
-	});
-
-	// Add all users to the workspace
-	console.log('Adding members to workspace...');
-
 	const allUserIds = [
-		theseusId,
 		hippolytaId,
 		egeusId,
 		lysanderId,
@@ -171,18 +201,25 @@ const populateUniversityDramaClub = async (
 		helenaId,
 		quinceId,
 		bottomId,
+		theseusId,
 	];
 
-	// TODO: Change to workspaceAddMembers when implemented
-	await prisma.workspaceMember.createMany({
-		data: allUserIds.map(userId => ({
-			userId,
-			workspaceId: dramaClubId,
-			role: [theseusId, hippolytaId, egeusId].includes(userId)
-				? 'MANAGER'
-				: 'MEMBER',
-		})),
+	const dramaClubId = await api.createWorkspace({
+		name: 'University Drama Club',
+		owner: theseusId,
+		members: allUserIds
+			.filter(id => id !== theseusId)
+			.map(userId => ({
+				userId,
+				role: [theseusId, hippolytaId, egeusId].includes(userId)
+					? 'MANAGER'
+					: 'MEMBER',
+			})),
 	});
+
+	// Add all users to the workspace
+	console.log('Adding members to workspace...');
+
 	// Create Tasks for Act 1
 	console.log('Creating Act 1 tasks...');
 
