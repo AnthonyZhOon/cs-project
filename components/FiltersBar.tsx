@@ -3,11 +3,17 @@
 import {useRouter, useSearchParams} from 'next/navigation';
 import Select from '@/components/inputs/Select';
 
+export type FilterOption = string | {label: string; value: string};
+
 export interface FilterSpec {
 	name: string;
 	label: string;
 	value?: string;
-	options: string[];
+	/**
+	 * Options can be either simple strings (label === value)
+	 * or explicit pairs {label, value} to decouple display and URL param.
+	 */
+	options: FilterOption[];
 }
 
 // TODO: Fix this garbage
@@ -50,11 +56,14 @@ export default function FiltersBar({
 						onChange={e => updateParam(f.name, e.currentTarget.value)}
 					>
 						<option value="">All</option>
-						{f.options.map(o => (
-							<option key={o} value={o}>
-								{o}
-							</option>
-						))}
+						{f.options.map(o => {
+							const opt = typeof o === 'string' ? {label: o, value: o} : o;
+							return (
+								<option key={opt.value} value={opt.value}>
+									{opt.label}
+								</option>
+							);
+						})}
 					</Select>
 				</div>
 			))}

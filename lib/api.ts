@@ -274,12 +274,12 @@ export const createAPI = (prisma: PrismaClient) => {
 			workspaceId,
 			priority,
 			tag,
-			assigneeName,
+			assigneeId,
 		}: {
 			workspaceId: Id;
 			priority?: Priority | undefined;
 			tag?: string | undefined;
-			assigneeName?: string | undefined;
+			assigneeId?: string | undefined;
 		}) =>
 			prisma.task.findMany({
 				where: {
@@ -288,8 +288,8 @@ export const createAPI = (prisma: PrismaClient) => {
 					...(tag !== undefined && tag !== ''
 						? {tags: {some: {name: tag}}}
 						: {}),
-					...(assigneeName !== undefined && assigneeName !== ''
-						? {assignees: {some: {name: assigneeName}}}
+					...(assigneeId !== undefined && assigneeId !== ''
+						? {assignees: {some: {id: assigneeId}}}
 						: {}),
 				},
 				include: {assignees: true, tags: true},
@@ -300,18 +300,20 @@ export const createAPI = (prisma: PrismaClient) => {
 		getEvents: async ({
 			workspaceId,
 			tag,
-			attendeeName,
+			attendeeId,
 		}: {
 			workspaceId: Id;
 			tag?: string | undefined;
-			attendeeName?: string | undefined;
+			attendeeId?: string | undefined;
 		}) =>
 			prisma.event.findMany({
 				where: {
 					workspaceId,
-					...(tag !== undefined ? {tags: {some: {name: tag}}} : {}),
-					...(attendeeName !== undefined
-						? {attendees: {some: {name: attendeeName}}}
+					...(tag !== undefined && tag !== ''
+						? {tags: {some: {name: tag}}}
+						: {}),
+					...(attendeeId !== undefined && attendeeId !== ''
+						? {attendees: {some: {id: attendeeId}}}
 						: {}),
 				},
 				include: {attendees: true, tags: true},

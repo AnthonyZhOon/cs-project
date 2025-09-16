@@ -19,12 +19,17 @@ export default async function EventsPage({
 		api.getEvents({
 			workspaceId,
 			tag,
-			attendeeName: attendee,
+			attendeeId: attendee,
 		}),
 		api.getTags(workspaceId),
 		(async () => {
 			const ws = await api.getWorkspaceMembers(workspaceId);
-			return ws?.members.map(m => m.user.name) ?? [];
+			return (
+				ws?.members.map(m => ({
+					label: m.user.name,
+					value: m.user.id,
+				})) ?? []
+			);
 		})(),
 	]);
 
