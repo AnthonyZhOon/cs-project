@@ -35,12 +35,9 @@ export default function CreateWorkspacePage() {
 				/>
 
 				<div className="space-y-3">
-					{/* <label className="block font-medium text-sm">
+					<div className="block font-medium text-sm">
 						Invite others (optional)
-					</label> 
-					
-					Was causing error. Came from merge so i'll just leave here for now :D
-					*/}
+					</div>
 					{members.map((member, idx) => (
 						<div key={idx} className="flex gap-2">
 							<input

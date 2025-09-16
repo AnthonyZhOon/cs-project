@@ -170,11 +170,11 @@ export const MultiSuggestInput = (props: MultiSuggestInputProps) => {
 				<div className="flex flex-wrap gap-2">
 					{selected.map(v => (
 						<span
-							key={String(v)}
+							key={v}
 							className="mt-1 mb-1 flex items-center gap-2 rounded bg-gray-200 text-gray-700 text-sm font-semibold px-3 py-1"
 						>
-							<input type="hidden" name={name} value={String(v)} />
-							{labelByValue.get(String(v)) ?? String(v)}
+							<input type="hidden" name={name} value={v} />
+							{labelByValue.get(v) ?? v}
 
 							<button
 								type="button"
