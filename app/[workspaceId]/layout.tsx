@@ -11,7 +11,7 @@ export default async function DashboardLayout({
 	params: Promise<{workspaceId: string}>;
 }) {
 	const {workspaceId} = await params;
-	const a = await api.getWorkspace(workspaceId);
+	const {name} = (await api.getWorkspace(workspaceId)) ?? {name: 'ERROR'};
 	return (
 		<div className="min-h-screen flex">
 			{/* Sidebar */}
@@ -25,7 +25,7 @@ export default async function DashboardLayout({
 				{/* Topbar */}
 				<header className="border-b px-6 py-3 flex items-center justify-between">
 					<div className="text-sm text-gray-600">
-						Workspace: <strong>Default</strong>
+						Workspace: <strong>{name}</strong>
 					</div>
 
 					<div className="flex items-center gap-3">
