@@ -1,8 +1,11 @@
+'use client';
+import {useUser} from '@auth0/nextjs-auth0';
 import Link from 'next/link';
 import ClientSidebar from './sidebar.client';
 import type {ReactNode} from 'react';
 
 export default function DashboardLayout({children}: {children: ReactNode}) {
+	const {user, isLoading} = useUser();
 	return (
 		<div className="min-h-screen flex">
 			{/* Sidebar */}
@@ -16,10 +19,18 @@ export default function DashboardLayout({children}: {children: ReactNode}) {
 				{/* Topbar */}
 				<header className="border-b px-6 py-3 flex items-center justify-between">
 					<div className="text-sm text-gray-600">
+						{/* TODO: Switch between workspaces? */}
 						Workspace: <strong>Default</strong>
 					</div>
 
 					<div className="flex items-center gap-3">
+						<p className="text-sm text-gray-600">
+							{user && !isLoading ? (
+								<strong>{user.name}</strong>
+							) : (
+								'Loading user...'
+							)}
+						</p>
 						<Link
 							href="/profile"
 							aria-label="Profile"
@@ -48,6 +59,27 @@ export default function DashboardLayout({children}: {children: ReactNode}) {
 								/>
 							</svg>
 						</Link>
+						{/*Logout button*/}
+						{user && !isLoading ? (
+							<Link
+								href="/auth/logout"
+								aria-label="Logout"
+								className="p-2 rounded-lg border hover:bg-gray-50"
+							>
+								<svg
+									width="20"
+									height="20"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+								>
+									<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+									<polyline points="16,17 21,12 16,7" />
+									<line x1="21" y1="12" x2="9" y2="12" />
+								</svg>
+							</Link>
+						) : null}
 					</div>
 				</header>
 
