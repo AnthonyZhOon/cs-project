@@ -1,4 +1,5 @@
 'use client';
+import {formatInstant} from '@/lib/formatTime';
 import ComponentBox from './ComponentBox';
 import type {Task} from '@/lib/types';
 
@@ -16,7 +17,7 @@ export default function UpcomingTaskBox({tasks}: {tasks: Task[]}) {
 						</div>
 					)}
 					<div className="grow">{task.title}</div>
-					<div>{task.deadline?.toLocaleDateString()}</div>
+					<div>{task.deadline && formatInstant(task.deadline)}</div>
 				</div>
 			))}
 		</ComponentBox>

@@ -1,4 +1,5 @@
 'use client';
+import {formatInstant} from '@/lib/formatTime';
 import ComponentBox from './ComponentBox';
 import type {Event} from '@/lib/types';
 
@@ -15,7 +16,7 @@ export default function UpcomingEventBox({events}: {events: Event[]}) {
 						</div>
 					)}
 					<div className="grow">{event.title}</div>
-					<div>{event.end.toLocaleDateString()}</div>
+					<div>{formatInstant(event.end)}</div>
 				</div>
 			))}
 		</ComponentBox>

@@ -1,13 +1,18 @@
 import Form from 'next/form';
+import Link from 'next/link';
 
 export default function CreateForm({
 	formTitle,
 	submitText = 'Create',
 	children,
+	deleteAction,
+	cancelHref,
 	...props
 }: React.ComponentPropsWithRef<typeof Form> & {
 	formTitle: string;
 	submitText?: string;
+	deleteAction?: (() => Promise<void>) | undefined;
+	cancelHref: string;
 }) {
 	return (
 		<div className="border border-black rounded-md p-4 space-y-4">
@@ -16,12 +21,27 @@ export default function CreateForm({
 			<Form className="flex flex-col gap-2" {...props}>
 				{children}
 
-				{/* button */}
-				<div className="flex justify-end gap-2 mt-4">
-					<button className="border px-4 py-2 rounded">Cancel</button>
-					<button className="bg-black text-white px-4 py-2 rounded">
-						{submitText}
-					</button>
+				{/* This delete button is a little stupid but. */}
+				<div className="flex justify-between items-center mt-4">
+					{deleteAction && (
+						<button
+							type="submit"
+							formAction={deleteAction}
+							className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors"
+						>
+							Delete
+						</button>
+					)}
+					<div className="flex gap-2">
+						<Link href={cancelHref}>
+							<button type="button" className="border px-4 py-2 rounded">
+								Cancel
+							</button>
+						</Link>
+						<button className="bg-black text-white px-4 py-2 rounded">
+							{submitText}
+						</button>
+					</div>
 				</div>
 			</Form>
 		</div>

@@ -1,47 +1,7 @@
 import ComponentBox from '@/components/ComponentBox';
-import Tags from '@/components/Tags';
+import {InfoRow, PillRow} from '@/components/InfoRow';
+import {formatInstant} from '@/lib/formatTime';
 import type {Task, TaskWithAssigneesAndTags} from '@/lib/types';
-
-export const exampleTask: NonNullable<TaskWithAssigneesAndTags> = {
-	id: '1',
-	title: 'Complete the project report',
-	description:
-		'Finalize the project report and submit it by the end of the week.',
-	status: 'IN_PROGRESS',
-	priority: 'HIGH',
-	deadline: new Date('2023-10-31T23:59:59'),
-	visibility: 'MEMBER',
-	workspaceId: 'workspace-123',
-	assignees: [
-		{name: 'John Doe', id: '0', email: 'jdoe@mail.com'},
-		{name: 'Jane Smith', id: '1', email: 'jsmith@mail.com'},
-	],
-	tags: [
-		{name: 'report', id: '1', workspaceId: 'workspace-123'},
-		{name: 'project', id: '2', workspaceId: 'workspace-123'},
-		{name: 'deadline', id: '3', workspaceId: 'workspace-123'},
-	],
-};
-
-const LeftRightLabelContents = ({
-	label,
-	text,
-	className = '',
-}: {
-	label: string;
-	text: string | React.ReactNode;
-	className?: string;
-}) => (
-	<div className="flex justify-between items-center mb-1">
-		<span className="text-sm text-gray-600">{label}</span>
-
-		{typeof text === 'string' ? (
-			<span className={`text-sm font-medium ${className}`}>{text}</span>
-		) : (
-			<div>{text}</div>
-		)}
-	</div>
-);
 
 const Status = ({
 	status,
@@ -71,7 +31,7 @@ const Status = ({
 		}
 	};
 	return (
-		<LeftRightLabelContents
+		<InfoRow
 			label="Status"
 			text={statusText(status)}
 			className={`${getStatusColor(status)} ${className}`}
@@ -112,21 +72,13 @@ const Priority = ({
 		}
 	};
 	return (
-		<LeftRightLabelContents
+		<InfoRow
 			label="Priority"
 			text={priorityText(priority)}
 			className={`${getPriorityColor(priority)} ${className}`}
 		/>
 	);
 };
-
-const TagsBox = ({tags}: {tags: string[]}) => (
-	<LeftRightLabelContents
-		label="Tags"
-		text={Tags(tags)}
-		className="text-gray-600"
-	/>
-);
 
 export default function TaskComponent({
 	task,
@@ -139,20 +91,30 @@ export default function TaskComponent({
 	const taskTitle = `${taskIcon} ${task.title}`;
 
 	return (
-		// Add an outline to the task component
 		<ComponentBox title={taskTitle} className={`max-w-sm ${className}`}>
-			<div className="task-details p-2 mb-2 space-y-0.5 border-gray-300 rounded-lg">
+			<div className="p-2 space-y-1">
 				<Status status={task.status} />
 				<Priority priority={task.priority} />
-				<TagsBox tags={task.tags.map(tag => tag.name)} />
-				<p className="text-sm text-gray-800 leading-relaxed mb-1">
+				{task.tags.length > 0 && (
+					<PillRow
+						label="Tags"
+						tags={task.tags.map(tag => tag.name)}
+						className="text-gray-600"
+					/>
+				)}
+				<PillRow
+					tags={task.assignees.map(a => a.name)}
+					label="Assignees"
+					className="text-gray-600"
+				/>
+				<p className="text-sm text-gray-800 leading-relaxed">
 					{task.description}
 				</p>
-				{/* Footer for assignees and due date */}
-				<div className="flex justify-between items-center text-sm text-gray-600">
-					<span>{task.assignees.map(a => a.name).join(', ')}</span>
-					<span>{task.deadline?.toLocaleString() ?? 'No due date set'}</span>
-				</div>
+				{task.deadline != null && (
+					<div className="text-xs text-gray-600">
+						{formatInstant(task.deadline)}
+					</div>
+				)}
 			</div>
 		</ComponentBox>
 	);
