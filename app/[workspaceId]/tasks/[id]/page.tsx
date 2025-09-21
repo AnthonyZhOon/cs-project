@@ -16,8 +16,7 @@ export default async function EditTaskPage({
 
 	if (!task) redirect('/tasks');
 
-	const members =
-		ws?.members.map(m => ({id: m.user.id, name: m.user.name})) ?? [];
+	const members = ws.members.map(m => ({id: m.user.id, name: m.user.name}));
 	return (
 		<TaskForm
 			task={task}

@@ -217,7 +217,7 @@ export const createAPI = (prisma: PrismaClient) => {
 			prisma.workspace.findUnique({where: {id}}),
 		getWorkspaceMembers: async (id: Id) =>
 			// Include member.user so callers can access user names without extra queries
-			prisma.workspace.findUnique({
+			prisma.workspace.findUniqueOrThrow({
 				where: {id},
 				include: {members: {include: {user: {select: {id: true, name: true}}}}},
 			}),

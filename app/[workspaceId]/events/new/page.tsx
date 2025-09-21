@@ -12,8 +12,7 @@ export default async function NewEventPage({
 		api.getTags(workspaceId),
 		api.getWorkspaceMembers(workspaceId),
 	]);
-	const members =
-		ws?.members.map(m => ({id: m.user.id, name: m.user.name})) ?? [];
+	const members = ws.members.map(m => ({id: m.user.id, name: m.user.name}));
 
 	return (
 		<EventForm

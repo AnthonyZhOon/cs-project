@@ -25,15 +25,12 @@ export default async function TasksPage({
 			assigneeId: assignee,
 		}),
 		api.getTags(workspaceId),
-		(async () => {
-			const ws = await api.getWorkspaceMembers(workspaceId);
-			return (
-				ws?.members.map(m => ({
-					label: m.user.name,
-					value: m.user.id,
-				})) ?? []
-			);
-		})(),
+		api.getWorkspaceMembers(workspaceId).then(ws =>
+			ws.members.map(m => ({
+				label: m.user.name,
+				value: m.user.id,
+			})),
+		),
 	]);
 	const priorityOptions = [
 		{label: 'High', value: 'HIGH'},
