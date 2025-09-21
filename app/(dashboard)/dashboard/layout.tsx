@@ -1,29 +1,30 @@
 import Link from 'next/link';
-import {ReactNode} from 'react';
+import { ReactNode } from 'react';
 import ClientSidebar from './sidebar.client';
 
-export default function DashboardLayout({children}: {children: ReactNode}) {
+export default function DashboardLayout({ children }: { children: ReactNode }) {
 	return (
-		<div className="min-h-screen flex">
+		<div className="min-h-screen flex bg-pink-50">
 			{/* Sidebar */}
-			<aside className="w-56 shrink-0 border-r bg-white">
-				<div className="p-4 font-semibold">LOGO</div>
+			<aside className="w-56 shrink-0 border-r border-pink-100 bg-white/70 backdrop-blur-sm">
+				<div className="p-4 font-semibold text-pink-600">LOGO</div>
 				<ClientSidebar />
 			</aside>
 
 			{/* Main */}
 			<div className="flex-1 flex flex-col">
 				{/* Topbar */}
-				<header className="border-b px-6 py-3 flex items-center justify-between">
+				<header className="border-b border-pink-100 bg-white/70 backdrop-blur-sm px-6 py-3 flex items-center justify-between">
 					<div className="text-sm text-gray-600">
-						Workspace: <strong>Default</strong>
+						Workspace:{' '}
+						<strong className="text-teal-600">Default</strong>
 					</div>
 
 					<div className="flex items-center gap-3">
 						<Link
 							href="/messages"
 							aria-label="Messages"
-							className="p-2 rounded-lg border hover:bg-gray-50"
+							className="p-2 rounded-lg border border-teal-100 text-teal-600 hover:bg-teal-50 transition-colors"
 						>
 							{/* envelope icon */}
 							<svg
@@ -49,7 +50,7 @@ export default function DashboardLayout({children}: {children: ReactNode}) {
 						<Link
 							href="/profile"
 							aria-label="Profile"
-							className="p-2 rounded-lg border hover:bg-gray-50"
+							className="p-2 rounded-lg border border-pink-100 text-pink-600 hover:bg-pink-50 transition-colors"
 						>
 							{/* user icon */}
 							<svg
@@ -78,7 +79,7 @@ export default function DashboardLayout({children}: {children: ReactNode}) {
 				</header>
 
 				{/* Content */}
-				<main className="min-h-0">{children}</main>
+				<main className="min-h-0 p-6">{children}</main>
 			</div>
 		</div>
 	);
