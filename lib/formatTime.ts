@@ -1,17 +1,22 @@
+const LOCALE = 'en-AU';
+
 const sameDay = (a: Date, b: Date): boolean =>
 	a.getFullYear() === b.getFullYear() &&
 	a.getMonth() === b.getMonth() &&
 	a.getDate() === b.getDate();
+
 const y = (d: Date): number => d.getFullYear();
+
 const fmt = (d: Date, withYear: boolean): string =>
-	new Intl.DateTimeFormat(undefined, {
+	new Intl.DateTimeFormat(LOCALE, {
 		weekday: 'short',
 		month: 'short',
 		day: 'numeric',
 		...(withYear ? {year: 'numeric' as const} : {}),
 	}).format(d);
+
 const fmtTime = (d: Date): string =>
-	new Intl.DateTimeFormat(undefined, {
+	new Intl.DateTimeFormat(LOCALE, {
 		hour: 'numeric',
 		minute: '2-digit',
 	}).format(d);

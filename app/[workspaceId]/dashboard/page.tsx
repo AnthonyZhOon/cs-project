@@ -1,39 +1,32 @@
 import Calendar from '@/components/Calendar';
+import MissingAuthError from '@/components/MissingAuthError';
 import TaskSummary from '@/components/TaskSummary';
-import UpcomingBox from '@/components/UpcomingBox';
+import UpcomingEventBox from '@/components/UpcomingEventBox';
+import UpcomingTaskBox from '@/components/UpcomingTaskBox';
+import api from '@/lib/api';
+import {auth0} from '@/lib/auth0';
 
-const exampleTasks = [
-	{name: 'Task 1', date: new Date(), url: '#', complete: true},
-	{
-		name: 'Task 2',
-		date: new Date(Date.now() + 86400000),
-		url: '#',
-		complete: false,
-	},
-	{
-		name: 'Task 3',
-		date: new Date(Date.now() + 2 * 86400000),
-		url: '#',
-		complete: false,
-	},
-];
+export default async function DashboardPage({
+	params,
+}: {
+	params: Promise<{workspaceId: string}>;
+}) {
+	const {workspaceId} = await params;
+	const session = await auth0.getSession();
+	if (session === null) return <MissingAuthError />;
 
-const exampleEvents = [
-	{name: 'Event A', date: new Date(), url: '#'},
-	{name: 'Event B', date: new Date(Date.now() + 3 * 86400000), url: '#'},
-	{name: 'Event C', date: new Date(Date.now() + 5 * 86400000), url: '#'},
-];
-
-export default function DashboardPage() {
+	const userId = session.user.sub;
+	const tasks = await api.getTasks({workspaceId, assigneeId: userId});
+	const events = await api.getEvents({workspaceId, attendeeId: userId});
 	return (
 		<div className="grid grid-cols-12 gap-4 p-6">
 			<section className="col-span-12 lg:col-span-6 space-y-4">
-				<UpcomingBox itemType="Task" items={exampleTasks} />
-				<TaskSummary />
+				<UpcomingTaskBox tasks={tasks} />
+				<TaskSummary tasks={tasks} />
 			</section>
 
 			<section className="col-span-12 lg:col-span-6 space-y-4">
-				<UpcomingBox itemType="Event" items={exampleEvents} />
+				<UpcomingEventBox events={events} />
 				<Calendar />
 			</section>
 		</div>

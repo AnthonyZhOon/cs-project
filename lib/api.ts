@@ -216,17 +216,16 @@ export const createAPI = (prisma: PrismaClient) => {
 		getWorkspace: async (id: Id) =>
 			// TODO: only select properties that are needed
 			prisma.workspace.findUnique({where: {id}}),
-		getWorkspaceMembers: async (id: Id) => {
-			const ws = await prisma.workspace.findUnique({
-				where: {id},
-				include: {
-					members: {include: {user: {select: {id: true, name: true}}}},
-				},
-			});
-
-			return ws ? ws.members.map(({user}) => user) : [];
-		},
-		// Include member.user so callers can access user names without extra queries
+		getWorkspaceMembers: async (id: Id) =>
+			// Include member.user so callers can access user names without extra queries
+			(
+				await prisma.workspace.findUniqueOrThrow({
+					where: {id},
+					include: {
+						members: {include: {user: {select: {id: true, name: true}}}},
+					},
+				})
+			).members.map(({user}) => user),
 		getWorkspaces: async (user: Id) =>
 			// TODO: only select properties that are needed
 			prisma.workspace.findMany({

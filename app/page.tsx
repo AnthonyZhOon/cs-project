@@ -2,68 +2,28 @@ import Link from 'next/link';
 import Calendar from '@/components/Calendar';
 import ComponentBox from '@/components/ComponentBox';
 import TaskSummaryChart from '@/components/TaskSummary';
-import UpcomingBox from '@/components/UpcomingBox';
+import UpcomingTaskBox from '@/components/UpcomingTaskBox';
 import {auth0} from '@/lib/auth0';
 import prisma from '@/lib/prisma';
 import {getWorkspaceId} from '@/lib/util';
 
-// const getFeed = () => {
-// 	const feed = [
-// 		{
-// 			id: '1',
-// 			title: 'Prisma is the perfect ORM for Next.js',
-// 			content:
-// 				'[Prisma](https://github.com/prisma/prisma) and Next.js go _great_ together!',
-// 			published: false,
-// 			author: {
-// 				name: 'Nikolas Burk',
-// 				email: 'burk@prisma.io',
-// 			},
-// 		},
-// 		{
-// 			id: '2',
-// 			title: 'Prisma is the perfect ORM for Next.js',
-// 			content:
-// 				'[Prisma](https://github.com/prisma/prisma) and Next.js go _great_ together!',
-// 			published: false,
-// 			author: {
-// 				name: 'Nikolas Burk',
-// 				email: 'burk@prisma.io',
-// 			},
-// 		},
-// 	]
-// 	return feed
-// }
-
-const getUsers = async () => {
+const allUsers = async () => {
 	const users = await prisma.user.findMany();
 	return users;
 };
 
-const exampleTasks = [
-	{
-		name: 'Task 1',
-		date: new Date('01-01-01'),
-		url: '',
-		complete: true,
-	},
-	{
-		name: 'Task 2',
-		date: new Date('02-02-02'),
-		url: '',
-		complete: false,
-	},
-	{
-		name: 'Task 3',
-		date: new Date('03-03-03'),
-		url: '',
-		complete: false,
-	},
-];
+const allTasks = async () => {
+	const tasks = await prisma.task.findMany({
+		include: {assignees: true, tags: true},
+	});
+	return tasks;
+};
 
 export default async function Blog() {
-	const users = await getUsers();
 	const workspaceId = await getWorkspaceId();
+	const users = await allUsers();
+	const tasks = await allTasks();
+
 	const session = await auth0.getSession();
 	// TODO: Handle null session better, should be middleware protected
 	if (session === null) return <div>Not logged in for some reason??</div>;
@@ -96,7 +56,7 @@ export default async function Blog() {
 			</ol>
 			{/* Example Chart */}
 			<div className="max-w-sm mt-6">
-				<TaskSummaryChart todo={30} inProgress={40} done={30} />
+				<TaskSummaryChart tasks={tasks} />
 			</div>
 			{/* Example Component Box */}
 			<div className="w-sm">
@@ -113,7 +73,7 @@ export default async function Blog() {
 
 			{/* Example Upcoming Box */}
 			<div className="w-sm mt-2">
-				<UpcomingBox itemType="Task" items={exampleTasks} />
+				<UpcomingTaskBox tasks={tasks} />
 			</div>
 
 			<div>
