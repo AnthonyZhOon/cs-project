@@ -13,7 +13,7 @@ export const GET = async (req: NextRequest): Promise<NextResponse> => {
 
 	return NextResponse.redirect(
 		new URL(
-			req.nextUrl.searchParams.get('returnTo') ?? '/dashboard',
+			req.nextUrl.searchParams.get('returnTo') ?? '/workspaces',
 			req.nextUrl.origin,
 		),
 	);
