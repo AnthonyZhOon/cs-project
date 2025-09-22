@@ -12,7 +12,7 @@ export default function ClientToolbar() {
 				{user && !isLoading ? <strong>{user.name}</strong> : 'Loading user...'}
 			</p>
 			<Link
-				href="/auth/workspaces"
+				href="/workspaces"
 				className="px-3 py-2 rounded-lg border hover:bg-gray-50 text-sm text-gray-700"
 			>
 				View workspaces

@@ -5,6 +5,7 @@ import type {PrismaClient} from '@/lib/prisma';
 const base = async (prisma: PrismaClient): Promise<void> => {
 	const {id: alice} = await prisma.user.create({
 		data: {
+			id: 'alice',
 			name: 'Alice',
 			email: 'axxx0000@student.monash.edu',
 		},
@@ -12,6 +13,7 @@ const base = async (prisma: PrismaClient): Promise<void> => {
 	});
 	const {id: bob} = await prisma.user.create({
 		data: {
+			id: 'bob',
 			name: 'Bob',
 			email: 'bxxx0000@student.monash.edu',
 		},
@@ -142,49 +144,58 @@ const populateUniversityDramaClub = async (
 	console.log('Creating club members...');
 
 	// Club Executives
-	const theseusId = await api.createUser({
+	const theseusId = await api.login({
+		id: 'pres',
 		email: 'theseus@university.edu',
 		name: 'Theseus Chen (Club President)',
 	});
 
-	const hippolytaId = await api.createUser({
+	const hippolytaId = await api.login({
+		id: 'vp',
 		email: 'hippolyta@university.edu',
 		name: 'Hippolyta Rodriguez (Vice President)',
 	});
 
-	const egeusId = await api.createUser({
+	const egeusId = await api.login({
+		id: 'prof',
 		email: 'egeus@university.edu',
 		name: 'Professor Egeus (Faculty Advisor)',
 	});
 
 	// Club Members
-	const lysanderId = await api.createUser({
+	const lysanderId = await api.login({
+		id: 'member1',
 		email: 'lysander@university.edu',
 		name: 'Lysander Kim',
 	});
 
-	const demetriusId = await api.createUser({
+	const demetriusId = await api.login({
+		id: 'member2',
 		email: 'demetrius@university.edu',
 		name: 'Demetrius Johnson',
 	});
 
-	const hermiaId = await api.createUser({
+	const hermiaId = await api.login({
+		id: 'member3',
 		email: 'hermia@university.edu',
 		name: 'Hermia Patel',
 	});
 
-	const helenaId = await api.createUser({
+	const helenaId = await api.login({
+		id: 'member4',
 		email: 'helena@university.edu',
 		name: 'Helena Williams',
 	});
 
 	// Production Crew
-	const quinceId = await api.createUser({
+	const quinceId = await api.login({
+		id: 'prod1',
 		email: 'quince@university.edu',
 		name: 'Peter Quince (Technical Director)',
 	});
 
-	const bottomId = await api.createUser({
+	const bottomId = await api.login({
+		id: 'prod2',
 		email: 'bottom@university.edu',
 		name: 'Nick Bottom (Lead Actor)',
 	});
