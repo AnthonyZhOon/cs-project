@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type -- prisma return types are complicated */
 
-import prisma, {
-	Prisma,
-	type PrismaClient,
-	type TransactionClient,
-} from './prisma';
+import prisma, {type PrismaClient, type TransactionClient} from './prisma';
 import {
 	WorkspaceMemberRole,
 	compareRoles,
@@ -192,10 +188,12 @@ export const createAPI = (prisma: PrismaClient) => {
 		getUser: async (id: Id) =>
 			// TODO: only select properties that are needed
 			prisma.user.findUnique({where: {id}}),
-		createUser: async (data: CreateUserArgs): Promise<Id> => {
-			const {id} = await prisma.user.create({
+		login: async ({email, name}: CreateUserArgs): Promise<Id> => {
+			const {id} = await prisma.user.upsert({
 				select: {id: true},
-				data,
+				where: {email},
+				create: {email, name},
+				update: {name},
 			});
 			return id;
 		},
