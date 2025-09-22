@@ -192,16 +192,7 @@ const populateUniversityDramaClub = async (
 	// Create Workspace
 	console.log('Creating workspace...');
 
-	const dramaClubId = await api.createWorkspace({
-		name: 'University Drama Club',
-		owner: theseusId,
-	});
-
-	// Add all users to the workspace
-	console.log('Adding members to workspace...');
-
 	const allUserIds = [
-		theseusId,
 		hippolytaId,
 		egeusId,
 		lysanderId,
@@ -210,18 +201,25 @@ const populateUniversityDramaClub = async (
 		helenaId,
 		quinceId,
 		bottomId,
+		theseusId,
 	];
 
-	// TODO: Change to workspaceAddMembers when implemented
-	await prisma.workspaceMember.createMany({
-		data: allUserIds.map(userId => ({
-			userId,
-			workspaceId: dramaClubId,
-			role: [theseusId, hippolytaId, egeusId].includes(userId)
-				? 'MANAGER'
-				: 'MEMBER',
-		})),
+	const dramaClubId = await api.createWorkspace({
+		name: 'University Drama Club',
+		owner: theseusId,
+		members: allUserIds
+			.filter(id => id !== theseusId)
+			.map(userId => ({
+				userId,
+				role: [theseusId, hippolytaId, egeusId].includes(userId)
+					? 'MANAGER'
+					: 'MEMBER',
+			})),
 	});
+
+	// Add all users to the workspace
+	console.log('Adding members to workspace...');
+
 	// Create Tasks for Act 1
 	console.log('Creating Act 1 tasks...');
 

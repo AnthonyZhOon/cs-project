@@ -8,11 +8,10 @@ export default async function NewEventPage({
 }) {
 	const {workspaceId} = await params;
 
-	const [availableTags, ws] = await Promise.all([
+	const [availableTags, members] = await Promise.all([
 		api.getTags(workspaceId),
 		api.getWorkspaceMembers(workspaceId),
 	]);
-	const members = ws.members.map(m => ({id: m.user.id, name: m.user.name}));
 
 	return (
 		<EventForm

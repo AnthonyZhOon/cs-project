@@ -12,20 +12,10 @@ export default function ClientToolbar() {
 				{user && !isLoading ? <strong>{user.name}</strong> : 'Loading user...'}
 			</p>
 			<Link
-				href="/messages"
-				aria-label="Messages"
-				className="p-2 rounded-lg border hover:bg-gray-50"
+				href="/auth/workspaces"
+				className="px-3 py-2 rounded-lg border hover:bg-gray-50 text-sm text-gray-700"
 			>
-				{/* envelope icon */}
-				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-					<path d="M4 6h16v12H4z" stroke="currentColor" strokeWidth="1.5" />
-					<path
-						d="m4 7 8 6 8-6"
-						stroke="currentColor"
-						strokeWidth="1.5"
-						fill="none"
-					/>
-				</svg>
+				View workspaces
 			</Link>
 			<Link
 				href="/profile"

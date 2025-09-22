@@ -43,7 +43,7 @@ export default function TaskForm({
 						? async () => {
 								'use server';
 								await api.deleteTask(task.id);
-								redirect('/tasks');
+								redirect(`/${workspaceId}/tasks`);
 							}
 						: undefined
 				}

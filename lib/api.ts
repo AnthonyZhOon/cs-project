@@ -22,6 +22,7 @@ interface CreateUserArgs {
 interface CreateWorkspaceArgs {
 	name: string;
 	owner: Id;
+	members?: {userId: Id; role: WorkspaceMemberRole}[];
 }
 interface CreateTaskArgs {
 	title: string;
@@ -217,33 +218,61 @@ export const createAPI = (prisma: PrismaClient) => {
 			prisma.workspace.findUnique({where: {id}}),
 		getWorkspaceMembers: async (id: Id) =>
 			// Include member.user so callers can access user names without extra queries
-			prisma.workspace.findUniqueOrThrow({
-				where: {id},
-				include: {members: {include: {user: {select: {id: true, name: true}}}}},
-			}),
+			(
+				await prisma.workspace.findUniqueOrThrow({
+					where: {id},
+					include: {
+						members: {include: {user: {select: {id: true, name: true}}}},
+					},
+				})
+			).members.map(({user}) => user),
 		getWorkspaces: async (user: Id) =>
 			// TODO: only select properties that are needed
-			prisma.workspace.findMany({where: {members: {some: {userId: user}}}}),
+			prisma.workspace.findMany({
+				where: {members: {some: {userId: user}}},
+			}),
 		createWorkspace: async ({
 			owner,
+			members = [],
 			...rest
 		}: CreateWorkspaceArgs): Promise<Id> => {
 			const {id} = await prisma.workspace.create({
 				select: {id: true},
-				data: {owner: {connect: {id: owner}}, ...rest},
+				data: {
+					owner: {connect: {id: owner}},
+					members: {
+						createMany: {data: [{userId: owner, role: 'MANAGER'}, ...members]},
+					},
+					...rest,
+				},
 			});
 			return id;
 		},
-		updateWorkspace: async (
-			id: Id,
-			{owner, ...rest}: Partial<CreateWorkspaceArgs>,
-		): Promise<void> => {
-			await prisma.workspace.update({
-				select: {id: true},
-				where: {id},
-				data: {owner: {connect: {id: owner ?? Prisma.skip}}, ...rest},
-			});
-		},
+
+		// TODO
+		// Maybe separate:
+		// - set member role
+		// - Remove member.
+		// - Change owner.
+
+		// It's ambiguous whether a member not appearing in the list means
+		// to remove them or to leave them not updated
+		// Gonna comment out for now since it is not used.
+
+		// updateWorkspace: async (
+		// 	id: Id,
+		// 	{owner, members = [], ...rest}: Partial<CreateWorkspaceArgs>,
+		// ): Promise<void> => {
+		// 	await prisma.workspace.update({
+		// 		select: {id: true},
+		// 		where: {id},
+		// 		data: {owner: {connect: {id: owner ?? Prisma.skip}},
+		// 			members: {
+		// 				createMany: {data: [{userId: owner, role: 'MANAGER'}, ...members]},
+		// 			},
+		// 			...rest,
+		// 	});
+		// },
 
 		// #endregion
 

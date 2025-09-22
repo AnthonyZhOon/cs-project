@@ -22,12 +22,7 @@ export default async function EventsPage({
 			attendeeId: attendee,
 		}),
 		api.getTags(workspaceId),
-		api.getWorkspaceMembers(workspaceId).then(ws =>
-			ws.members.map(m => ({
-				label: m.user.name,
-				value: m.user.id,
-			})),
-		),
+		api.getWorkspaceMembers(workspaceId),
 	]);
 
 	return (
@@ -52,7 +47,7 @@ export default async function EventsPage({
 						name: 'attendee',
 						label: 'Attendee',
 						value: attendee ?? '',
-						options: attendees,
+						options: attendees.map(({name, id}) => ({label: name, value: id})),
 					},
 				]}
 			/>
