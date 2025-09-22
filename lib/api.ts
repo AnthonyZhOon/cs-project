@@ -1,19 +1,17 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type -- prisma return types are complicated */
 
-import prisma, {
-	Prisma,
-	type PrismaClient,
-	type TransactionClient,
-} from './prisma';
+import prisma, {type PrismaClient, type TransactionClient} from './prisma';
 import {
+	WorkspaceMemberRole,
 	compareRoles,
 	type Id,
 	type Priority,
 	type TaskStatus,
-	type WorkspaceMemberRole,
+	type User,
 } from './types';
 
 interface CreateUserArgs {
+	id: Id;
 	email: string;
 	name: string;
 }
@@ -21,6 +19,7 @@ interface CreateUserArgs {
 interface CreateWorkspaceArgs {
 	name: string;
 	owner: Id;
+	members?: {userId: Id; role: WorkspaceMemberRole}[];
 }
 interface CreateTaskArgs {
 	title: string;
@@ -190,10 +189,12 @@ export const createAPI = (prisma: PrismaClient) => {
 		getUser: async (id: Id) =>
 			// TODO: only select properties that are needed
 			prisma.user.findUnique({where: {id}}),
-		createUser: async (data: CreateUserArgs): Promise<Id> => {
-			const {id} = await prisma.user.create({
+		login: async ({id, email, name}: CreateUserArgs): Promise<Id> => {
+			await prisma.user.upsert({
 				select: {id: true},
-				data,
+				where: {id},
+				create: {id, email, name},
+				update: {name},
 			});
 			return id;
 		},
@@ -215,31 +216,62 @@ export const createAPI = (prisma: PrismaClient) => {
 			// TODO: only select properties that are needed
 			prisma.workspace.findUnique({where: {id}}),
 		getWorkspaceMembers: async (id: Id) =>
-			// TODO: only select properties that are needed
-			prisma.workspace.findUnique({where: {id}, include: {members: true}}),
+			// Include member.user so callers can access user names without extra queries
+			(
+				await prisma.workspace.findUniqueOrThrow({
+					where: {id},
+					include: {
+						members: {include: {user: {select: {id: true, name: true}}}},
+					},
+				})
+			).members.map(({user}) => user),
 		getWorkspaces: async (user: Id) =>
 			// TODO: only select properties that are needed
-			prisma.workspace.findMany({where: {members: {some: {userId: user}}}}),
+			prisma.workspace.findMany({
+				where: {members: {some: {userId: user}}},
+			}),
 		createWorkspace: async ({
 			owner,
+			members = [],
 			...rest
 		}: CreateWorkspaceArgs): Promise<Id> => {
 			const {id} = await prisma.workspace.create({
 				select: {id: true},
-				data: {owner: {connect: {id: owner}}, ...rest},
+				data: {
+					owner: {connect: {id: owner}},
+					members: {
+						createMany: {data: [{userId: owner, role: 'MANAGER'}, ...members]},
+					},
+					...rest,
+				},
 			});
 			return id;
 		},
-		updateWorkspace: async (
-			id: Id,
-			{owner, ...rest}: Partial<CreateWorkspaceArgs>,
-		): Promise<void> => {
-			await prisma.workspace.update({
-				select: {id: true},
-				where: {id},
-				data: {owner: {connect: {id: owner ?? Prisma.skip}}, ...rest},
-			});
-		},
+
+		// TODO
+		// Maybe separate:
+		// - set member role
+		// - Remove member.
+		// - Change owner.
+
+		// It's ambiguous whether a member not appearing in the list means
+		// to remove them or to leave them not updated
+		// Gonna comment out for now since it is not used.
+
+		// updateWorkspace: async (
+		// 	id: Id,
+		// 	{owner, members = [], ...rest}: Partial<CreateWorkspaceArgs>,
+		// ): Promise<void> => {
+		// 	await prisma.workspace.update({
+		// 		select: {id: true},
+		// 		where: {id},
+		// 		data: {owner: {connect: {id: owner ?? Prisma.skip}},
+		// 			members: {
+		// 				createMany: {data: [{userId: owner, role: 'MANAGER'}, ...members]},
+		// 			},
+		// 			...rest,
+		// 	});
+		// },
 
 		// #endregion
 
@@ -258,24 +290,65 @@ export const createAPI = (prisma: PrismaClient) => {
 		getEvent: async (id: Id) =>
 			// TODO: only select properties that are needed
 			prisma.event.findUnique({where: {id}}),
+		getEventWithAttendeesAndTags: async (id: Id) =>
+			// TODO: only select properties that are needed
+			prisma.event.findUnique({
+				where: {id},
+				include: {attendees: true, tags: true},
+			}),
 
 		/** Sorted by deadline in ascending order */
-		getTasks: async (user: Id) =>
+		getTasks: async ({
+			workspaceId,
+			priority,
+			tag,
+			assigneeId,
+		}: {
+			workspaceId: Id;
+			priority?: Priority | undefined;
+			tag?: string | undefined;
+			assigneeId?: string | undefined;
+		}) =>
 			prisma.task.findMany({
-				where: {assignees: {some: {id: user}}},
-				// TODO: only select properties that are needed
+				where: {
+					workspaceId,
+					...(priority ? {priority} : {}),
+					...(tag !== undefined && tag !== ''
+						? {tags: {some: {name: tag}}}
+						: {}),
+					...(assigneeId !== undefined && assigneeId !== ''
+						? {assignees: {some: {id: assigneeId}}}
+						: {}),
+				},
+				include: {assignees: true, tags: true},
 				orderBy: {deadline: 'asc'},
 			}),
 
 		/** Sorted by start time and then end time in ascending order */
-		getEvents: async (user: Id) =>
+		getEvents: async ({
+			workspaceId,
+			tag,
+			attendeeId,
+		}: {
+			workspaceId: Id;
+			tag?: string | undefined;
+			attendeeId?: string | undefined;
+		}) =>
 			prisma.event.findMany({
-				where: {attendees: {some: {id: user}}},
-				// TODO: only select properties that are needed
+				where: {
+					workspaceId,
+					...(tag !== undefined && tag !== ''
+						? {tags: {some: {name: tag}}}
+						: {}),
+					...(attendeeId !== undefined && attendeeId !== ''
+						? {attendees: {some: {id: attendeeId}}}
+						: {}),
+				},
+				include: {attendees: true, tags: true},
 				orderBy: [{start: 'asc'}, {end: 'asc'}],
 			}),
 
-		/** Sorted in ascending order */
+		/** Sorted in ascending order; requires workspace scope. */
 		getTags: async (workspaceId: Id) =>
 			(
 				await prisma.tag.findMany({
@@ -284,6 +357,27 @@ export const createAPI = (prisma: PrismaClient) => {
 					orderBy: {name: 'asc'},
 				})
 			).map(t => t.name),
+
+		getAvailableMembers: async (
+			workspaceId: Id,
+			visibility: WorkspaceMemberRole = WorkspaceMemberRole.MEMBER,
+		): Promise<Pick<User, 'id' | 'name'>[]> =>
+			(
+				await prisma.workspaceMember.findMany({
+					select: {userId: true, user: {select: {name: true}}},
+					where: {
+						workspaceId,
+						role: {
+							in: [
+								WorkspaceMemberRole.MANAGER,
+								...(visibility === WorkspaceMemberRole.MEMBER
+									? [WorkspaceMemberRole.MEMBER]
+									: []),
+							],
+						},
+					},
+				})
+			).map(m => ({id: m.userId, name: m.user.name})),
 
 		createTask: async ({
 			workspaceId,
@@ -353,25 +447,39 @@ export const createAPI = (prisma: PrismaClient) => {
 				});
 				if (errors.length) throw new AggregateError(errors);
 
+				// Not sure why but the prisma skip thing was causing an error.
+				// assignees: {connect: assignees?.map(id => ({id})) ?? Prisma.skip},
 				await prisma.task.update({
 					select: {id: true},
 					where: {id},
 					data: {
 						tags: {
-							set:
-								tags?.map(name => ({workspaceId_name: {workspaceId, name}})) ??
-								Prisma.skip,
+							set: [], // Reset tags
+							connectOrCreate:
+								tags?.map(name => ({
+									where: {workspaceId_name: {workspaceId, name}},
+									create: {workspaceId, name},
+								})) ?? [],
 						},
-						assignees: {connect: assignees?.map(id => ({id})) ?? Prisma.skip},
-						dependencies: {
-							connect: dependencies?.map(id => ({id})) ?? Prisma.skip,
-						},
-						parents: {connect: parents?.map(id => ({id})) ?? Prisma.skip},
+						// When assignees is provided, replace the full set
+						...(assignees !== undefined
+							? {assignees: {set: [], connect: assignees.map(id => ({id}))}}
+							: {}),
+						...(dependencies
+							? {dependencies: {connect: dependencies.map(id => ({id}))}}
+							: {}),
+						...(parents ? {parents: {connect: parents.map(id => ({id}))}} : {}),
 						...(title !== undefined ? {title} : {}),
 						...rest,
 					},
 				});
 			}),
+
+		deleteTask: async (id: Id): Promise<void> => {
+			await prisma.task.delete({
+				where: {id},
+			});
+		},
 
 		createEvent: async ({
 			workspaceId,
@@ -403,7 +511,7 @@ export const createAPI = (prisma: PrismaClient) => {
 		): Promise<void> =>
 			prisma.$transaction(async prisma => {
 				// TODO: check attendees have access to event
-				const {workspaceId} = await prisma.task.findUniqueOrThrow({
+				const {workspaceId} = await prisma.event.findUniqueOrThrow({
 					select: {workspaceId: true},
 					where: {id},
 				});
@@ -412,15 +520,31 @@ export const createAPI = (prisma: PrismaClient) => {
 					where: {id},
 					data: {
 						tags: {
-							set:
-								tags?.map(name => ({workspaceId_name: {workspaceId, name}})) ??
-								Prisma.skip,
+							set: [],
+							connectOrCreate:
+								tags?.map(name => ({
+									where: {workspaceId_name: {workspaceId, name}},
+									create: {workspaceId, name},
+								})) ?? [],
 						},
-						attendees: {connect: attendees?.map(id => ({id})) ?? Prisma.skip},
+						// When attendees is provided, replace full set
+						...(attendees !== undefined
+							? {attendees: {set: [], connect: attendees.map(id => ({id}))}}
+							: {}),
 						...rest,
 					},
 				});
 			}),
+
+		deleteEvent: async (id: Id): Promise<void> => {
+			await prisma.event.delete({
+				where: {id},
+			});
+		},
+
+		// #endregion
+
+		// #region Helpers
 
 		// #endregion
 	};

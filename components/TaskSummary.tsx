@@ -1,6 +1,7 @@
 'use client';
 
 import ComponentBox from '@/components/ComponentBox';
+import type {Task} from '@/lib/types';
 
 interface Segment {
 	label: string;
@@ -31,17 +32,23 @@ const arcPath = (
 	return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y} L ${cx} ${cy} Z`;
 };
 
-export default function TaskSummary({
-	title = 'Tasks Summary',
-	todo = 30,
-	inProgress = 40,
-	done = 30,
-}: {
-	title?: string;
-	todo?: number;
-	inProgress?: number;
-	done?: number;
-}) {
+export default function TaskSummary({tasks}: {tasks: Task[]}) {
+	const {todo, inProgress, done} =
+		tasks.length > 0
+			? {
+					todo:
+						(tasks.filter(t => t.status === 'TODO').length / tasks.length) *
+						100,
+					inProgress:
+						(tasks.filter(t => t.status === 'IN_PROGRESS').length /
+							tasks.length) *
+						100,
+					done:
+						(tasks.filter(t => t.status === 'COMPLETE').length / tasks.length) *
+						100,
+				}
+			: {todo: 0, inProgress: 0, done: 0};
+
 	const size = 240;
 	const cx = size / 2;
 	const cy = size / 2;
@@ -53,7 +60,18 @@ export default function TaskSummary({
 		{label: 'To Do', value: (todo / total) * 100, color: '#9CA3AF'},
 		{label: 'In Progress', value: (inProgress / total) * 100, color: '#4B5563'},
 		{label: 'Done', value: (done / total) * 100, color: '#E5E7EB'},
-	];
+	].filter(segment => segment.value > 0); // Filter out segments with 0 value
+
+	// Handle case where all values are 0
+	if (data.length === 0) {
+		return (
+			<ComponentBox title={'Tasks Summary'} className="p-3">
+				<div className="flex items-center justify-center">
+					<div className="text-gray-500">No tasks available</div>
+				</div>
+			</ComponentBox>
+		);
+	}
 
 	let acc = 0;
 	const segments = data.map(seg => {
@@ -74,7 +92,7 @@ export default function TaskSummary({
 	});
 
 	return (
-		<ComponentBox title={title} className="p-3">
+		<ComponentBox title={'Tasks Summary'} className="p-3">
 			<div className="flex items-center justify-center">
 				<svg
 					width={size}
