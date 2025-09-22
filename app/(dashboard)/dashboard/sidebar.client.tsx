@@ -4,9 +4,9 @@ import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 
 const items = [
-	{ href: '/dashboard', label: 'Dashboard' },
-	{ href: '/tasks', label: 'Tasks' },
-	{ href: '/events', label: 'Events' },
+	{href: '/dashboard', label: 'Dashboard'},
+	{href: '/tasks', label: 'Tasks'},
+	{href: '/events', label: 'Events'},
 ];
 
 export default function ClientSidebar() {

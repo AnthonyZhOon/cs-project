@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { ReactNode } from 'react';
+import {ReactNode} from 'react';
 import ClientSidebar from './sidebar.client';
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default function DashboardLayout({children}: {children: ReactNode}) {
 	return (
 		<div className="min-h-screen flex bg-pink-50">
 			{/* Sidebar */}
@@ -16,8 +16,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 				{/* Topbar */}
 				<header className="border-b border-pink-100 bg-white/70 backdrop-blur-sm px-6 py-3 flex items-center justify-between">
 					<div className="text-sm text-gray-600">
-						Workspace:{' '}
-						<strong className="text-teal-600">Default</strong>
+						Workspace: <strong className="text-teal-600">Default</strong>
 					</div>
 
 					<div className="flex items-center gap-3">
