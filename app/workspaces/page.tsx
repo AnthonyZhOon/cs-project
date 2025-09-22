@@ -22,7 +22,7 @@ export default async function WorkspacesPage() {
 						You&apos;re not part of any workspaces yet.
 					</p>
 					<Link
-						href="/auth/createWorkspace"
+						href="/workspaces/new"
 						className="inline-block bg-black text-white px-6 py-2 rounded hover:bg-gray-800 transition-colors"
 					>
 						Create your first workspace
@@ -66,7 +66,7 @@ export default async function WorkspacesPage() {
 
 					<div className="pt-4 border-t mt-6">
 						<Link
-							href="/auth/createWorkspace"
+							href="/workspaces/new"
 							className="block w-full text-center py-2 text-blue-600 hover:underline text-sm"
 						>
 							+ Create new workspace
