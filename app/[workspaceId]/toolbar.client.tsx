@@ -13,14 +13,14 @@ export default function ClientToolbar() {
 			</p>
 			<Link
 				href="/workspaces"
-				className="px-3 py-2 rounded-lg border hover:bg-gray-50 text-sm text-gray-700"
+				className="px-3 py-2 rounded-lg border border-pink-100 text-pink-600 hover:bg-pink-50 transition-colors"
 			>
 				View workspaces
 			</Link>
 			<Link
 				href="/profile"
 				aria-label="Profile"
-				className="p-2 rounded-lg border hover:bg-gray-50"
+				className="p-2 rounded-lg border border-pink-100 text-pink-600 hover:bg-pink-50 transition-colors"
 			>
 				{/* user icon */}
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -44,7 +44,7 @@ export default function ClientToolbar() {
 				<Link
 					href="/auth/logout"
 					aria-label="Logout"
-					className="p-2 rounded-lg border hover:bg-gray-50"
+					className="p-2 rounded-lg border border-pink-100 text-pink-600 hover:bg-pink-50 transition-colors"
 				>
 					<svg
 						width="20"
