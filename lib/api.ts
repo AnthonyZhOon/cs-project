@@ -11,6 +11,7 @@ import {
 } from './types';
 
 interface CreateUserArgs {
+	id: Id;
 	email: string;
 	name: string;
 }
@@ -188,14 +189,13 @@ export const createAPI = (prisma: PrismaClient) => {
 		getUser: async (id: Id) =>
 			// TODO: only select properties that are needed
 			prisma.user.findUnique({where: {id}}),
-		login: async ({email, name}: CreateUserArgs): Promise<Id> => {
-			const {id} = await prisma.user.upsert({
+		login: async ({id, email, name}: CreateUserArgs): Promise<void> => {
+			await prisma.user.upsert({
 				select: {id: true},
-				where: {email},
-				create: {email, name},
+				where: {id},
+				create: {id, email, name},
 				update: {name},
 			});
-			return id;
 		},
 		updateUser: async (
 			id: Id,

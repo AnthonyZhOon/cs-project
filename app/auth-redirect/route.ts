@@ -6,10 +6,10 @@ export const GET = async (req: NextRequest): Promise<NextResponse> => {
 	const session = await auth0.getSession();
 	if (!session) throw new Error('not logged in');
 
-	const {email, name} = session.user;
+	const {sub, email, name} = session.user;
 	if (email === undefined) throw new Error('no email');
 	if (name === undefined) throw new Error('no name');
-	await api.login({email, name});
+	await api.login({id: sub, email, name});
 
 	return NextResponse.redirect(
 		new URL(
