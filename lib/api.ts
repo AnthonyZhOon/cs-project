@@ -189,14 +189,13 @@ export const createAPI = (prisma: PrismaClient) => {
 		getUser: async (id: Id) =>
 			// TODO: only select properties that are needed
 			prisma.user.findUnique({where: {id}}),
-		login: async ({id, email, name}: CreateUserArgs): Promise<Id> => {
+		login: async ({id, email, name}: CreateUserArgs): Promise<void> => {
 			await prisma.user.upsert({
 				select: {id: true},
 				where: {id},
 				create: {id, email, name},
 				update: {name},
 			});
-			return id;
 		},
 		updateUser: async (
 			id: Id,
