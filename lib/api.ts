@@ -85,25 +85,26 @@ export const createAPI = (prisma: PrismaClient) => {
 		taskId: Id | undefined,
 		workspaceId: Id,
 		visibility: WorkspaceMemberRole,
-		dependencies: Id[],
+		dependencyIds: Id[],
 	): Promise<Error[]> => {
-		const tasks = Object.fromEntries(
+		const dependencies = Object.fromEntries(
 			Object.entries(
 				Object.groupBy(
 					await prisma.task.findMany({
 						select: {
 							id: true,
+							title: true,
 							visibility: true,
 							dependencies: {select: {id: true}},
 						},
-						where: {workspaceId, id: {in: dependencies}},
+						where: {workspaceId, id: {in: dependencyIds}},
 					}),
 					x => x.id,
 				),
 			).map(([k, v]) => [k, v![0]!]),
 		);
-		const errors = dependencies.flatMap(id => {
-			const dep = tasks[id];
+		const errors = dependencyIds.flatMap(id => {
+			const dep = dependencies[id];
 			return !dep
 				? [new Error(`Dependent task ${id} is not in workspace ${workspaceId}`)]
 				: compareRoles(dep.visibility, visibility) < 0
@@ -116,37 +117,53 @@ export const createAPI = (prisma: PrismaClient) => {
 		});
 		if (errors.length) return errors;
 
+		const tasks: Record<
+			Id,
+			Omit<(typeof dependencies)[number], 'title' | 'visibility'>
+		> = {...dependencies};
 		// Check for cycles
-		const check = async (id: Id, seen: Set<Id>): Promise<Error[]> => {
-			if (seen.has(id))
-				return [new Error(`Dependency cycle detected at task ${id}`)];
+		const check = async (
+			{id, dependencies}: (typeof tasks)[number],
+			originalDependency: string,
+			seen: Set<Id>,
+		): Promise<Error[]> => {
+			if (seen.has(id)) {
+				return [
+					new Error(
+						`Dependency cycle detected at task ‘${originalDependency}’`,
+					),
+				];
+			}
 
-			const task = tasks[id];
-			if (!task) return [];
 			(
 				await prisma.task.findMany({
 					select: {
 						id: true,
-						visibility: true,
 						dependencies: {select: {id: true}},
 					},
 					where: {
 						id: {
-							in: task.dependencies.map(t => t.id).filter(id => !(id in tasks)),
+							in: dependencies.map(t => t.id).filter(id => !(id in tasks)),
 						},
 					},
 				})
 			).forEach(t => (tasks[t.id] = t));
 			return (
 				await Promise.all(
-					dependencies.map(async depId => check(depId, new Set([...seen, id]))),
+					dependencies.map(async t =>
+						check(tasks[t.id]!, originalDependency, new Set([...seen, t.id])),
+					),
 				)
 			).flat();
 		};
 		return (
 			await Promise.all(
-				dependencies.map(async id =>
-					check(id, new Set(taskId === undefined ? undefined : [taskId])),
+				dependencyIds.map(async id =>
+					check(
+						tasks[id]!,
+						dependencies[id]!.title,
+						new Set(taskId === undefined ? undefined : [taskId]),
+					),
 				),
 			)
 		).flat();
