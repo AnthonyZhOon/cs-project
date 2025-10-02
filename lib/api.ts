@@ -79,7 +79,6 @@ export const createAPI = (prisma: PrismaClient) => {
 		});
 	};
 
-	// TODO: check dependency cycles
 	const checkTaskDependencies = async (
 		prisma: TransactionClient,
 		taskId: Id | undefined,
@@ -151,7 +150,7 @@ export const createAPI = (prisma: PrismaClient) => {
 			return (
 				await Promise.all(
 					dependencies.map(async t =>
-						check(tasks[t.id]!, originalDependency, new Set([...seen, t.id])),
+						check(tasks[t.id]!, originalDependency, new Set([...seen, id])),
 					),
 				)
 			).flat();
@@ -632,6 +631,7 @@ export const createAPI = (prisma: PrismaClient) => {
 					where: {id},
 				});
 				const errors = await checkTask(prisma, {
+					id,
 					title,
 					workspaceId,
 					visibility,
