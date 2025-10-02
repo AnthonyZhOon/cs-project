@@ -8,10 +8,11 @@ export default async function EditTaskPage({
 	params: Promise<{id: string; workspaceId: string}>;
 }) {
 	const {id, workspaceId} = await params;
-	const [task, availableTags, members] = await Promise.all([
-		api.getTaskWithAssigneesAndTags(id),
+	const [task, availableTags, members, dependencies] = await Promise.all([
+		api.getTask(id),
 		api.getTags(workspaceId),
-		api.getWorkspaceMembers(workspaceId),
+		api.getAvailableMembers(workspaceId),
+		api.getAvailableTaskDependencies(workspaceId),
 	]);
 
 	if (!task) redirect('/tasks');
@@ -20,7 +21,8 @@ export default async function EditTaskPage({
 		<TaskForm
 			task={task}
 			availableTags={availableTags}
-			members={members}
+			availableMembers={members}
+			availableDependencies={dependencies.filter(t => t.id !== task.id)}
 			workspaceId={workspaceId}
 		/>
 	);

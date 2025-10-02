@@ -79,22 +79,31 @@ export const createAPI = (prisma: PrismaClient) => {
 		});
 	};
 
-	// TODO: check dependency cycles
 	const checkTaskDependencies = async (
 		prisma: TransactionClient,
+		taskId: Id | undefined,
 		workspaceId: Id,
 		visibility: WorkspaceMemberRole,
-		dependencies: Id[],
+		dependencyIds: Id[],
 	): Promise<Error[]> => {
-		const tasks = Object.groupBy(
-			await prisma.task.findMany({
-				select: {id: true, visibility: true},
-				where: {workspaceId, id: {in: dependencies}},
-			}),
-			x => x.id,
+		const dependencies = Object.fromEntries(
+			Object.entries(
+				Object.groupBy(
+					await prisma.task.findMany({
+						select: {
+							id: true,
+							title: true,
+							visibility: true,
+							dependencies: {select: {id: true}},
+						},
+						where: {workspaceId, id: {in: dependencyIds}},
+					}),
+					x => x.id,
+				),
+			).map(([k, v]) => [k, v![0]!]),
 		);
-		return dependencies.flatMap(id => {
-			const [dep] = tasks[id] ?? [];
+		const errors = dependencyIds.flatMap(id => {
+			const dep = dependencies[id];
 			return !dep
 				? [new Error(`Dependent task ${id} is not in workspace ${workspaceId}`)]
 				: compareRoles(dep.visibility, visibility) < 0
@@ -105,6 +114,58 @@ export const createAPI = (prisma: PrismaClient) => {
 						]
 					: [];
 		});
+		if (errors.length) return errors;
+
+		const tasks: Record<
+			Id,
+			Omit<(typeof dependencies)[number], 'title' | 'visibility'>
+		> = {...dependencies};
+		// Check for cycles
+		const check = async (
+			{id, dependencies}: (typeof tasks)[number],
+			originalDependency: string,
+			seen: Set<Id>,
+		): Promise<Error[]> => {
+			if (seen.has(id)) {
+				return [
+					new Error(
+						`Dependency cycle detected at task ‘${originalDependency}’`,
+					),
+				];
+			}
+
+			(
+				await prisma.task.findMany({
+					select: {
+						id: true,
+						dependencies: {select: {id: true}},
+					},
+					where: {
+						id: {
+							in: dependencies.map(t => t.id).filter(id => !(id in tasks)),
+						},
+					},
+				})
+			).forEach(t => (tasks[t.id] = t));
+			return (
+				await Promise.all(
+					dependencies.map(async t =>
+						check(tasks[t.id]!, originalDependency, new Set([...seen, id])),
+					),
+				)
+			).flat();
+		};
+		return (
+			await Promise.all(
+				dependencyIds.map(async id =>
+					check(
+						tasks[id]!,
+						dependencies[id]!.title,
+						new Set(taskId === undefined ? undefined : [taskId]),
+					),
+				),
+			)
+		).flat();
 	};
 
 	const checkTaskParents = async (
@@ -137,6 +198,7 @@ export const createAPI = (prisma: PrismaClient) => {
 	const checkTask = async (
 		prisma: TransactionClient,
 		{
+			id,
 			title,
 			workspaceId,
 			visibility,
@@ -144,6 +206,7 @@ export const createAPI = (prisma: PrismaClient) => {
 			dependencies,
 			parents,
 		}: {
+			id?: Id | undefined;
 			title?: string | undefined;
 			workspaceId: Id;
 			visibility: WorkspaceMemberRole;
@@ -172,6 +235,7 @@ export const createAPI = (prisma: PrismaClient) => {
 					? [
 							checkTaskDependencies(
 								prisma,
+								id,
 								workspaceId,
 								visibility,
 								dependencies,
@@ -392,12 +456,9 @@ export const createAPI = (prisma: PrismaClient) => {
 
 		getTask: async (id: Id) =>
 			// TODO: only select properties that are needed
-			prisma.task.findUnique({where: {id}}),
-		getTaskWithAssigneesAndTags: async (id: Id) =>
-			// TODO: only select properties that are needed
 			prisma.task.findUnique({
 				where: {id},
-				include: {assignees: true, tags: true},
+				include: {assignees: true, tags: true, dependencies: true},
 			}),
 
 		getEvent: async (id: Id) =>
@@ -433,7 +494,7 @@ export const createAPI = (prisma: PrismaClient) => {
 						? {assignees: {some: {id: assigneeId}}}
 						: {}),
 				},
-				include: {assignees: true, tags: true},
+				include: {assignees: true, tags: true, dependencies: true},
 				orderBy: {deadline: 'asc'},
 			}),
 
@@ -491,6 +552,25 @@ export const createAPI = (prisma: PrismaClient) => {
 					},
 				})
 			).map(m => ({id: m.userId, name: m.user.name})),
+
+		getAvailableTaskDependencies: async (
+			workspaceId: Id,
+			visibility: WorkspaceMemberRole = WorkspaceMemberRole.MEMBER,
+		) =>
+			prisma.task.findMany({
+				select: {id: true, title: true},
+				where: {
+					workspaceId,
+					visibility: {
+						in: [
+							WorkspaceMemberRole.MANAGER,
+							...(visibility === WorkspaceMemberRole.MEMBER
+								? [WorkspaceMemberRole.MEMBER]
+								: []),
+						],
+					},
+				},
+			}),
 
 		createTask: async ({
 			workspaceId,
@@ -551,6 +631,7 @@ export const createAPI = (prisma: PrismaClient) => {
 					where: {id},
 				});
 				const errors = await checkTask(prisma, {
+					id,
 					title,
 					workspaceId,
 					visibility,

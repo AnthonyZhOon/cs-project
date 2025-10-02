@@ -14,14 +14,14 @@ export default async function EditEventPage({
 
 	const [availableTags, members] = await Promise.all([
 		api.getTags(event.workspaceId),
-		api.getWorkspaceMembers(event.workspaceId),
+		api.getAvailableMembers(event.workspaceId),
 	]);
 
 	return (
 		<EventForm
 			event={event}
 			availableTags={availableTags}
-			members={members}
+			availableMembers={members}
 			workspaceId={workspaceId}
 		/>
 	);

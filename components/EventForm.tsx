@@ -9,14 +9,14 @@ import type {Event} from '@/lib/types';
 interface EventFormProps {
 	event?: Event & {tags: {name: string}[]; attendees: {id: string}[]};
 	availableTags: string[];
-	members: {id: string; name: string}[];
+	availableMembers: {id: string; name: string}[];
 	workspaceId: string;
 }
 
 export default function EventForm({
 	event,
 	availableTags,
-	members,
+	availableMembers,
 	workspaceId,
 }: EventFormProps) {
 	const isEditing = !!event;
@@ -90,7 +90,7 @@ export default function EventForm({
 					name="attendees"
 					label="Attendees"
 					placeholder="Search members…"
-					options={members.map(m => ({value: m.id, label: m.name}))}
+					options={availableMembers.map(m => ({value: m.id, label: m.name}))}
 					defaultValue={event?.attendees.map(a => a.id) ?? []}
 				/>
 

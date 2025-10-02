@@ -10,13 +10,13 @@ export default async function NewEventPage({
 
 	const [availableTags, members] = await Promise.all([
 		api.getTags(workspaceId),
-		api.getWorkspaceMembers(workspaceId),
+		api.getAvailableMembers(workspaceId),
 	]);
 
 	return (
 		<EventForm
 			availableTags={availableTags}
-			members={members}
+			availableMembers={members}
 			workspaceId={workspaceId}
 		/>
 	);
