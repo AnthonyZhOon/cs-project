@@ -1,10 +1,18 @@
-import {redirect} from 'next/navigation';
+'use client';
+
+import {useState, useTransition} from 'react';
+import {redirect, useRouter} from 'next/navigation';
 import CreateForm from '@/components/CreateForm';
 import Input from '@/components/inputs/Input';
 import MultiSuggestInput from '@/components/inputs/MultiSuggestInput';
 import Select from '@/components/inputs/Select';
 import Textarea from '@/components/inputs/Textarea';
 import api from '@/lib/api';
+import {
+	createTaskAction,
+	deleteTaskAction,
+	updateTaskAction,
+} from '@/lib/actions/tasks';
 import {Priority, TaskStatus} from '@/lib/types';
 import type {FullTask} from '@/lib/types';
 
@@ -24,6 +32,9 @@ export default function TaskForm({
 	workspaceId,
 }: TaskFormProps) {
 	const isEditing = !!task;
+	const router = useRouter();
+	const [isPending, startTransition] = useTransition();
+	const [error, setError] = useState<string | null>(null);
 
 	// Format the deadline for datetime-local input
 	const formattedDeadline = task?.deadline
@@ -36,6 +47,11 @@ export default function TaskForm({
 
 	return (
 		<div className="max-w-3xl mx-auto p-4">
+			{error && (
+				<div className="mb-4 p-3 rounded border border-red-200 bg-red-50 text-red-700 whitespace-pre-line">
+					{error}
+				</div>
+			)}
 			<CreateForm
 				formTitle={isEditing ? 'Edit Task' : 'Create Task'}
 				submitText={isEditing ? 'Update Task' : 'Create Task'}
@@ -43,39 +59,47 @@ export default function TaskForm({
 				deleteAction={
 					isEditing
 						? async () => {
-								'use server';
-								await api.deleteTask(task.id);
-								redirect(`/${workspaceId}/tasks`);
+								const res = await deleteTaskAction(task.id);
+								if (!res.ok) {
+									setError(res.error || 'Failed to delete task.');
+									return;
+								}
+
+								router.push(`/${workspaceId}/tasks`);
 							}
 						: undefined
 				}
 				action={async (formData: FormData) => {
-					'use server';
-					const deadline = formData.get('deadline') as string;
-					const priority = formData.get('priority') as '' | Priority;
-					const status = formData.get('status') as '' | TaskStatus;
-					const assignees = formData.getAll('assignees') as string[];
-					const dependencies = formData.getAll('dependencies') as string[];
+					setError(null);
+					startTransition(async () => {
+						const deadline = formData.get('deadline') as string;
+						const priority = formData.get('priority') as '' | Priority;
+						const status = formData.get('status') as '' | TaskStatus;
+						const assignees = formData.getAll('assignees') as string[];
+						const dependencies = formData.getAll('dependencies') as string[];
 
-					const taskData = {
-						title: formData.get('title') as string,
-						description: formData.get('description') as string,
-						tags: formData.getAll('tags') as string[],
-						assignees,
-						dependencies,
-						...(priority ? {priority} : {}),
-						...(status ? {status} : {}),
-						...(deadline ? {deadline: new Date(deadline)} : {}),
-					};
+						const taskData = {
+							title: formData.get('title') as string,
+							description: formData.get('description') as string,
+							tags: (formData.getAll('tags') as string[]) ?? [],
+							...(assignees.length ? {assignees} : {}),
+							...(dependencies.length ? {dependencies} : {}),
+							...(priority ? {priority} : {}),
+							...(status ? {status} : {}),
+							...(deadline ? {deadline: new Date(deadline)} : {}),
+						};
 
-					await (task
-						? api.updateTask(task.id, taskData)
-						: api.createTask({
-								workspaceId,
-								...taskData,
-							}));
+						const res = isEditing
+							? await updateTaskAction(task.id, taskData)
+							: await createTaskAction(workspaceId, taskData);
 
-					redirect(`/${workspaceId}/tasks`);
+						if (!res.ok) {
+							setError(res.error || 'Failed to save task.');
+							return;
+						}
+
+						router.push(`/${workspaceId}/tasks`);
+					});
 				}}
 			>
 				<Input
@@ -132,10 +156,6 @@ export default function TaskForm({
 					type="datetime-local"
 					defaultValue={formattedDeadline}
 				/>
-				{/* <Select name="dependency" label="Task Dependency">
-					<option>Task B</option>
-					<option>Task B</option>
-				</Select> */}
 				<Textarea
 					name="description"
 					label="Description"
