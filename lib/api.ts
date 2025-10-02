@@ -82,19 +82,28 @@ export const createAPI = (prisma: PrismaClient) => {
 	// TODO: check dependency cycles
 	const checkTaskDependencies = async (
 		prisma: TransactionClient,
+		taskId: Id | undefined,
 		workspaceId: Id,
 		visibility: WorkspaceMemberRole,
 		dependencies: Id[],
 	): Promise<Error[]> => {
-		const tasks = Object.groupBy(
-			await prisma.task.findMany({
-				select: {id: true, visibility: true},
-				where: {workspaceId, id: {in: dependencies}},
-			}),
-			x => x.id,
+		const tasks = Object.fromEntries(
+			Object.entries(
+				Object.groupBy(
+					await prisma.task.findMany({
+						select: {
+							id: true,
+							visibility: true,
+							dependencies: {select: {id: true}},
+						},
+						where: {workspaceId, id: {in: dependencies}},
+					}),
+					x => x.id,
+				),
+			).map(([k, v]) => [k, v![0]!]),
 		);
-		return dependencies.flatMap(id => {
-			const [dep] = tasks[id] ?? [];
+		const errors = dependencies.flatMap(id => {
+			const dep = tasks[id];
 			return !dep
 				? [new Error(`Dependent task ${id} is not in workspace ${workspaceId}`)]
 				: compareRoles(dep.visibility, visibility) < 0
@@ -105,6 +114,42 @@ export const createAPI = (prisma: PrismaClient) => {
 						]
 					: [];
 		});
+		if (errors.length) return errors;
+
+		// Check for cycles
+		const check = async (id: Id, seen: Set<Id>): Promise<Error[]> => {
+			if (seen.has(id))
+				return [new Error(`Dependency cycle detected at task ${id}`)];
+
+			const task = tasks[id];
+			if (!task) return [];
+			(
+				await prisma.task.findMany({
+					select: {
+						id: true,
+						visibility: true,
+						dependencies: {select: {id: true}},
+					},
+					where: {
+						id: {
+							in: task.dependencies.map(t => t.id).filter(id => !(id in tasks)),
+						},
+					},
+				})
+			).forEach(t => (tasks[t.id] = t));
+			return (
+				await Promise.all(
+					dependencies.map(async depId => check(depId, new Set([...seen, id]))),
+				)
+			).flat();
+		};
+		return (
+			await Promise.all(
+				dependencies.map(async id =>
+					check(id, new Set(taskId === undefined ? undefined : [taskId])),
+				),
+			)
+		).flat();
 	};
 
 	const checkTaskParents = async (
@@ -137,6 +182,7 @@ export const createAPI = (prisma: PrismaClient) => {
 	const checkTask = async (
 		prisma: TransactionClient,
 		{
+			id,
 			title,
 			workspaceId,
 			visibility,
@@ -144,6 +190,7 @@ export const createAPI = (prisma: PrismaClient) => {
 			dependencies,
 			parents,
 		}: {
+			id?: Id | undefined;
 			title?: string | undefined;
 			workspaceId: Id;
 			visibility: WorkspaceMemberRole;
@@ -172,6 +219,7 @@ export const createAPI = (prisma: PrismaClient) => {
 					? [
 							checkTaskDependencies(
 								prisma,
+								id,
 								workspaceId,
 								visibility,
 								dependencies,
