@@ -135,12 +135,18 @@ export default async function WorkspacesPage() {
 						</Link>
 					))}
 
-					<div className="pt-4 border-t mt-6">
+					<div className="pt-4 border-t mt-6 space-y-2">
 						<Link
 							href="/workspaces/new"
 							className="block w-full text-center py-2 text-blue-600 hover:underline text-sm"
 						>
 							+ Create new workspace
+						</Link>
+						<Link
+							href="/my-assignments"
+							className="block w-full text-center py-2 text-gray-600 hover:underline text-sm"
+						>
+							📋 View all my assignments
 						</Link>
 					</div>
 				</div>
