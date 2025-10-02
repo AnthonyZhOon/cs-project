@@ -224,6 +224,58 @@ export const createAPI = (prisma: PrismaClient) => {
 					},
 				})
 			).members.map(({user}) => user),
+
+		getWorkspaceMembersWithRoles: async (id: Id) =>
+			// Get members with their roles for management
+			await prisma.workspace.findUniqueOrThrow({
+				where: {id},
+				include: {
+					owner: {select: {id: true}},
+					members: {
+						include: {user: {select: {id: true, name: true, email: true}}},
+					},
+				},
+			}),
+
+		getUserWorkspaceRole: async (workspaceId: Id, userId: Id) => {
+			const member = await prisma.workspaceMember.findUnique({
+				where: {userId_workspaceId: {userId, workspaceId}},
+				select: {role: true},
+			});
+			return member?.role;
+		},
+
+		updateMemberRole: async (
+			workspaceId: Id,
+			userId: Id,
+			role: WorkspaceMemberRole,
+		): Promise<void> => {
+			await prisma.workspaceMember.update({
+				where: {userId_workspaceId: {userId, workspaceId}},
+				data: {role},
+			});
+		},
+
+		removeMember: async (workspaceId: Id, userId: Id): Promise<void> => {
+			await prisma.workspaceMember.delete({
+				where: {userId_workspaceId: {userId, workspaceId}},
+			});
+		},
+
+		getWorkspaceInvites: async (workspaceId: Id) =>
+			prisma.workspaceInvite.findMany({
+				where: {workspaceId},
+				select: {email: true, memberRole: true},
+			}),
+		removeWorkspaceInvite: async (
+			workspaceId: Id,
+			email: string,
+		): Promise<void> => {
+			await prisma.workspaceInvite.delete({
+				where: {email_workspaceId: {email, workspaceId}},
+			});
+		},
+
 		getWorkspaces: async (user: Id) =>
 			// TODO: only select properties that are needed
 			prisma.workspace.findMany({
@@ -271,6 +323,68 @@ export const createAPI = (prisma: PrismaClient) => {
 		// 			...rest,
 		// 	});
 		// },
+
+		createWorkspaceInvites: async (
+			workspaceId: Id,
+			invites: {email: string; memberRole: WorkspaceMemberRole}[],
+		): Promise<void> => {
+			if (invites.length === 0) return;
+
+			await prisma.workspaceInvite.createMany({
+				data: invites.map(invite => ({
+					...invite,
+					workspaceId,
+				})),
+				skipDuplicates: true,
+			});
+		},
+
+		getPendingInvites: async (userId: Id) => {
+			const user = await prisma.user.findUniqueOrThrow({
+				where: {id: userId},
+				select: {email: true},
+			});
+			return prisma.workspaceInvite.findMany({
+				where: {email: user.email},
+				include: {workspace: true},
+			});
+		},
+
+		acceptInvite: async (userId: Id, workspaceId: Id): Promise<void> => {
+			await prisma.$transaction(async prisma => {
+				const email = (
+					await prisma.user.findUniqueOrThrow({
+						where: {id: userId},
+						select: {email: true},
+					})
+				).email;
+				const invite = await prisma.workspaceInvite.findUniqueOrThrow({
+					where: {email_workspaceId: {email, workspaceId}},
+				});
+				await prisma.workspaceMember.create({
+					data: {
+						userId,
+						workspaceId,
+						role: invite.memberRole,
+					},
+				});
+				await prisma.workspaceInvite.delete({
+					where: {email_workspaceId: {email, workspaceId}},
+				});
+			});
+		},
+
+		rejectInvite: async (userId: Id, workspaceId: Id): Promise<void> => {
+			const email = (
+				await prisma.user.findUniqueOrThrow({
+					where: {id: userId},
+					select: {email: true},
+				})
+			).email;
+			await prisma.workspaceInvite.delete({
+				where: {email_workspaceId: {email, workspaceId}},
+			});
+		},
 
 		// #endregion
 
