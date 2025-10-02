@@ -10,6 +10,7 @@ export default function ClientSidebar({workspaceId}: {workspaceId: string}) {
 		{href: `/${workspaceId}/dashboard`, label: 'Dashboard'},
 		{href: `/${workspaceId}/tasks`, label: 'Tasks'},
 		{href: `/${workspaceId}/events`, label: 'Events'},
+		{href: `/${workspaceId}/members`, label: 'Members'},
 	];
 
 	return (
