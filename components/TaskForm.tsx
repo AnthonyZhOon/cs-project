@@ -6,19 +6,21 @@ import Select from '@/components/inputs/Select';
 import Textarea from '@/components/inputs/Textarea';
 import api from '@/lib/api';
 import {Priority, TaskStatus} from '@/lib/types';
-import type {TaskWithAssigneesAndTags} from '@/lib/types';
+import type {FullTask} from '@/lib/types';
 
 interface TaskFormProps {
-	task?: TaskWithAssigneesAndTags;
+	task?: FullTask;
 	availableTags: string[];
-	members: {id: string; name: string}[];
+	availableMembers: {id: string; name: string}[];
+	availableDependencies: {id: string; title: string}[];
 	workspaceId: string;
 }
 
 export default function TaskForm({
 	task,
 	availableTags,
-	members,
+	availableMembers,
+	availableDependencies,
 	workspaceId,
 }: TaskFormProps) {
 	const isEditing = !!task;
@@ -53,12 +55,14 @@ export default function TaskForm({
 					const priority = formData.get('priority') as '' | Priority;
 					const status = formData.get('status') as '' | TaskStatus;
 					const assignees = formData.getAll('assignees') as string[];
+					const dependencies = formData.getAll('dependencies') as string[];
 
 					const taskData = {
 						title: formData.get('title') as string,
 						description: formData.get('description') as string,
 						tags: formData.getAll('tags') as string[],
-						...(assignees.length ? {assignees} : {}),
+						assignees,
+						dependencies,
 						...(priority ? {priority} : {}),
 						...(status ? {status} : {}),
 						...(deadline ? {deadline: new Date(deadline)} : {}),
@@ -93,8 +97,18 @@ export default function TaskForm({
 					name="assignees"
 					label="Assignees"
 					placeholder="Search members…"
-					options={members.map(m => ({value: m.id, label: m.name}))}
+					options={availableMembers.map(m => ({value: m.id, label: m.name}))}
 					defaultValue={task?.assignees.map(a => a.id) ?? []}
+				/>
+				<MultiSuggestInput
+					name="dependencies"
+					label="Dependencies"
+					placeholder="Search tasks…"
+					options={availableDependencies.map(m => ({
+						value: m.id,
+						label: m.title,
+					}))}
+					defaultValue={task?.dependencies.map(t => t.id) ?? []}
 				/>
 				<Select name="status" label="Status" defaultValue={task?.status ?? ''}>
 					<option value="">Select&hellip;</option>

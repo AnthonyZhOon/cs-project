@@ -392,12 +392,9 @@ export const createAPI = (prisma: PrismaClient) => {
 
 		getTask: async (id: Id) =>
 			// TODO: only select properties that are needed
-			prisma.task.findUnique({where: {id}}),
-		getTaskWithAssigneesAndTags: async (id: Id) =>
-			// TODO: only select properties that are needed
 			prisma.task.findUnique({
 				where: {id},
-				include: {assignees: true, tags: true},
+				include: {assignees: true, tags: true, dependencies: true},
 			}),
 
 		getEvent: async (id: Id) =>
@@ -433,7 +430,7 @@ export const createAPI = (prisma: PrismaClient) => {
 						? {assignees: {some: {id: assigneeId}}}
 						: {}),
 				},
-				include: {assignees: true, tags: true},
+				include: {assignees: true, tags: true, dependencies: true},
 				orderBy: {deadline: 'asc'},
 			}),
 
@@ -491,6 +488,25 @@ export const createAPI = (prisma: PrismaClient) => {
 					},
 				})
 			).map(m => ({id: m.userId, name: m.user.name})),
+
+		getAvailableTaskDependencies: async (
+			workspaceId: Id,
+			visibility: WorkspaceMemberRole = WorkspaceMemberRole.MEMBER,
+		) =>
+			prisma.task.findMany({
+				select: {id: true, title: true},
+				where: {
+					workspaceId,
+					visibility: {
+						in: [
+							WorkspaceMemberRole.MANAGER,
+							...(visibility === WorkspaceMemberRole.MEMBER
+								? [WorkspaceMemberRole.MEMBER]
+								: []),
+						],
+					},
+				},
+			}),
 
 		createTask: async ({
 			workspaceId,
