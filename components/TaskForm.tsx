@@ -61,7 +61,7 @@ export default function TaskForm({
 						? async () => {
 								const res = await deleteTaskAction(task.id);
 								if (!res.ok) {
-									setError(res.error || 'Failed to delete task.');
+									setError(res.error);
 									return;
 								}
 
@@ -94,7 +94,7 @@ export default function TaskForm({
 							: await createTaskAction(workspaceId, taskData);
 
 						if (!res.ok) {
-							setError(res.error || 'Failed to save task.');
+							setError(res.error);
 							return;
 						}
 
