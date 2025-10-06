@@ -7,15 +7,17 @@ export default async function NewTaskPage({
 	params: Promise<{workspaceId: string}>;
 }) {
 	const {workspaceId} = await params;
-	const [availableTags, members] = await Promise.all([
+	const [availableTags, members, dependencies] = await Promise.all([
 		api.getTags(workspaceId),
-		api.getWorkspaceMembers(workspaceId),
+		api.getAvailableMembers(workspaceId),
+		api.getAvailableTaskDependencies(workspaceId),
 	]);
 
 	return (
 		<TaskForm
 			availableTags={availableTags}
-			members={members}
+			availableMembers={members}
+			availableDependencies={dependencies}
 			workspaceId={workspaceId}
 		/>
 	);
