@@ -9,14 +9,10 @@ type Event = Awaited<ReturnType<typeof api.getAllEvents>>[number];
 
 // Simple task list item component
 const TaskListItem = ({
-	id,
-	title,
-	status,
-	priority,
-	deadline,
-	tags,
-	workspace,
-}: Task) => {
+	task: {id, title, status, priority, deadline, tags, workspace},
+}: {
+	task: Task;
+}) => {
 	const getPriorityColour = (priority: Task['priority']): string => {
 		switch (priority) {
 			case 'HIGH':
@@ -94,7 +90,11 @@ const TaskListItem = ({
 };
 
 // Simple event list item component
-const EventListItem = ({id, title, start, end, tags, workspace}: Event) => (
+const EventListItem = ({
+	event: {id, title, start, end, tags, workspace},
+}: {
+	event: Event;
+}) => (
 	<Link
 		href={`/${workspace.id}/events/${id}`}
 		className="block p-3 bg-white border border-black rounded-lg hover:shadow-md transition-all"
@@ -166,7 +166,7 @@ export default async function MyAssignmentsPage() {
 				) : (
 					<div className="space-y-3">
 						{tasks.map(task => (
-							<TaskListItem {...task} />
+							<TaskListItem key={task.id} task={task} />
 						))}
 					</div>
 				)}
@@ -188,7 +188,7 @@ export default async function MyAssignmentsPage() {
 				) : (
 					<div className="space-y-3">
 						{events.map(event => (
-							<EventListItem {...event} />
+							<EventListItem key={event.id} event={event} />
 						))}
 					</div>
 				)}
