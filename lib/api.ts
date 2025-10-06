@@ -472,6 +472,24 @@ export const createAPI = (prisma: PrismaClient) => {
 			}),
 
 		/** Sorted by deadline in ascending order */
+		getAllTasks: async (assigneeId: Id) =>
+			prisma.task.findMany({
+				where: {
+					assignees: {some: {id: assigneeId}},
+				},
+				select: {
+					id: true,
+					title: true,
+					status: true,
+					priority: true,
+					deadline: true,
+					tags: {select: {name: true}},
+					workspace: {select: {id: true, name: true}},
+				},
+				orderBy: {deadline: 'asc'},
+			}),
+
+		/** Sorted by deadline in ascending order */
 		getTasks: async ({
 			workspaceId,
 			priority,
@@ -496,6 +514,23 @@ export const createAPI = (prisma: PrismaClient) => {
 				},
 				include: {assignees: true, tags: true, dependencies: true},
 				orderBy: {deadline: 'asc'},
+			}),
+
+		/** Sorted by deadline in ascending order */
+		getAllEvents: async (attendeeId: Id) =>
+			prisma.event.findMany({
+				where: {
+					attendees: {some: {id: attendeeId}},
+				},
+				select: {
+					id: true,
+					title: true,
+					start: true,
+					end: true,
+					tags: {select: {name: true}},
+					workspace: {select: {id: true, name: true}},
+				},
+				orderBy: [{start: 'asc'}, {end: 'asc'}],
 			}),
 
 		/** Sorted by start time and then end time in ascending order */
