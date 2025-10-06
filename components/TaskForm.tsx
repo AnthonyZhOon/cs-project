@@ -33,7 +33,7 @@ export default function TaskForm({
 }: TaskFormProps) {
 	const isEditing = !!task;
 	const router = useRouter();
-	const [isPending, startTransition] = useTransition();
+	const [, startTransition] = useTransition();
 	const [error, setError] = useState<string | null>(null);
 
 	// Format the deadline for datetime-local input
@@ -134,8 +134,11 @@ export default function TaskForm({
 					}))}
 					defaultValue={task?.dependencies.map(t => t.id) ?? []}
 				/>
-				<Select name="status" label="Status" defaultValue={task?.status ?? ''}>
-					<option value="">Select&hellip;</option>
+				<Select
+					name="status"
+					label="Status"
+					defaultValue={task?.status ?? TaskStatus.TODO}
+				>
 					<option value={TaskStatus.TODO}>To do</option>
 					<option value={TaskStatus.IN_PROGRESS}>In progress</option>
 					<option value={TaskStatus.COMPLETE}>Complete</option>
