@@ -22,7 +22,7 @@ export default function CreateWorkspacePage() {
 
 	return (
 		<>
-			<h2 className="text-xl font-bold mb-2">Welcome !</h2>
+			<h2 className="text-xl font-bold mb-2">Welcome!</h2>
 			<h3 className="text-lg mb-6">Create your workspace</h3>
 
 			<form action={createWorkspaceAction} className="space-y-4">
