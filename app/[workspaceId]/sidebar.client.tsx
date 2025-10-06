@@ -10,10 +10,21 @@ export default function ClientSidebar({workspaceId}: {workspaceId: string}) {
 		{href: `/${workspaceId}/dashboard`, label: 'Dashboard'},
 		{href: `/${workspaceId}/tasks`, label: 'Tasks'},
 		{href: `/${workspaceId}/events`, label: 'Events'},
+		{href: `/${workspaceId}/members`, label: 'Members'},
 	];
 
 	return (
-		<nav className="px-2 space-y-2">
+		<nav className="px-2 space-y-1">
+			{/* My Assignments link */}
+			<div className="pt-2 pb-2 border-b mb-2">
+				<Link
+					href="/my-assignments"
+					className="group flex items-center gap-3 rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-50"
+				>
+					<span className="h-5 w-1.5 rounded-full bg-transparent group-hover:bg-gray-300" />
+					<span>📋 My Assignments</span>
+				</Link>
+			</div>
 			{items.map(it => {
 				const active =
 					pathname === it.href || pathname.startsWith(it.href + '/');

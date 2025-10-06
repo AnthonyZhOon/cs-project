@@ -1,23 +1,29 @@
 import {createAPI} from '@/lib/api';
-import {Priority} from '@/lib/types';
+import {Priority, type Id} from '@/lib/types';
 import type {PrismaClient} from '@/lib/prisma';
 
+const createUser = (() => {
+	let id = 0;
+	return async (
+		prisma: PrismaClient,
+		{name, email}: {name: string; email: string},
+	): Promise<Id> =>
+		(
+			await prisma.user.create({
+				data: {id: String(id++), name, email},
+				select: {id: true},
+			})
+		).id;
+})();
+
 const base = async (prisma: PrismaClient): Promise<void> => {
-	const {id: alice} = await prisma.user.create({
-		data: {
-			id: 'alice',
-			name: 'Alice',
-			email: 'axxx0000@student.monash.edu',
-		},
-		select: {id: true},
+	const alice = await createUser(prisma, {
+		name: 'Alice',
+		email: 'axxx0000@student.monash.edu',
 	});
-	const {id: bob} = await prisma.user.create({
-		data: {
-			id: 'bob',
-			name: 'Bob',
-			email: 'bxxx0000@student.monash.edu',
-		},
-		select: {id: true},
+	const bob = await createUser(prisma, {
+		name: 'Bob',
+		email: 'bxxx0000@student.monash.edu',
 	});
 	const {id: workspaceId} = await prisma.workspace.create({
 		data: {
@@ -144,60 +150,51 @@ const populateUniversityDramaClub = async (
 	console.log('Creating club members...');
 
 	// Club Executives
-	const theseusId = await api.login({
-		id: 'pres',
-		email: 'theseus@university.edu',
-		name: 'Theseus Chen (Club President)',
+	const theseusId = await createUser(prisma, {
+		name: 'theseus@university.edu',
+		email: 'Theseus Chen (Club President)',
 	});
 
-	const hippolytaId = await api.login({
-		id: 'vp',
-		email: 'hippolyta@university.edu',
-		name: 'Hippolyta Rodriguez (Vice President)',
+	const hippolytaId = await createUser(prisma, {
+		name: 'hippolyta@university.edu',
+		email: 'Hippolyta Rodriguez (Vice President)',
 	});
 
-	const egeusId = await api.login({
-		id: 'prof',
-		email: 'egeus@university.edu',
-		name: 'Professor Egeus (Faculty Advisor)',
+	const egeusId = await createUser(prisma, {
+		name: 'egeus@university.edu',
+		email: 'Professor Egeus (Faculty Advisor)',
 	});
 
 	// Club Members
-	const lysanderId = await api.login({
-		id: 'member1',
-		email: 'lysander@university.edu',
-		name: 'Lysander Kim',
+	const lysanderId = await createUser(prisma, {
+		name: 'lysander@university.edu',
+		email: 'Lysander Kim',
 	});
 
-	const demetriusId = await api.login({
-		id: 'member2',
-		email: 'demetrius@university.edu',
-		name: 'Demetrius Johnson',
+	const demetriusId = await createUser(prisma, {
+		name: 'demetrius@university.edu',
+		email: 'Demetrius Johnson',
 	});
 
-	const hermiaId = await api.login({
-		id: 'member3',
-		email: 'hermia@university.edu',
-		name: 'Hermia Patel',
+	const hermiaId = await createUser(prisma, {
+		name: 'hermia@university.edu',
+		email: 'Hermia Patel',
 	});
 
-	const helenaId = await api.login({
-		id: 'member4',
-		email: 'helena@university.edu',
-		name: 'Helena Williams',
+	const helenaId = await createUser(prisma, {
+		name: 'helena@university.edu',
+		email: 'Helena Williams',
 	});
 
 	// Production Crew
-	const quinceId = await api.login({
-		id: 'prod1',
-		email: 'quince@university.edu',
-		name: 'Peter Quince (Technical Director)',
+	const quinceId = await createUser(prisma, {
+		name: 'quince@university.edu',
+		email: 'Peter Quince (Technical Director)',
 	});
 
-	const bottomId = await api.login({
-		id: 'prod2',
-		email: 'bottom@university.edu',
-		name: 'Nick Bottom (Lead Actor)',
+	const bottomId = await createUser(prisma, {
+		name: 'bottom@university.edu',
+		email: 'Nick Bottom (Lead Actor)',
 	});
 
 	// Create Workspace

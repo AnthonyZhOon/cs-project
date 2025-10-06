@@ -79,22 +79,31 @@ export const createAPI = (prisma: PrismaClient) => {
 		});
 	};
 
-	// TODO: check dependency cycles
 	const checkTaskDependencies = async (
 		prisma: TransactionClient,
+		taskId: Id | undefined,
 		workspaceId: Id,
 		visibility: WorkspaceMemberRole,
-		dependencies: Id[],
+		dependencyIds: Id[],
 	): Promise<Error[]> => {
-		const tasks = Object.groupBy(
-			await prisma.task.findMany({
-				select: {id: true, visibility: true},
-				where: {workspaceId, id: {in: dependencies}},
-			}),
-			x => x.id,
+		const dependencies = Object.fromEntries(
+			Object.entries(
+				Object.groupBy(
+					await prisma.task.findMany({
+						select: {
+							id: true,
+							title: true,
+							visibility: true,
+							dependencies: {select: {id: true}},
+						},
+						where: {workspaceId, id: {in: dependencyIds}},
+					}),
+					x => x.id,
+				),
+			).map(([k, v]) => [k, v![0]!]),
 		);
-		return dependencies.flatMap(id => {
-			const [dep] = tasks[id] ?? [];
+		const errors = dependencyIds.flatMap(id => {
+			const dep = dependencies[id];
 			return !dep
 				? [new Error(`Dependent task ${id} is not in workspace ${workspaceId}`)]
 				: compareRoles(dep.visibility, visibility) < 0
@@ -105,6 +114,58 @@ export const createAPI = (prisma: PrismaClient) => {
 						]
 					: [];
 		});
+		if (errors.length) return errors;
+
+		const tasks: Record<
+			Id,
+			Omit<(typeof dependencies)[number], 'title' | 'visibility'>
+		> = {...dependencies};
+		// Check for cycles
+		const check = async (
+			{id, dependencies}: (typeof tasks)[number],
+			originalDependency: string,
+			seen: Set<Id>,
+		): Promise<Error[]> => {
+			if (seen.has(id)) {
+				return [
+					new Error(
+						`Dependency cycle detected at task ‘${originalDependency}’`,
+					),
+				];
+			}
+
+			(
+				await prisma.task.findMany({
+					select: {
+						id: true,
+						dependencies: {select: {id: true}},
+					},
+					where: {
+						id: {
+							in: dependencies.map(t => t.id).filter(id => !(id in tasks)),
+						},
+					},
+				})
+			).forEach(t => (tasks[t.id] = t));
+			return (
+				await Promise.all(
+					dependencies.map(async t =>
+						check(tasks[t.id]!, originalDependency, new Set([...seen, id])),
+					),
+				)
+			).flat();
+		};
+		return (
+			await Promise.all(
+				dependencyIds.map(async id =>
+					check(
+						tasks[id]!,
+						dependencies[id]!.title,
+						new Set(taskId === undefined ? undefined : [taskId]),
+					),
+				),
+			)
+		).flat();
 	};
 
 	const checkTaskParents = async (
@@ -137,6 +198,7 @@ export const createAPI = (prisma: PrismaClient) => {
 	const checkTask = async (
 		prisma: TransactionClient,
 		{
+			id,
 			title,
 			workspaceId,
 			visibility,
@@ -144,6 +206,7 @@ export const createAPI = (prisma: PrismaClient) => {
 			dependencies,
 			parents,
 		}: {
+			id?: Id | undefined;
 			title?: string | undefined;
 			workspaceId: Id;
 			visibility: WorkspaceMemberRole;
@@ -172,6 +235,7 @@ export const createAPI = (prisma: PrismaClient) => {
 					? [
 							checkTaskDependencies(
 								prisma,
+								id,
 								workspaceId,
 								visibility,
 								dependencies,
@@ -189,14 +253,13 @@ export const createAPI = (prisma: PrismaClient) => {
 		getUser: async (id: Id) =>
 			// TODO: only select properties that are needed
 			prisma.user.findUnique({where: {id}}),
-		login: async ({id, email, name}: CreateUserArgs): Promise<Id> => {
+		login: async ({id, email, name}: CreateUserArgs): Promise<void> => {
 			await prisma.user.upsert({
 				select: {id: true},
 				where: {id},
 				create: {id, email, name},
 				update: {name},
 			});
-			return id;
 		},
 		updateUser: async (
 			id: Id,
@@ -225,6 +288,58 @@ export const createAPI = (prisma: PrismaClient) => {
 					},
 				})
 			).members.map(({user}) => user),
+
+		getWorkspaceMembersWithRoles: async (id: Id) =>
+			// Get members with their roles for management
+			await prisma.workspace.findUniqueOrThrow({
+				where: {id},
+				include: {
+					owner: {select: {id: true}},
+					members: {
+						include: {user: {select: {id: true, name: true, email: true}}},
+					},
+				},
+			}),
+
+		getUserWorkspaceRole: async (workspaceId: Id, userId: Id) => {
+			const member = await prisma.workspaceMember.findUnique({
+				where: {userId_workspaceId: {userId, workspaceId}},
+				select: {role: true},
+			});
+			return member?.role;
+		},
+
+		updateMemberRole: async (
+			workspaceId: Id,
+			userId: Id,
+			role: WorkspaceMemberRole,
+		): Promise<void> => {
+			await prisma.workspaceMember.update({
+				where: {userId_workspaceId: {userId, workspaceId}},
+				data: {role},
+			});
+		},
+
+		removeMember: async (workspaceId: Id, userId: Id): Promise<void> => {
+			await prisma.workspaceMember.delete({
+				where: {userId_workspaceId: {userId, workspaceId}},
+			});
+		},
+
+		getWorkspaceInvites: async (workspaceId: Id) =>
+			prisma.workspaceInvite.findMany({
+				where: {workspaceId},
+				select: {email: true, memberRole: true},
+			}),
+		removeWorkspaceInvite: async (
+			workspaceId: Id,
+			email: string,
+		): Promise<void> => {
+			await prisma.workspaceInvite.delete({
+				where: {email_workspaceId: {email, workspaceId}},
+			});
+		},
+
 		getWorkspaces: async (user: Id) =>
 			// TODO: only select properties that are needed
 			prisma.workspace.findMany({
@@ -273,18 +388,77 @@ export const createAPI = (prisma: PrismaClient) => {
 		// 	});
 		// },
 
+		createWorkspaceInvites: async (
+			workspaceId: Id,
+			invites: {email: string; memberRole: WorkspaceMemberRole}[],
+		): Promise<void> => {
+			if (invites.length === 0) return;
+
+			await prisma.workspaceInvite.createMany({
+				data: invites.map(invite => ({
+					...invite,
+					workspaceId,
+				})),
+				skipDuplicates: true,
+			});
+		},
+
+		getPendingInvites: async (userId: Id) => {
+			const user = await prisma.user.findUniqueOrThrow({
+				where: {id: userId},
+				select: {email: true},
+			});
+			return prisma.workspaceInvite.findMany({
+				where: {email: user.email},
+				include: {workspace: true},
+			});
+		},
+
+		acceptInvite: async (userId: Id, workspaceId: Id): Promise<void> => {
+			await prisma.$transaction(async prisma => {
+				const email = (
+					await prisma.user.findUniqueOrThrow({
+						where: {id: userId},
+						select: {email: true},
+					})
+				).email;
+				const invite = await prisma.workspaceInvite.findUniqueOrThrow({
+					where: {email_workspaceId: {email, workspaceId}},
+				});
+				await prisma.workspaceMember.create({
+					data: {
+						userId,
+						workspaceId,
+						role: invite.memberRole,
+					},
+				});
+				await prisma.workspaceInvite.delete({
+					where: {email_workspaceId: {email, workspaceId}},
+				});
+			});
+		},
+
+		rejectInvite: async (userId: Id, workspaceId: Id): Promise<void> => {
+			const email = (
+				await prisma.user.findUniqueOrThrow({
+					where: {id: userId},
+					select: {email: true},
+				})
+			).email;
+			await prisma.workspaceInvite.delete({
+				where: {email_workspaceId: {email, workspaceId}},
+			});
+		},
+
 		// #endregion
 
 		// #region Tasks & Events
 
 		getTask: async (id: Id) =>
 			// TODO: only select properties that are needed
-			prisma.task.findUnique({where: {id}}),
-		getTaskWithAssigneesAndTags: async (id: Id) =>
-			// TODO: only select properties that are needed
 			prisma.task.findUnique({
 				where: {id},
-				include: {assignees: true, tags: true},
+				include: {assignees: true, tags: true, dependencies: true},
 			}),
 
 		getEvent: async (id: Id) =>
@@ -320,7 +494,7 @@ export const createAPI = (prisma: PrismaClient) => {
 						? {assignees: {some: {id: assigneeId}}}
 						: {}),
 				},
-				include: {assignees: true, tags: true},
+				include: {assignees: true, tags: true, dependencies: true},
 				orderBy: {deadline: 'asc'},
 			}),
 
@@ -378,6 +552,25 @@ export const createAPI = (prisma: PrismaClient) => {
 					},
 				})
 			).map(m => ({id: m.userId, name: m.user.name})),
+
+		getAvailableTaskDependencies: async (
+			workspaceId: Id,
+			visibility: WorkspaceMemberRole = WorkspaceMemberRole.MEMBER,
+		) =>
+			prisma.task.findMany({
+				select: {id: true, title: true},
+				where: {
+					workspaceId,
+					visibility: {
+						in: [
+							WorkspaceMemberRole.MANAGER,
+							...(visibility === WorkspaceMemberRole.MEMBER
+								? [WorkspaceMemberRole.MEMBER]
+								: []),
+						],
+					},
+				},
+			}),
 
 		createTask: async ({
 			workspaceId,
@@ -438,6 +631,7 @@ export const createAPI = (prisma: PrismaClient) => {
 					where: {id},
 				});
 				const errors = await checkTask(prisma, {
+					id,
 					title,
 					workspaceId,
 					visibility,

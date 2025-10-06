@@ -4,10 +4,10 @@ import Input from '@/components/inputs/Input';
 import {createWorkspaceAction} from './actions';
 
 export default function CreateWorkspacePage() {
-	const [members, setMembers] = useState([{email: '', role: 'Member'}]);
+	const [members, setMembers] = useState([{email: '', role: 'MEMBER'}]);
 
 	const addMember = () => {
-		setMembers([...members, {email: '', role: 'Member'}]);
+		setMembers([...members, {email: '', role: 'MEMBER'}]);
 	};
 
 	const updateMember = (
@@ -42,21 +42,24 @@ export default function CreateWorkspacePage() {
 						<div key={idx} className="flex gap-2">
 							<input
 								type="email"
+								name={`member-${idx}-email`}
 								placeholder="Enter email to invite"
 								value={member.email}
 								onChange={e => updateMember(idx, 'email', e.target.value)}
 								className="flex-1 border p-2 rounded"
 							/>
 							<select
+								name={`member-${idx}-role`}
 								value={member.role}
 								onChange={e => updateMember(idx, 'role', e.target.value)}
 								className="w-32 border p-2 rounded"
 							>
-								<option>Member</option>
-								<option>Manager</option>
+								<option value="MEMBER">Member</option>
+								<option value="MANAGER">Manager</option>
 							</select>
 						</div>
 					))}
+					<input type="hidden" name="members-count" value={members.length} />
 					<button
 						type="button"
 						onClick={addMember}

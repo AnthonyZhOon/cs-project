@@ -1,7 +1,7 @@
 import ComponentBox from '@/components/ComponentBox';
 import {InfoRow, PillRow} from '@/components/InfoRow';
 import {formatInstant} from '@/lib/formatTime';
-import type {Task, TaskWithAssigneesAndTags} from '@/lib/types';
+import type {FullTask, Task} from '@/lib/types';
 
 const Status = ({
 	status,
@@ -84,7 +84,7 @@ export default function TaskComponent({
 	task,
 	className = '',
 }: {
-	task: NonNullable<TaskWithAssigneesAndTags>;
+	task: NonNullable<FullTask>;
 	className?: string;
 }) {
 	const taskIcon = '📋';
@@ -105,6 +105,11 @@ export default function TaskComponent({
 				<PillRow
 					tags={task.assignees.map(a => a.name)}
 					label="Assignees"
+					className="text-gray-600"
+				/>
+				<PillRow
+					tags={task.dependencies.map(t => t.title)}
+					label="Dependencies"
 					className="text-gray-600"
 				/>
 				<p className="text-sm text-gray-800 leading-relaxed">

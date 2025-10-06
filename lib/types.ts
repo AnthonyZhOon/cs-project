@@ -16,9 +16,7 @@ export {
 } from './generated/prisma';
 
 export type Id = string;
-export type TaskWithAssigneesAndTags = Awaited<
-	ReturnType<typeof api.getTaskWithAssigneesAndTags>
->;
+export type FullTask = Awaited<ReturnType<typeof api.getTask>>;
 
 export const roleRank = (role: WorkspaceMemberRole): number => {
 	switch (role) {
