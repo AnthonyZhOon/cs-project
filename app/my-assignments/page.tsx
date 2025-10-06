@@ -59,7 +59,9 @@ const TaskListItem = ({
 					{task.title}
 				</h3>
 				<span className="text-sm text-gray-400 flex-shrink-0">in</span>
-				<span className="text-sm font-medium text-gray-700 flex-shrink-0">{workspace.name}</span>
+				<span className="text-sm font-medium text-gray-700 flex-shrink-0">
+					{workspace.name}
+				</span>
 				<div className="flex items-center gap-2 text-xs ml-auto flex-shrink-0">
 					<span
 						className={`px-2 py-1 rounded-full font-medium ${getPriorityColor(task.priority)}`}
@@ -105,7 +107,9 @@ const EventListItem = ({
 				{event.title}
 			</h3>
 			<span className="text-sm text-gray-400 flex-shrink-0">in</span>
-			<span className="text-sm font-medium text-gray-700 flex-shrink-0">{workspace.name}</span>
+			<span className="text-sm font-medium text-gray-700 flex-shrink-0">
+				{workspace.name}
+			</span>
 			<div className="flex items-center gap-2 text-xs ml-auto flex-shrink-0">
 				<span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full whitespace-nowrap">
 					🕒 {formatRange(event.start, event.end)}
