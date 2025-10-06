@@ -1,8 +1,8 @@
 'use client';
+import Link from 'next/link';
 import {formatInstant} from '@/lib/formatTime';
 import ComponentBox from './ComponentBox';
 import type {Task} from '@/lib/types';
-import Link from 'next/link';
 
 // Sorting and selecting number of items will be the responsibility of the parent.
 export default function UpcomingTaskBox({tasks}: {tasks: Task[]}) {

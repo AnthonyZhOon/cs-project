@@ -1,8 +1,8 @@
 'use client';
+import Link from 'next/link';
 import {formatInstant} from '@/lib/formatTime';
 import ComponentBox from './ComponentBox';
 import type {Event} from '@/lib/types';
-import Link from 'next/link';
 
 export default function UpcomingEventBox({events}: {events: Event[]}) {
 	return (

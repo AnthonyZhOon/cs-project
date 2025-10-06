@@ -1,7 +1,7 @@
 import ComponentBox from '@/components/ComponentBox';
 import {InfoRow, PillRow} from '@/components/InfoRow';
 import {formatInstant} from '@/lib/formatTime';
-import type {Task, FullTask} from '@/lib/types';
+import type {FullTask, Task} from '@/lib/types';
 
 const Status = ({
 	status,

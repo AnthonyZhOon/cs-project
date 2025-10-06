@@ -5,8 +5,8 @@ export default async function LandingPage() {
 	const session = await auth0.getSession();
 	const user = session?.user;
 	const displayName =
-		(user?.name as string | undefined) ??
-		(user?.email ? user.email.split('@')[0] : undefined);
+		user?.name ??
+		(user?.email !== undefined ? user.email.split('@')[0] : undefined);
 
 	return (
 		<main className="relative flex flex-col items-center justify-center min-h-screen bg-gray-50">

@@ -1,18 +1,18 @@
 'use client';
 
-import {useState, useTransition} from 'react';
 import {redirect, useRouter} from 'next/navigation';
+import {useState, useTransition} from 'react';
 import CreateForm from '@/components/CreateForm';
 import Input from '@/components/inputs/Input';
 import MultiSuggestInput from '@/components/inputs/MultiSuggestInput';
 import Select from '@/components/inputs/Select';
 import Textarea from '@/components/inputs/Textarea';
-import api from '@/lib/api';
 import {
 	createTaskAction,
 	deleteTaskAction,
 	updateTaskAction,
 } from '@/lib/actions/tasks';
+import api from '@/lib/api';
 import {Priority, TaskStatus} from '@/lib/types';
 import type {FullTask} from '@/lib/types';
 
@@ -47,7 +47,7 @@ export default function TaskForm({
 
 	return (
 		<div className="max-w-3xl mx-auto p-4">
-			{error && (
+			{error !== null && (
 				<div className="mb-4 p-3 rounded border border-red-200 bg-red-50 text-red-700 whitespace-pre-line">
 					{error}
 				</div>
@@ -69,7 +69,7 @@ export default function TaskForm({
 							}
 						: undefined
 				}
-				action={async (formData: FormData) => {
+				action={(formData: FormData) => {
 					setError(null);
 					startTransition(async () => {
 						const deadline = formData.get('deadline') as string;
@@ -81,7 +81,7 @@ export default function TaskForm({
 						const taskData = {
 							title: formData.get('title') as string,
 							description: formData.get('description') as string,
-							tags: (formData.getAll('tags') as string[]) ?? [],
+							tags: formData.getAll('tags') as string[],
 							...(assignees.length ? {assignees} : {}),
 							...(dependencies.length ? {dependencies} : {}),
 							...(priority ? {priority} : {}),
