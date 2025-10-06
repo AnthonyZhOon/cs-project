@@ -1,11 +1,10 @@
 import Link from 'next/link';
 import FiltersBar from '@/components/FiltersBar';
-import TaskComponent from '@/components/Task';
+import SortableTaskList from '@/components/SortableTaskList';
 import api from '@/lib/api';
 import {priorityFromString} from '@/lib/types';
 import type {Priority} from '@/lib/types';
 
-// Page: accepts tasks if provided, otherwise shows example placeholders so the route renders standalone
 export default async function TasksPage({
 	searchParams,
 	params,
@@ -43,6 +42,7 @@ export default async function TasksPage({
 					</button>
 				</Link>
 			</div>
+
 			<FiltersBar
 				filters={[
 					{
@@ -66,21 +66,7 @@ export default async function TasksPage({
 				]}
 			/>
 
-			{tasks.length === 0 ? (
-				<p className="text-sm text-gray-600">No tasks found.</p>
-			) : (
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-					{tasks.map(task => (
-						<Link
-							key={task.id}
-							href={`/${workspaceId}/tasks/${task.id}`}
-							className="block hover:opacity-80 transition-opacity"
-						>
-							<TaskComponent key={task.id} task={task} />
-						</Link>
-					))}
-				</div>
-			)}
+			<SortableTaskList tasks={tasks} />
 		</div>
 	);
 }

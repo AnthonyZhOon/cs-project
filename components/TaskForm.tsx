@@ -1,6 +1,6 @@
 'use client';
 
-import {redirect, useRouter} from 'next/navigation';
+import {useRouter} from 'next/navigation';
 import {useState, useTransition} from 'react';
 import CreateForm from '@/components/CreateForm';
 import Input from '@/components/inputs/Input';
@@ -12,7 +12,6 @@ import {
 	deleteTaskAction,
 	updateTaskAction,
 } from '@/lib/actions/tasks';
-import api from '@/lib/api';
 import {Priority, TaskStatus} from '@/lib/types';
 import type {FullTask} from '@/lib/types';
 
