@@ -72,18 +72,19 @@ export default function Calendar({
 						const marked = markedSet.has(dateKey);
 						return (
 							<button
-								key={key}
-								type="button"
-								onClick={() => onSelectDate?.(date)}
-								className={`relative h-9 rounded-md border border-black/20 hover:border-black transition-colors focus:outline-none focus:ring-2 focus:ring-black/50 flex items-center justify-center ${
-									isToday ? 'bg-black text-white font-semibold' : 'bg-white'
-								}`}
-							>
-								<span>{date.getDate()}</span>
-								{marked && (
-									<span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-black" />
-								)}
-							</button>
+							key={key}
+							type="button"
+							onClick={() => onSelectDate?.(date)}
+							className={`relative h-9 rounded-md border border-black/20 transition-colors focus:outline-none focus:ring-2 focus:ring-black/50 flex items-center justify-center
+								${isToday ? 'bg-black text-white font-semibold' : 'bg-white hover:bg-pink-50 hover:border-pink-300'}
+							`}
+						>
+							<span>{date.getDate()}</span>
+							{marked && (
+								<span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-black" />
+							)}
+						</button>
+
 						);
 					})}
 				</div>
