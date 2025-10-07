@@ -19,15 +19,23 @@ export default async function DashboardPage({
 	const tasks = await api.getTasks({workspaceId, assigneeId: userId});
 	const events = await api.getEvents({workspaceId, attendeeId: userId});
 	return (
-		<div className="grid grid-cols-12 gap-4 p-6">
-			<section className="col-span-12 lg:col-span-6 space-y-4">
-				<UpcomingTaskBox tasks={tasks} />
-				<TaskSummary tasks={tasks} />
+		<div className="grid grid-cols-12 gap-6 p-6 bg-pink-50 min-h-screen">
+			<section className="col-span-12 lg:col-span-5 space-y-4">
+				<div className="rounded-2xl bg-white/70 border border-pink-100 shadow-sm p-4">
+					<UpcomingTaskBox tasks={tasks} />
+				</div>
+				<div className="rounded-2xl bg-white/70 border border-pink-100 shadow-sm p-4">
+					<TaskSummary tasks={tasks} />
+				</div>
 			</section>
 
 			<section className="col-span-12 lg:col-span-6 space-y-4">
-				<UpcomingEventBox events={events} />
-				<Calendar />
+				<div className="rounded-2xl bg-white/70 border border-blue-100 shadow-sm p-4">
+					<UpcomingEventBox events={events} />
+				</div>
+				<div className="rounded-2xl bg-white/70 border border-blue-100 shadow-sm p-4">
+					<Calendar />
+				</div>
 			</section>
 		</div>
 	);
