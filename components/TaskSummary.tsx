@@ -57,10 +57,10 @@ export default function TaskSummary({tasks}: {tasks: Task[]}) {
 
 	const total = Math.max(todo + inProgress + done, 0.0001);
 	const data: Segment[] = [
-		{label: 'To Do', value: (todo / total) * 100, color: '#9CA3AF'},
-		{label: 'In Progress', value: (inProgress / total) * 100, color: '#4B5563'},
-		{label: 'Done', value: (done / total) * 100, color: '#E5E7EB'},
-	].filter(segment => segment.value > 0); // Filter out segments with 0 value
+		{label: 'To Do', value: (todo / total) * 100, color: '#FCA5A5'}, 
+		{label: 'In Progress', value: (inProgress / total) * 100, color: '#ffeca2ff'}, 
+		{label: 'Done', value: (done / total) * 100, color: '#BBF7D0'}, 
+	].filter(segment => segment.value > 0);
 
 	// Handle case where all values are 0
 	if (data.length === 0) {
