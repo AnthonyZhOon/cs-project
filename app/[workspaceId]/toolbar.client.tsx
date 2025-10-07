@@ -17,28 +17,29 @@ export default function ClientToolbar() {
 			>
 				View workspaces
 			</Link>
-			<Link
-				href="/profile"
-				aria-label="Profile"
-				className="p-2 rounded-lg border border-pink-100 text-pink-600 hover:bg-pink-50 transition-colors"
-			>
-				{/* user icon */}
-				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-					<circle
-						cx="12"
-						cy="8"
-						r="4"
-						stroke="currentColor"
-						strokeWidth="1.5"
-					/>
-					<path
-						d="M4 20c0-4 4-6 8-6s8 2 8 6"
-						stroke="currentColor"
-						strokeWidth="1.5"
-						fill="none"
-					/>
-				</svg>
-			</Link>
+			{/* TODO: A profile page was not made a requirement */}
+			{/* <Link */}
+			{/* 	href="/profile" */}
+			{/* 	aria-label="Profile" */}
+			{/* 	className="p-2 rounded-lg border hover:bg-gray-50" */}
+			{/* > */}
+			{/* user icon */}
+			{/* <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden> */}
+			{/*   <circle */}
+			{/*     cx="12" */}
+			{/*     cy="8" */}
+			{/*     r="4" */}
+			{/*     stroke="currentColor" */}
+			{/*     strokeWidth="1.5" */}
+			{/*   /> */}
+			{/*   <path */}
+			{/*     d="M4 20c0-4 4-6 8-6s8 2 8 6" */}
+			{/*     stroke="currentColor" */}
+			{/*     strokeWidth="1.5" */}
+			{/*     fill="none" */}
+			{/*   /> */}
+			{/* </svg> */}
+			{/* </Link> */}
 			{/*Logout button*/}
 			{user && !isLoading ? (
 				<Link

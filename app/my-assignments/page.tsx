@@ -3,17 +3,17 @@ import MissingAuthError from '@/components/MissingAuthError';
 import api from '@/lib/api';
 import {auth0} from '@/lib/auth0';
 import {formatInstant, formatRange} from '@/lib/formatTime';
-import type {Event, Task, Workspace} from '@/lib/types';
+
+type Task = Awaited<ReturnType<typeof api.getAllTasks>>[number];
+type Event = Awaited<ReturnType<typeof api.getAllEvents>>[number];
 
 // Simple task list item component
 const TaskListItem = ({
-	task,
-	workspace,
+	task: {id, title, status, priority, deadline, tags, workspace},
 }: {
-	task: Task & {assignees: {name: string}[]; tags: {name: string}[]};
-	workspace: Workspace;
-}): React.JSX.Element => {
-	const getPriorityColor = (priority: Task['priority']) => {
+	task: Task;
+}) => {
+	const getPriorityColour = (priority: Task['priority']): string => {
 		switch (priority) {
 			case 'HIGH':
 				return 'bg-red-100 text-red-800';
@@ -21,10 +21,12 @@ const TaskListItem = ({
 				return 'bg-yellow-100 text-yellow-800';
 			case 'LOW':
 				return 'bg-green-100 text-green-800';
+			case null:
+				return '';
 		}
 	};
 
-	const getStatusColor = (status: Task['status']) => {
+	const getStatusColour = (status: Task['status']): string => {
 		switch (status) {
 			case 'COMPLETE':
 				return 'text-green-600';
@@ -35,7 +37,7 @@ const TaskListItem = ({
 		}
 	};
 
-	const statusIcon = (status: Task['status']) => {
+	const statusIcon = (status: Task['status']): string => {
 		switch (status) {
 			case 'COMPLETE':
 				return '✅';
@@ -48,15 +50,13 @@ const TaskListItem = ({
 
 	return (
 		<Link
-			href={`/${workspace.id}/tasks/${task.id}`}
+			href={`/${workspace.id}/tasks/${id}`}
 			className="block p-3 bg-white border border-black rounded-lg hover:shadow-md transition-all"
 		>
 			<div className="flex items-center gap-3">
-				<span className={getStatusColor(task.status)}>
-					{statusIcon(task.status)}
-				</span>
+				<span className={getStatusColour(status)}>{statusIcon(status)}</span>
 				<h3 className="font-semibold text-gray-900 truncate min-w-0 flex-shrink">
-					{task.title}
+					{title}
 				</h3>
 				<span className="text-sm text-gray-400 flex-shrink-0">in</span>
 				<span className="text-sm font-medium text-gray-700 flex-shrink-0">
@@ -64,23 +64,23 @@ const TaskListItem = ({
 				</span>
 				<div className="flex items-center gap-2 text-xs ml-auto flex-shrink-0">
 					<span
-						className={`px-2 py-1 rounded-full font-medium ${getPriorityColor(task.priority)}`}
+						className={`px-2 py-1 rounded-full font-medium ${getPriorityColour(priority)}`}
 					>
-						{task.priority}
+						{priority}
 					</span>
-					{task.deadline && (
+					{deadline && (
 						<span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full whitespace-nowrap">
-							📅 {formatInstant(task.deadline)}
+							📅 {formatInstant(deadline)}
 						</span>
 					)}
-					{task.tags.length > 0 && task.tags[0] && (
+					{tags.length > 0 && tags[0] && (
 						<span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
-							{task.tags[0].name}
+							{tags[0].name}
 						</span>
 					)}
-					{task.tags.length > 1 && (
+					{tags.length > 1 && (
 						<span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-							+{task.tags.length - 1}
+							+{tags.length - 1}
 						</span>
 					)}
 				</div>
@@ -91,20 +91,18 @@ const TaskListItem = ({
 
 // Simple event list item component
 const EventListItem = ({
-	event,
-	workspace,
+	event: {id, title, start, end, tags, workspace},
 }: {
-	event: Event & {attendees: {name: string}[]; tags: {name: string}[]};
-	workspace: Workspace;
-}): React.JSX.Element => (
+	event: Event;
+}) => (
 	<Link
-		href={`/${workspace.id}/events/${event.id}`}
+		href={`/${workspace.id}/events/${id}`}
 		className="block p-3 bg-white border border-black rounded-lg hover:shadow-md transition-all"
 	>
 		<div className="flex items-center gap-3">
 			<span>📅</span>
 			<h3 className="font-semibold text-gray-900 truncate min-w-0 flex-shrink">
-				{event.title}
+				{title}
 			</h3>
 			<span className="text-sm text-gray-400 flex-shrink-0">in</span>
 			<span className="text-sm font-medium text-gray-700 flex-shrink-0">
@@ -112,16 +110,16 @@ const EventListItem = ({
 			</span>
 			<div className="flex items-center gap-2 text-xs ml-auto flex-shrink-0">
 				<span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full whitespace-nowrap">
-					🕒 {formatRange(event.start, event.end)}
+					🕒 {formatRange(start, end)}
 				</span>
-				{event.tags.length > 0 && event.tags[0] && (
+				{tags.length > 0 && tags[0] && (
 					<span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
-						{event.tags[0].name}
+						{tags[0].name}
 					</span>
 				)}
-				{event.tags.length > 1 && (
+				{tags.length > 1 && (
 					<span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
-						+{event.tags.length - 1}
+						+{tags.length - 1}
 					</span>
 				)}
 			</div>
@@ -135,55 +133,10 @@ export default async function MyAssignmentsPage() {
 
 	const userId = session.user.sub;
 
-	// Get all workspaces for the user
-	const workspaces = await api.getWorkspaces(userId);
-
-	// Get all tasks and events across all workspaces
-	const tasksAndEventsPromises = workspaces.flatMap(workspace => [
-		api
-			.getTasks({workspaceId: workspace.id, assigneeId: userId})
-			.then(tasks => ({workspace, tasks})),
-		api
-			.getEvents({workspaceId: workspace.id, attendeeId: userId})
-			.then(events => ({workspace, events})),
+	const [tasks, events] = await Promise.all([
+		api.getAllTasks(userId),
+		api.getAllEvents(userId),
 	]);
-
-	const results = await Promise.all(tasksAndEventsPromises);
-
-	// Separate tasks and events with their workspace info
-	const tasksWithWorkspace: {
-		task: Task & {assignees: {name: string}[]; tags: {name: string}[]};
-		workspace: Workspace;
-	}[] = [];
-	const eventsWithWorkspace: {
-		event: Event & {attendees: {name: string}[]; tags: {name: string}[]};
-		workspace: Workspace;
-	}[] = [];
-
-	results.forEach(result => {
-		if ('tasks' in result) {
-			result.tasks.forEach(task => {
-				tasksWithWorkspace.push({task, workspace: result.workspace});
-			});
-		} else if ('events' in result) {
-			result.events.forEach(event => {
-				eventsWithWorkspace.push({event, workspace: result.workspace});
-			});
-		}
-	});
-
-	// Sort tasks by deadline
-	tasksWithWorkspace.sort((a, b) => {
-		if (!a.task.deadline && !b.task.deadline) return 0;
-		if (!a.task.deadline) return 1;
-		if (!b.task.deadline) return -1;
-		return a.task.deadline.getTime() - b.task.deadline.getTime();
-	});
-
-	// Sort events by start time
-	eventsWithWorkspace.sort(
-		(a, b) => a.event.start.getTime() - b.event.start.getTime(),
-	);
 
 	return (
 		<div className="p-4 space-y-4">
@@ -201,12 +154,10 @@ export default async function MyAssignmentsPage() {
 			<section className="space-y-4">
 				<div className="flex items-center gap-2">
 					<h2 className="text-xl font-bold">Tasks</h2>
-					<span className="text-sm text-gray-500">
-						({tasksWithWorkspace.length})
-					</span>
+					<span className="text-sm text-gray-500">({tasks.length})</span>
 				</div>
 
-				{tasksWithWorkspace.length === 0 ? (
+				{tasks.length === 0 ? (
 					<div className="p-8 bg-white border border-black rounded-lg text-center">
 						<p className="text-sm text-gray-600">
 							No tasks assigned to you at the moment.
@@ -214,8 +165,8 @@ export default async function MyAssignmentsPage() {
 					</div>
 				) : (
 					<div className="space-y-3">
-						{tasksWithWorkspace.map(({task, workspace}) => (
-							<TaskListItem key={task.id} task={task} workspace={workspace} />
+						{tasks.map(task => (
+							<TaskListItem key={task.id} task={task} />
 						))}
 					</div>
 				)}
@@ -225,12 +176,10 @@ export default async function MyAssignmentsPage() {
 			<section className="space-y-4">
 				<div className="flex items-center gap-2">
 					<h2 className="text-xl font-bold">Events</h2>
-					<span className="text-sm text-gray-500">
-						({eventsWithWorkspace.length})
-					</span>
+					<span className="text-sm text-gray-500">({events.length})</span>
 				</div>
 
-				{eventsWithWorkspace.length === 0 ? (
+				{events.length === 0 ? (
 					<div className="p-8 bg-white border border-black rounded-lg text-center">
 						<p className="text-sm text-gray-600">
 							No events scheduled for you at the moment.
@@ -238,12 +187,8 @@ export default async function MyAssignmentsPage() {
 					</div>
 				) : (
 					<div className="space-y-3">
-						{eventsWithWorkspace.map(({event, workspace}) => (
-							<EventListItem
-								key={event.id}
-								event={event}
-								workspace={workspace}
-							/>
+						{events.map(event => (
+							<EventListItem key={event.id} event={event} />
 						))}
 					</div>
 				)}

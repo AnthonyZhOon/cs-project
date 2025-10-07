@@ -27,12 +27,30 @@ export const roleRank = (role: WorkspaceMemberRole): number => {
 	}
 };
 
+export const compareRoles = (
+	a: WorkspaceMemberRole,
+	b: WorkspaceMemberRole,
+): number => roleRank(a) - roleRank(b);
+
 export const priorityFromString = (s: string): Priority | undefined =>
 	Object.keys($Enums.Priority).includes(s.toUpperCase())
 		? (s.toUpperCase() as Priority)
 		: undefined;
 
-export const compareRoles = (
-	x: WorkspaceMemberRole,
-	y: WorkspaceMemberRole,
-): number => roleRank(x) - roleRank(y);
+const priorityRank = (priority: Priority | null): number => {
+	switch (priority) {
+		case 'HIGH':
+			return 3;
+		case 'MEDIUM':
+			return 2;
+		case 'LOW':
+			return 1;
+		case null:
+			return 0;
+	}
+};
+
+export const comparePriorities = (
+	a: Priority | null,
+	b: Priority | null,
+): number => priorityRank(a) - priorityRank(b);
