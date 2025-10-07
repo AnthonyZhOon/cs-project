@@ -13,6 +13,10 @@ const fmt = (d: Date) =>
 export interface CalendarProps {
 	// Dates that should display a dot. Only the day portion (local) matters.
 	markedDates?: Date[];
+	// Days that have tasks (green dots)
+	taskDates?: Date[];
+	// Days that have events (yellow dots)
+	eventDates?: Date[];
 	// Month index 0-11 (default: current month)
 	month?: number;
 	// Full year (default: current year)
@@ -26,6 +30,8 @@ export interface CalendarProps {
 
 export default function Calendar({
 	markedDates = [],
+	taskDates = [],
+	eventDates = [],
 	month,
 	year,
 	onSelectDate,
@@ -41,6 +47,8 @@ export default function Calendar({
 	const firstWeekday = firstOfMonth.getDay(); // 0 = Sunday
 
 	const markedSet = useMemo(() => new Set(markedDates.map(fmt)), [markedDates]);
+	const taskSet = useMemo(() => new Set(taskDates.map(fmt)), [taskDates]);
+	const eventSet = useMemo(() => new Set(eventDates.map(fmt)), [eventDates]);
 
 	const cells: {key: string; date?: Date}[] = [];
 	// leading blanks
@@ -69,7 +77,11 @@ export default function Calendar({
 							date.getFullYear() === today.getFullYear() &&
 							date.getMonth() === today.getMonth() &&
 							date.getDate() === today.getDate();
-						const marked = markedSet.has(dateKey);
+
+						const hasTask = taskSet.has(dateKey);
+						const hasEvent = eventSet.has(dateKey);
+						const legacyMarked = markedSet.has(dateKey);
+
 						return (
 							<button
 								key={key}
@@ -80,8 +92,18 @@ export default function Calendar({
 								}`}
 							>
 								<span>{date.getDate()}</span>
-								{marked && (
-									<span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-black" />
+								{(hasTask || hasEvent || legacyMarked) && (
+									<div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 flex items-center gap-0.5">
+										{hasTask && (
+											<span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+										)}
+										{hasEvent && (
+											<span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+										)}
+										{!hasTask && !hasEvent && legacyMarked && (
+											<span className="w-1.5 h-1.5 rounded-full bg-black" />
+										)}
+									</div>
 								)}
 							</button>
 						);

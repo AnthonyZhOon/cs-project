@@ -18,6 +18,28 @@ export default async function DashboardPage({
 	const userId = session.user.sub;
 	const tasks = await api.getTasks({workspaceId, assigneeId: userId});
 	const events = await api.getEvents({workspaceId, attendeeId: userId});
+	const taskDates = tasks
+		.filter(t => t.deadline != null)
+		.map(t => new Date(t.deadline!));
+
+	const eventDates = events.flatMap(e => {
+		const start = new Date(e.start);
+		const end = new Date(e.end);
+
+		const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+		const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+		const days: Date[] = [];
+		let current = new Date(startDay);
+
+		while (current <= endDay) {
+			days.push(new Date(current));
+			current.setDate(current.getDate() + 1);
+		}
+
+		return days;
+	});
+
 	return (
 		<div className="grid grid-cols-12 gap-4 p-6">
 			<section className="col-span-12 lg:col-span-6 space-y-4">
@@ -27,7 +49,10 @@ export default async function DashboardPage({
 
 			<section className="col-span-12 lg:col-span-6 space-y-4">
 				<UpcomingEventBox events={events} />
-				<Calendar />
+				<Calendar
+					taskDates={taskDates}
+					eventDates={eventDates}
+				/>
 			</section>
 		</div>
 	);
