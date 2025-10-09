@@ -13,10 +13,10 @@ export default async function DashboardLayout({
 	const {workspaceId} = await params;
 	const {name} = (await api.getWorkspace(workspaceId)) ?? {name: 'ERROR'};
 	return (
-		<div className="min-h-screen flex bg-pink-50">
+		<div className="min-h-screen flex bg-white">
 			{/* Sidebar */}
 			<aside className="w-56 shrink-0 border-r border-pink-100 bg-white/70 backdrop-blur-sm">
-				<div className="p-4 font-semibold text-pink-600">LOGO</div>
+				<div className="p-4 font-semibold text-pink-600">TASKLY</div>
 				<ClientSidebar workspaceId={workspaceId} />
 			</aside>
 
